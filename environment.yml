@@ -8,5 +8,5 @@ dependencies:
 - flask
 - requests
 - jinja2
-- werkzeug=0.15.6
+- werkzeug
 - mamba
