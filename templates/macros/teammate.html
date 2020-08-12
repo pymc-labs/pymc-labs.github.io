@@ -1,0 +1,12 @@
+{% macro render_teammate(teammate) %}
+<div class="col-md-3 mb-5">
+    <div class="card border-light h-100">
+        <a href="{{ teammate.profile_url }}">
+            <img class="img-round card-img-top" src="{{ teammate.picture }}" alt="">
+        </a>
+        <div class="card-body">
+            <h4 class="card-title text-center">{{ teammate.name }}</h4>
+        </div>
+    </div>
+</div>
+{% endmacro %}

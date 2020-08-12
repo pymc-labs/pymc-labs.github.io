@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% from "macros/teammate.html" import render_teammate %}
+{% block body %}
+<style>
+    .img-round {
+        border-radius: 50%;
+    }
+
+    .border-white {
+        border-color: white;
+    }
+
+</style>
+<div class="row">
+    {% for teammate in this.children %}
+    {{ render_teammate(teammate)}}
+    {% endfor %}
+</div>
+{% endblock %}

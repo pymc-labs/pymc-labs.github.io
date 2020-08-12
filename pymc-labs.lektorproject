@@ -1,0 +1,18 @@
+[project]
+name = PyMC Labs
+locale = en_US
+url = https://pymc-labs.github.io/
+
+[servers.gh_ssh]
+name = GitHub Pages
+target = ghpages://pymc-labs/pymc-labs.github.io
+
+[servers.gh_https]
+name = GitHub Pages
+target = ghpages+https://pymc-labs/pymc-labs.github.io
+
+[packages]
+lektor-markdown-header-anchors = 0.3
+lektor-markdown-highlighter = 0.3
+lektor-simplemde = 0.5
+lektor-tags = 0.2

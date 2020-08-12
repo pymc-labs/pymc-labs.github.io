@@ -1,0 +1,12 @@
+name: pymc-labs
+channels:
+- conda-forge
+dependencies:
+- python>=3.7
+- pip
+- lektor
+- flask
+- requests
+- jinja2
+- werkzeug=0.15.6
+- mamba

@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% from "macros/testimonial.html" import render_testimonial %}
+
+{% block body %}
+{% for child in this.children %}
+
+{{ render_testimonial(child) }}
+
+{% endfor %}
+
+{% endblock %}

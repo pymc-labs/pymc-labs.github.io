@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block header %}
+<!-- Header -->
+<style>
+    .hero-image {
+        background-image: url("https://raw.githubusercontent.com/pymc-devs/pymcon/gh-pages/assets/contact.png");
+        background-color: #ffffff;
+        height: 500px;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        position: relative;
+    }
+
+</style>
+<header class="py-5 mb-5">
+    <div class="container h-100">
+        <div class="row h-100 align-items-center">
+            <div class="col-lg-12 hero-image">
+                <h1 class="display-4 mt-5 mb-2">{{ this.title }}</h1>
+                <p class="lead mb-5">{{ this.tagline }}</p>
+            </div>
+        </div>
+    </div>
+</header>
+{% endblock %}
+
+{% block body %}
+
+<div class="row">
+    <div class="col-md-8 mb-5">
+        <h2>Our Mission</h2>
+        <hr>
+        <p>{{ this.mission }}</p>
+    </div>
+    <div class="col-md-4 mb-5">
+        <h2>Contact Us</h2>
+        <hr>
+        <div>
+            <strong>{{ bag('contact')['name'] }}</strong>
+            <br>{{ bag("contact")["email"] }}
+        </div>
+    </div>
+</div>
+<!-- /.row -->
+
+{% endblock %}

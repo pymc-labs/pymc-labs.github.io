@@ -1,0 +1,19 @@
+{
+    "header": [
+        {
+            "title": "Home",
+            "href": "/",
+            "icon": "fa-home"
+        },
+        {
+            "title": "Team",
+            "href": "/team",
+            "icon": "fa-user-friends"
+        },
+        {
+            "title": "Testimonials",
+            "href": "/testimonials",
+            "icon": "fa-microphone"
+        }
+    ]
+}
