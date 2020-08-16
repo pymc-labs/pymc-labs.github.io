@@ -36,11 +36,12 @@ jobs:
       - name: Install dependencies
         run: python3 -m pip install -r ./requirements.txt
 
-      - run: lektor build
+      - run: lektor build --output-path ./site
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
+          # https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-set-personal-access-token-personal_token
           personal_token: ${{ secrets.GHPAGES_TOKEN }}
           publish_dir: ./site
           publish_branch: gh-pages
