@@ -25,6 +25,12 @@
                 <i class="fab fa-linkedin"></i>
             </a>
             {% endif %}
+
+            {% if teammate.personal_url %}
+            <a href="{{ teammate.personal_url }}">
+                <i class="fas fa-globe"></i>
+            </a>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -39,6 +45,10 @@
         </a>
         <div class="card-body">
             <h4 class="card-title text-center">{{ teammate.name }}</h4>
+
+            {%if teammate.blurb %}
+            <p>{{ teammate.blurb }}</p>
+            {% endif %}
 
             {%if teammate.specializations %}
             <h5>Specializations</h5>
@@ -66,6 +76,12 @@
             {% if teammate.linkedin_url %}
             <a href="{{ teammate.linkedin_url }}">
                 <i class="fab fa-linkedin"></i>
+            </a>
+            {% endif %}
+
+            {% if teammate.personal_url %}
+            <a href="{{ teammate.personal_url }}">
+                <i class="fas fa-globe"></i>
             </a>
             {% endif %}
         </div>

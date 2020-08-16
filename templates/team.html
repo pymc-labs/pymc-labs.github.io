@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
 {% from "macros/teammate.html" import render_teammate_card %}
+{% block og_title %}Our Team - PyMC Labs{% endblock %}
+{% block og_description %}Meet the team of statistical consultants at PyMC Labs.{% endblock %}
 {% block body %}
 <style>
     .img-round {
@@ -13,7 +15,7 @@
 </style>
 <div class="row">
     {% for teammate in this.children %}
-    {{ render_teammate_card(teammate)}}
+    {{ render_teammate_card(teammate) }}
     {% endfor %}
 </div>
 {% endblock %}
