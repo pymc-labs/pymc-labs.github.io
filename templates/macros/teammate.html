@@ -1,11 +1,73 @@
-{% macro render_teammate(teammate) %}
+{% macro render_teammate_card(teammate) %}
 <div class="col-md-3 mb-5">
     <div class="card border-light h-100">
-        <a href="{{ teammate.profile_url }}">
+        <a href="{{ teammate._slug }}/">
             <img class="img-round card-img-top" src="{{ teammate.picture }}" alt="">
         </a>
         <div class="card-body">
             <h4 class="card-title text-center">{{ teammate.name }}</h4>
+        </div>
+        <div class="card-footer text-center">
+            {% if teammate.github_url %}
+            <a href="{{ teammate.github_url }}">
+                <i class="fab fa-github"></i>
+            </a>
+            {% endif %}
+
+            {% if teammate.twitter_url %}
+            <a href="{{ teammate.twitter_url }}">
+                <i class="fab fa-twitter"></i>
+            </a>
+            {% endif %}
+
+            {% if teammate.linkedin_url %}
+            <a href="{{ teammate.linkedin_url }}">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+
+{% macro render_teammate_page(teammate) %}
+<div class="col-md-6 mb-5">
+    <div class="card border-light h-100">
+        <a href="{{ teammate.slug }}">
+            <img class="img-round card-img-top" src="{{ teammate.picture }}" alt="">
+        </a>
+        <div class="card-body">
+            <h4 class="card-title text-center">{{ teammate.name }}</h4>
+
+            {%if teammate.specializations %}
+            <h5>Specializations</h5>
+            <p>{{ teammate.specializations }}</p>
+            {% endif %}
+
+            {% if teammate.location %}
+            <h5>Location</h5>
+            <p>{{ teammate.location }}</p>
+            {% endif %}
+        </div>
+        <div class="card-footer text-center">
+            {% if teammate.github_url %}
+            <a href="{{ teammate.github_url }}">
+                <i class="fab fa-github"></i>
+            </a>
+            {% endif %}
+
+            {% if teammate.twitter_url %}
+            <a href="{{ teammate.twitter_url }}">
+                <i class="fab fa-twitter"></i>
+            </a>
+            {% endif %}
+
+            {% if teammate.linkedin_url %}
+            <a href="{{ teammate.linkedin_url }}">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            {% endif %}
         </div>
     </div>
 </div>

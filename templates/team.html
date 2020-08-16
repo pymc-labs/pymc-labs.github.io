@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% from "macros/teammate.html" import render_teammate %}
+{% from "macros/teammate.html" import render_teammate_card %}
 {% block body %}
 <style>
     .img-round {
@@ -13,7 +13,7 @@
 </style>
 <div class="row">
     {% for teammate in this.children %}
-    {{ render_teammate(teammate)}}
+    {{ render_teammate_card(teammate)}}
     {% endfor %}
 </div>
 {% endblock %}
