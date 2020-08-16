@@ -1,6 +1,10 @@
 # PyMC Labs Official Website
 
-## Get Setup
+## Business contact
+
+- [Thomas Wiecki][thomas]
+
+## Maintenance
 
 ### Environment
 
@@ -49,7 +53,4 @@ Consult:
 
 [lektor]: https://getlektor.com
 [ericmjl]: http://shortwhale.com/ericmjl
-
-## Business contact
-
-- Thomas Wiecki
+[thomas]: https://twiecki.io
