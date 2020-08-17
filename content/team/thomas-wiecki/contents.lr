@@ -1,5 +1,15 @@
 name: Thomas Wiecki
 ---
-picture: https://avatars1.githubusercontent.com/u/674200?s=460&u=e7a2cbf8358fa554c2d9370ca51ed255ab9fb9a1&v=4
+picture: https://pymc-devs.github.io/pymcon//css/2017_style/img/team/twiecki.jpg
 ---
 github_url: https://github.com/twiecki
+---
+twitter_url: https://twitter.com/twiecki
+---
+linkedin_url: https://www.linkedin.com/in/thomas-wiecki-46339244/
+---
+personal_url: https://twiecki.io
+---
+blurb: Making Bayesian modeling accessible to a wider audience.
+---
+specializations: Bayesian statistics, teaching
