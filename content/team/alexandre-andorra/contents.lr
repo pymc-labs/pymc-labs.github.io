@@ -1,7 +1,17 @@
 name: Alexandre Andorra
 ---
-picture: https://avatars3.githubusercontent.com/u/30447180?s=460&u=a85dd506e8d505e2343d6134097b1f293f0c2e10&v=4
+picture: https://www.festivalgeopolitique.com/sites/default/files/styles/intervenants-max/public/medias/intervenants/andorra_alexandre.jpg?itok=X-nD6-Ju
 ---
 github_url: https://github.com/AlexAndorra
 ---
 location: Paris, France
+---
+blurb: Answering causal and social questions with methods estimating uncertainty, hierarchical structures and space-time variation.
+---
+twitter_url: https://twitter.com/alex_andorra
+---
+linkedin_url: https://www.linkedin.com/in/aandorra-pollsposition/
+---
+personal_url: https://learnbayesstats.anvil.app/
+---
+specializations: Bayesian models, Unrepresentative and survey data, Causal inference, Teaching and communicating Bayesian stats topics
