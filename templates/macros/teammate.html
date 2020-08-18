@@ -1,10 +1,18 @@
 {% macro render_teammate_card(teammate) %}
+<style>
+    .image-force-square {
+        width: 200px;
+        height: 200px;
+        object-fit: cover;
+    }
+
+</style>
 <div class="col-md-3 mb-5">
     <div class="card border-light h-100">
-        <a href="{{ teammate._slug }}/">
-            <img class="img-round card-img-top" src="{{ teammate.picture }}" alt="">
-        </a>
         <div class="card-body">
+            <a href="{{ teammate._slug }}/">
+                <img class="img-round card-img-top image-force-square" src="{{ teammate.picture }}" alt="">
+            </a>
             <h4 class="card-title text-center">{{ teammate.name }}</h4>
         </div>
         <div class="card-footer text-center">
@@ -38,10 +46,17 @@
 
 
 {% macro render_teammate_page(teammate) %}
+<style>
+    .square-image {
+        width: 300px;
+        height: 300px;
+    }
+
+</style>
 <div class="col-md-6 mb-5">
     <div class="card border-light h-100">
         <a href="{{ teammate.slug }}">
-            <img class="img-round card-img-top" src="{{ teammate.picture }}" alt="">
+            <img class="img-round card-img-top square-img" src="{{ teammate.picture }}" alt="">
         </a>
         <div class="card-body">
             <h4 class="card-title text-center">{{ teammate.name }}</h4>
