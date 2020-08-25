@@ -54,17 +54,17 @@ defaults and they can be overwritten from more specific templates. See
 `templates/layout.html` for info on how to set the metadata and the defaults
 used.
 
-`og_title`, `og_description` and `og_image` block can be used to modify the default title
+`title`, `og_description` and `og_image` block can be used to modify the default title
 description and image in the card respectively. Here is one example from the
 teammates template:
 
 ```html
 <!-- layout sets the metadata defaults and blocks to modify it -->
 {% extends "layout.html" %}
-<!-- Use og_title to modify the default "PyMC Labs" as title -->
-<!-- Note that this only affects the card title, not the title shown by the browser -->
-{% block og_title %}{{ this.name }} - PyMC Labs{% endblock %}
-<!-- Use og_title to modify the default "Bespoke Bayesian Modeling" as description -->
+<!-- Use title to modify the default "PyMC Labs" as title -->
+<!-- Note that this affects both the card title and the title shown by the browser -->
+{% block title %}{{ this.name }} - PyMC Labs{% endblock %}
+<!-- Use og_description to modify the default "Bespoke Bayesian Modeling" as description -->
 {% block og_description %}{{ this.blurb|string }}{% endblock %}
 ```
 
