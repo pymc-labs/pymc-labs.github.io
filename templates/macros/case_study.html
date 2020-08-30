@@ -11,6 +11,14 @@
         margin: 0 auto;
     }
 
+    .img-round {
+        border-radius: 2%;
+    }
+
+    .border-white {
+        border-color: white;
+    }
+
 </style>
 <div class="col-md-6 mb-5">
     <div class="card border-light h-100">
@@ -20,16 +28,25 @@
             </a>
         </div>
         <div class="card-body">
-
             <a href="{{ case_study._slug }}/">
-                <img class="img-round card-img-top image-force-square img-center " src="{{ case_study.picture }}"
-                    alt="">
+                {% if case_study.attachments.images.get('cover.jpg') %}
+                <img class="img-round card-img-top image-force-square img-center "
+                    src="{{ case_study.attachments.images.get('cover.jpg')|url }}" alt="">
+                {% elif case_study.attachments.images.get('cover.png') %}
+                <img class="img-round card-img-top image-force-square img-center "
+                    src="{{ case_study.attachments.images.get('cover.png')|url }}" alt="">
+                {% else %}
+                <img class="img-round card-img-top image-force-square img-center "
+                    src="{{ '/static/images/case_study/cover.jpg'|asseturl }}" alt="">
+                {% endif %}
             </a>
             <p>With {{ case_study.client }}</p>
             <p>{{ case_study.summary }}</p>
         </div>
         <div class="card-footer text-center">
-            <p>Authored by {{ case_study.authors }} on {{ case_study.date }}</p>
+            <i>
+                <p class="text-muted">Authored by {{ case_study.authors }} on {{ case_study.date }}</p>
+            </i>
         </div>
     </div>
 </div>
