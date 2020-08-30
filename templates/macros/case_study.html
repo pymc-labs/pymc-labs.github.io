@@ -14,13 +14,16 @@
 </style>
 <div class="col-md-6 mb-5">
     <div class="card border-light h-100">
+        <div class="card-header">
+            <a href="{{ case_study._slug }}/">
+                <h4 class="card-title mb-2 text-center">{{ case_study.project_name }}</h4>
+            </a>
+        </div>
         <div class="card-body">
+
             <a href="{{ case_study._slug }}/">
                 <img class="img-round card-img-top image-force-square img-center " src="{{ case_study.picture }}"
                     alt="">
-            </a>
-            <a href="{{ case_study._slug }}/">
-                <h4 class="card-title text-center">{{ case_study.project_name }}</h4>
             </a>
             <p>With {{ case_study.client }}</p>
             <p>{{ case_study.summary }}</p>
