@@ -1,0 +1,56 @@
+{% macro render_case_study_card(case_study) %}
+<style>
+    .image-force-square {
+        width: 85%;
+        height: auto;
+        object-fit: cover;
+    }
+
+    .img-center {
+        display: block;
+        margin: 0 auto;
+    }
+
+</style>
+<div class="col-md-6 mb-5">
+    <div class="card border-light h-100">
+        <div class="card-body">
+            <a href="{{ case_study._slug }}/">
+                <img class="img-round card-img-top image-force-square img-center " src="{{ case_study.picture }}"
+                    alt="">
+            </a>
+            <a href="{{ case_study._slug }}/">
+                <h4 class="card-title text-center">{{ case_study.project_name }}</h4>
+            </a>
+            <p>With {{ case_study.client }}</p>
+            <p>{{ case_study.summary }}</p>
+        </div>
+        <div class="card-footer text-center">
+            <p>Authored by {{ case_study.authors }} on {{ case_study.date }}</p>
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+
+{% macro render_case_study_page(case_study) %}
+<div class="card border-light h-100">
+    <div class="card-body">
+        <img class="img-round card-img-top image-force-square" src="{{ case_study.picture }}" alt="">
+
+        <h2 class="card-title text-center">{{ case_study.project_name }}</h2>
+        {%if case_study.summary %}
+        <h4 class="card-subtitle mb-2 text-muted">{{ case_study.summary }}</h4>
+        {% endif %}
+
+        {{ case_study.case_study }}
+
+    </div>
+    <div class="card-footer text-center">
+        <p class=text-muted>
+            Authored by {{ case_study.authors }}
+            on {{ case_study.date }}.
+        </p>
+    </div>
+</div>
+{% endmacro %}
