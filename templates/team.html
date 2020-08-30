@@ -15,7 +15,9 @@
 </style>
 <div class="row">
     {% for teammate in this.children %}
+    {% if teammate.visible %}
     {{ render_teammate_card(teammate) }}
+    {% endif %}
     {% endfor %}
 </div>
 {% endblock %}
