@@ -31,6 +31,8 @@ For navigation: `databags/nav.json`.
 
 For contact information: `databags/contact.json`.
 
+Images can be found under `assets/static/images/`.
+
 ### Main page content
 
 Use the Lektor editor.
@@ -86,14 +88,33 @@ but this could be modified or left to configure for each page if desired.
 
 ### Case Studies
 
-If our clients agree to it, we should put up case studies.
+If our clients agree to it, we will put up case studies of that project.
+Case studies are written in Markdown,
+and are intended to showcase what we can do.
+They should use jargon sparingly,
+focus on business value being delivered,
+and highlight the key contributions made by PyMC Labs.
+
+For visual effect and branding,
+we can also add cover images to the case studies.
+This is done in the Lektor editor,
+by adding an attachment to the website case study.
+While pasting in the case study,
+on the bottom-left corner of the Lektor editor interface,
+click on the "Add Attachment" link/button.
+Then, an image that is named either `cover.png` or `cover.jpg`.
+That image will serve as the case study cover image
+in our case studies gallery,
+and be displayed on the right side of the case study page.
+If you don't upload any cover image,
+then the default Rev. Bayes image will be used.
 
 ### Other stuff to edit?
 
 Consult:
 
 - [Lektor docs][lektor]
-- [Eric Ma][ericmjl] for a one-on-one coaching session on how to make the website.
+- [Eric Ma][ericmjl] for a one-on-one coaching session on how to make/edit the website.
 
 [lektor]: https://getlektor.com
 [ericmjl]: http://shortwhale.com/ericmjl
