@@ -44,6 +44,7 @@
 {% endmacro %}
 
 
+<!-- Convenience macro to render the cover image correctly. -->
 {% macro render_cover_image(case_study) %}
 {% if case_study.attachments.images.get('cover.jpg') %}
 <img class="img-round card-img-top image-force-square img-center mb-5"
@@ -103,12 +104,7 @@
 </div>
 {% endmacro %}
 
-
-Authored by Ravin.
-Authored by Ravin and Adrian.
-Authored by Ravin, Adrian, and Thomas.
-
-
+<!-- Convenience macro to render "Authored by" sentence. -->
 {% macro render_authors(case_study) %}
 Authored by
 
