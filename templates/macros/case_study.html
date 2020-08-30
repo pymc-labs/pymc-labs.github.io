@@ -1,0 +1,136 @@
+{% macro render_case_study_card(case_study) %}
+<style>
+    .image-force-square {
+        width: 85%;
+        height: auto;
+        object-fit: cover;
+    }
+
+    .img-center {
+        display: block;
+        margin: 0 auto;
+    }
+
+    .img-round {
+        border-radius: 2%;
+    }
+
+    .border-white {
+        border-color: white;
+    }
+
+</style>
+<div class="col-md-6 mb-5">
+    <div class="card border-light h-100">
+        <div class="card-header">
+            <a href="{{ case_study._slug }}/">
+                <h4 class="card-title mb-2 text-center">{{ case_study.project_name }}</h4>
+            </a>
+        </div>
+        <div class="card-body">
+            <a href="{{ case_study._slug }}/">
+                {{ render_cover_image(case_study) }}
+            </a>
+            <p>With {{ case_study.client }}</p>
+            <p>{{ case_study.summary }}</p>
+        </div>
+        <div class="card-footer text-center">
+            <i>
+                <p class="text-muted">{{ render_authors(case_study) }}</p>
+            </i>
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+
+<!-- Convenience macro to render the cover image correctly. -->
+{% macro render_cover_image(case_study) %}
+{% if case_study.attachments.images.get('cover.jpg') %}
+<img class="img-round card-img-top image-force-square img-center mb-5"
+    src="{{ case_study.attachments.images.get('cover.jpg')|url }}" alt="">
+{% elif case_study.attachments.images.get('cover.png') %}
+<img class="img-round card-img-top image-force-square img-center mb-5"
+    src="{{ case_study.attachments.images.get('cover.png')|url }}" alt="">
+{% else %}
+<img class="img-round card-img-top image-force-square img-center mb-5"
+    src="{{ '/static/images/case_study/cover.jpg'|asseturl }}" alt="">
+{% endif %}
+{% endmacro %}
+
+
+{% macro render_case_study_page(case_study) %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-light h-100">
+            <div class="card-header">
+                <h2 class="card-title text-center">{{ case_study.project_name }}</h2>
+            </div>
+            <div class="card-body">
+                {%if case_study.summary %}
+                <h4 class="card-subtitle mb-2 text-muted">{{ case_study.summary }}</h4>
+                {% endif %}
+                {{ case_study.case_study }}
+            </div>
+            <div class="card-footer text-center">
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-light h-100">
+            <div class="card-header">
+                <h2 class="card-title text-center">Project Details</h2>
+            </div>
+            <div class="card-body">
+                {{ render_cover_image(case_study) }}
+                <p>
+                    {% if case_study.client %}
+                    {{ case_study.client }}
+                    {% else %}
+                    Client prefers to remain anonymous.
+                    {% endif %}
+                </p>
+            </div>
+            <div class="card-footer">
+                <p class="text-muted">
+                    {{ render_authors(case_study) }}
+                </p>
+                <p class="text-muted">
+                    Completed on {{ case_study.date }}.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+<!-- Convenience macro to render "Authored by" sentence. -->
+{% macro render_authors(case_study) %}
+Authored by
+
+{% if case_study.authors|length == 1%}
+{% for author in case_study.authors %}
+{{author}}
+{% endfor %}
+{% endif %}
+
+{% if case_study.authors|length == 2%}
+{% for author in case_study.authors %}
+{% if loop.index == loop.length %}
+and {{ author }}.
+{% else %}
+{{ author }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if case_study.authors|length == 3 %}
+{% for author in case_study.authors %}
+{% if loop.index == loop.length %}
+and {{ author }}.
+{% else %}
+{{ author }},
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endmacro %}

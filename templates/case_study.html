@@ -1,0 +1,8 @@
+{% extends "layout.html" %}
+{% from "macros/case_study.html" import render_case_study_page %}
+{% block title %}{{ this.project_name }} - PyMC Labs{% endblock %}
+{% block og_description %}{{ this.summary }}{% endblock %}
+
+{% block body %}
+{{ render_case_study_page(this) }}
+{% endblock %}

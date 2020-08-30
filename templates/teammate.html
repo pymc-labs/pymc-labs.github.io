@@ -1,9 +1,8 @@
 {% extends "layout.html" %}
 {% from "macros/teammate.html" import render_teammate_page %}
-{% block og_title %}{{ this.name }} - PyMC Labs{% endblock %}
+{% block title %}{{ this.name }} - PyMC Labs{% endblock %}
 {% block og_description %}{{ this.blurb|string }}{% endblock %}
 {% block og_image %}{{ this.picture }}{% endblock %}
 {% block body %}
 {{ render_teammate_page(this)}}
-
 {% endblock %}
