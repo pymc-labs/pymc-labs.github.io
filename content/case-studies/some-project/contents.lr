@@ -1,0 +1,11 @@
+project_name: Some Project
+---
+authors: Thomas, Brandon, Max
+---
+case_study: blah
+---
+client: Some client
+---
+date: 2020-08-30
+---
+summary: Another summary sentence.

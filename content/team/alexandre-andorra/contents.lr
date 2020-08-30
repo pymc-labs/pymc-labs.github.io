@@ -15,3 +15,5 @@ linkedin_url: https://www.linkedin.com/in/aandorra-pollsposition/
 personal_url: https://learnbayesstats.anvil.app/
 ---
 specializations: Bayesian models, Unrepresentative and survey data, Causal inference, Teaching and communicating Bayesian stats topics
+---
+visible: yes

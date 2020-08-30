@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% from "macros/case_study.html" import render_case_study_card %}
+{% block title %}Case Studies - PyMC Labs{% endblock %}
+{% block og_description %}Read about our success stories.{% endblock %}
+{% block body %}
+
+<div class="row">
+    {% for case_study in this.children %}
+    {{ render_case_study_card(case_study) }}
+    {% endfor %}
+</div>
+{% endblock %}

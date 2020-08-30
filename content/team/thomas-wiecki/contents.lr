@@ -13,3 +13,5 @@ personal_url: https://twiecki.io
 blurb: Making Bayesian modeling accessible to a wider audience.
 ---
 specializations: Bayesian statistics, teaching
+---
+visible: yes
