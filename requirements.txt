@@ -1,1 +1,5 @@
 lektor
+flask
+requests
+jinja2
+werkzeug
