@@ -2,4 +2,4 @@ lektor
 flask
 requests
 jinja2
-werkzeug
+werkzeug==0.16.1
