@@ -1,11 +1,9 @@
 name: Adrian Seyboldt
 ---
+picture: https://github.com/pymc-labs/pymc-labs.github.io/raw/master/resources/_gen/images/adrian.JPG
+---
 github_url: https://github.com/aseyboldt
----
-linkedin_url: 
----
-picture: 
 ---
 twitter_url: https://twitter.com/aseyboldt
 ---
-visible: no
+visible: yes
