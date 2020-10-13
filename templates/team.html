@@ -14,7 +14,7 @@
 
 </style>
 <div class="row">
-    {% for teammate in this.children %}
+    {% for teammate in this.children|sort(attribute="name") %}
     {% if teammate.visible %}
     {{ render_teammate_card(teammate) }}
     {% endif %}
