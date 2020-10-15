@@ -1,8 +1,12 @@
 {% macro render_testimonial(testimonial) %}
-
-<div>
-    <h3>{{ testimonial.client }}</h3>
-    <p>{{ testimonial.testimonial }}</p>
+<div class="card-group">
+    <div class="card col-md-4">
+        <img src="https://www.everysk.com/images/everysk_logo.svg" class="card-img-top" alt="...">
+        <div class="card-body">
+            <h5 class="card-title">{{ testimonial.client }}</h5>
+            <p class="card-text">{{ testimonial.testimonial }}</p>
+            <p class="card-text"><small class="text-muted">{{ testimonial.date }}</small></p>
+        </div>
+    </div>
 </div>
-
 {% endmacro %}
