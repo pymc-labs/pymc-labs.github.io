@@ -1,12 +1,32 @@
 {% extends "layout.html" %}
 {% block body %}
 
-{% for block in this.content.blocks %}
-{% if block._flowblock == "image" %}
-<img src="{{ block.url }}">
-{% else %}
-{{ block }}
-{% endif %}
-{% endfor %}
-
+<div class="row">
+    <div class="col-md-4">
+        <div id="flow-content" class="list-group">
+            {% for block in this.content.blocks %}
+            {% if block.section_level == 1 %}
+            <a class="list-group-item list-group-item-action"
+                href="#list-item-{{ loop.index }}">{{ block.section_header }}</a>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div data-spy="scroll" data-target="#flow-content" data-offset="0" style="overflow: scroll; height:95vh">
+            {% for block in this.content.blocks %}
+            {% if block.section_level == 1 %}
+            <h2 id="list-item-{{ loop.index }}">{{ block.section_header }}</h2>
+            {% elif block.section_level == 2 %}
+            <h3 id="list-item-{{ loop.index }}">{{ block.section_header }}</h3>
+            {% elif block.section_level == 3 %}
+            <h4 id="list-item-{{ loop.index }}">{{ block.section_header }}</h4>
+            {% elif block.section_level == 4 %}
+            <h5 id="list-item-{{ loop.index }}">{{ block.section_header }}</h5>
+            {% endif %}
+            <p>{{ block.markdown }}</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 {% endblock %}

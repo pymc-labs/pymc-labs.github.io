@@ -7,6 +7,8 @@ content:
 #### text ####
 section_header: Who we are
 ----
+section_level: 1
+----
 markdown:
 
 We are the inventors of PyMC3, the leading toolbox to solve advanced data science problems. We have launched a consultancy to turn our expertise into your advantage. Our decades of experience in Bayesian modeling allows us to come up with unique and impactful solutions to your most challenging business problems. 
@@ -20,6 +22,8 @@ We work according to the following principles:
 #### text ####
 section_header: What do we need to solve your problem?
 ----
+section_level: 1
+----
 markdown:
 
 We usually start with an introductory call to introduce ourselves and get an understanding of the challenges you and your company face. From there we identify the simplest but most impactful project which we then want to understand in more detail. 
@@ -28,20 +32,30 @@ We usually require a data set although we have also developed models with mock d
 #### text ####
 section_header: How Bayesian statistics can help you
 ----
+section_level: 1
+----
 markdown:
 
 Bayesian statistics, as implemented in [PyMC3](https://docs.pymc.io), allows you to solve data science problems of varying complexity that you can hardly solve any other way. 
 
 The tool is highly versatile and is being used successfully by various companies. For example, SpaceX used PyMC3 to optimize its supply chains (as explained in this [blog post](https://twiecki.io/blog/2019/01/14/supply_chain/)). But it's also being used to [find planets outside of our solar-system](https://github.com/exoplanet-dev/exoplanet), [detect earthquakes](https://github.com/hvasbath/beat), [predict elections](https://github.com/AlexAndorra/pollsposition_models) or [estimate the spread of COVID-19 on rt.live](https://rt.live/). The PyMC3 journal article is the most cited paper on PeerJ where it was published.
+#### text ####
+section_header: Don't find a solution for the most likely outcome, but across all possible outcomes
+----
+section_level: 3
+----
+markdown: PyMC3 allows you to easily build Bayesian statistical models in Python. A central benefit of Bayesian statistics is the quantification of uncertainty. Business decisions always rely on assumptions and noisy data. Usually, decisions are based on the most likely assumptions and interpretation of the data, but this often leads to suboptimal decisions being made. Instead, by quantifying uncertainty we can make the best decision taking all possible assumptions and interpretations into account.
+#### text ####
+section_header:
 
-### Don't find a solution for the most likely outcome, but across all possible outcomes
-
-PyMC3 allows you to easily build Bayesian statistical models in Python. A central benefit of Bayesian statistics is the quantification of uncertainty. Business decisions always rely on assumptions and noisy data. Usually, decisions are based on the most likely assumptions and interpretation of the data, but this often leads to suboptimal decisions being made. Instead, by quantifying uncertainty we can make the best decision taking all possible assumptions and interpretations into account.
-
-### Build custom models to solve specific business problems 
-
-Another benefit of Bayesian statistics is that it allows you to incorporate the structure of your data into the model directly. This is different from machine learning which tries to infer all structure from large amounts of training data. PyMC3 on the other hand allows you to incorporate any knowledge you might have about your problem into your model directly which allows you to make better inference with fewer data or solve problems for which machine learning is not a good fit. For example, many data sets have a nested or hierarchical structure that is impossible to map adequately in a machine learning algorithm, [but is very naturally supported by PyMC3](https://twiecki.io/blog/2014/03/17/bayesian-glms-3/).
-
-### Inject your expert domain knowledge into the solution
-
-We realize that you already know much more about your problem domain than we ever will. Our solutions do not replace hard-earned knowledge. In fact, we can include this knowledge directly into the model by specifying priors which tell the model where to look -- and where not to look.
+Build custom models to solve specific business problems 
+----
+section_level: 3
+----
+markdown: Another benefit of Bayesian statistics is that it allows you to incorporate the structure of your data into the model directly. This is different from machine learning which tries to infer all structure from large amounts of training data. PyMC3 on the other hand allows you to incorporate any knowledge you might have about your problem into your model directly which allows you to make better inference with fewer data or solve problems for which machine learning is not a good fit. For example, many data sets have a nested or hierarchical structure that is impossible to map adequately in a machine learning algorithm, [but is very naturally supported by PyMC3](https://twiecki.io/blog/2014/03/17/bayesian-glms-3/).
+#### text ####
+section_header: Inject your expert domain knowledge into the solution
+----
+section_level: 3
+----
+markdown: We realize that you already know much more about your problem domain than we ever will. Our solutions do not replace hard-earned knowledge. In fact, we can include this knowledge directly into the model by specifying priors which tell the model where to look -- and where not to look.

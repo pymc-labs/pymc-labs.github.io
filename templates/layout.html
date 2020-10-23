@@ -1,7 +1,7 @@
 <!doctype html>
 
 {%- macro page_title() -%}
-    {% block title %}PyMC Labs{% endblock %}
+{% block title %}PyMC Labs{% endblock %}
 {%- endmacro -%}
 
 <html lang="en">
@@ -28,7 +28,8 @@
         <meta property="og:type" content="website" />
         <meta property="og:title" content="{{ page_title() }}" />
         <meta property="og:description" content="{% block og_description%}Bespoke Bayesian Modeling{% endblock %}" />
-        <meta property="og:image" content="{% block og_image%}https://raw.githubusercontent.com/pymc-devs/pymcon/gh-pages/assets/contact.png{% endblock %}" />
+        <meta property="og:image"
+            content="{% block og_image%}https://raw.githubusercontent.com/pymc-devs/pymcon/gh-pages/assets/contact.png{% endblock %}" />
 
     </head>
 
