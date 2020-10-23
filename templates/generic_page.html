@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block body %}
+
+{% for block in this.content.blocks %}
+{% if block._flowblock == "image" %}
+<img src="{{ block.url }}">
+{% else %}
+{{ block }}
+{% endif %}
+{% endfor %}
+
+{% endblock %}
