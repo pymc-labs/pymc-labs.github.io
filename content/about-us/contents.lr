@@ -64,7 +64,9 @@ But it's also being used to [find planets outside of our solar-system](https://g
 [detect earthquakes](https://github.com/hvasbath/beat),
 [predict elections](https://github.com/AlexAndorra/pollsposition_models)
 or [estimate the spread of COVID-19 on rt.live](https://rt.live/).
-The PyMC3 journal article is the most cited paper on PeerJ where it was published.
+The PyMC3 journal article is [the most cited paper on PeerJ where it was published][peerj_pm3].
+
+[peerj_pm3]: https://peerj.com/blog/post/115284882768/peerj-computer-sciences-most-cited-paper-probabilistic-programming-in-python-using-pymc3-author-interview-with-thomas-wiecki/
 
 #### text ####
 section_header: Don't find a solution for the most likely outcome, but across all possible outcomes
