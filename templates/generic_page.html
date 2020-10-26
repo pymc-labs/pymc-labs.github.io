@@ -13,7 +13,7 @@
         </div>
     </div>
     <div class="col-md-8">
-        <div data-spy="scroll" data-target="#flow-content" data-offset="0" style="overflow: scroll; height:95vh">
+        <div class="scrollspy-content" data-spy="scroll" data-target="#flow-content" data-offset="0">
             {% for block in this.content.blocks %}
             {% if block.section_level == 1 %}
             <h2 id="list-item-{{ loop.index }}">{{ block.section_header }}</h2>
