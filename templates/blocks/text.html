@@ -1,0 +1,12 @@
+<div>
+    {% if this.section_level == 1 %}
+    <h2>{{ this.section_header }}</h2>
+    {% elif this.section_level == 2 %}
+    <h3>{{ this.section_header }}</h3>
+    {% elif this.section_level == 3 %}
+    <h4>{{ this.section_header }}</h4>
+    {% elif this.section_level == 4 %}
+    <h5>{{ this.section_header }}</h5>
+    {% endif %}
+    <p>{{ this.markdown }}</p>
+</div>

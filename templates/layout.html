@@ -1,7 +1,7 @@
 <!doctype html>
 
 {%- macro page_title() -%}
-    {% block title %}PyMC Labs{% endblock %}
+{% block title %}PyMC Labs{% endblock %}
 {%- endmacro -%}
 
 <html lang="en">
@@ -22,13 +22,17 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
             integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
 
+        <link rel="stylesheet" href="{{ '/static/custom_styles.css'|asseturl }}">
+
+
         <title>{{ page_title() }}</title>
         <meta name="twitter:card" content="summary">
         <meta property="og:url" content="{{ this|url(external=true) }}" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="{{ page_title() }}" />
         <meta property="og:description" content="{% block og_description%}Bespoke Bayesian Modeling{% endblock %}" />
-        <meta property="og:image" content="{% block og_image%}https://raw.githubusercontent.com/pymc-devs/pymcon/gh-pages/assets/contact.png{% endblock %}" />
+        <meta property="og:image"
+            content="{% block og_image%}https://raw.githubusercontent.com/pymc-devs/pymcon/gh-pages/assets/contact.png{% endblock %}" />
 
     </head>
 

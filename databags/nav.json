@@ -6,6 +6,11 @@
             "icon": "fa-home"
         },
         {
+            "title": "About Us",
+            "href": "/about-us",
+            "icon": "fa-info-circle"
+        },
+        {
             "title": "Team",
             "href": "/team",
             "icon": "fa-user-friends"
