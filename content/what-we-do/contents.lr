@@ -110,9 +110,9 @@ markdown:
 
 If you meet one or more of these requirements, we are likely to add value to your business:
 
-* You want to learn something about your problem
+* You want to learn something about your business
     * Machine learning models are usually "black box" and do not give insight on what they actually learned
-    * Bayesian models are "open box" and can be inquired into to understand exactly why certain answers are produced
+    * Bayesian models are open books and can be inquired into to understand exactly why certain answers are produced
 * You have structured data with any of these properties:
     * Nested / hierarchical data
     * Time-series data
@@ -123,8 +123,12 @@ If you meet one or more of these requirements, we are likely to add value to you
 * You make decisions with real-world consequences based on noisy data
     * In this case it is important to take all possible interpretations of your data into account, not just the most likely
     * Bayesian statistics naturally supports this by modeling beliefs as distributions rather than scalar values
-    * This results in more robust decisions that work across a whole range of plausible assumptions
+    * This results in more robust decisions that work across a whole range of plausible assumptions 
+* You or your team has an interest in bayesian statistics but doesn't know where to start
+    * Our team has experience working with statistics across industry and academia
+    * We also have experience teaching these concepts at all levels
 
-Problems in many domains meet these criteria as demonstrated by our customers in diverse fields ranging from finance, biotech, agriculture, pharma, adtech and more.
+
+Problems in many domains meet these criteria as demonstrated by our customers in diverse fields ranging from finance, biotech, agriculture, pharma, adtech, supply chains and more.
 
 If you are interested in learning more, please email us at [thomas.wiecki@pymc-labs.io](mailto:thomas.wiecki@pymc-labs.io). We look forward to hearing from you.
