@@ -124,7 +124,7 @@ If you meet one or more of these requirements, we are likely to add value to you
     * In this case it is important to take all possible interpretations of your data into account, not just the most likely
     * Bayesian statistics naturally supports this by modeling beliefs as distributions rather than scalar values
     * This results in more robust decisions that work across a whole range of plausible assumptions 
-* You or your team has an interest in bayesian statistics but doesn't know where to start
+* You or your team has an interest in Bayesian statistics but doesn't know where to start
     * Our team has experience working with statistics across industry and academia
     * We also have experience teaching these concepts at all levels
 
