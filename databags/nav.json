@@ -16,8 +16,8 @@
             "icon": "fa-user-friends"
         },
         {
-            "title": "Testimonials",
-            "href": "/testimonials",
+            "title": "Clients",
+            "href": "/clients",
             "icon": "fa-microphone"
         }
     ]

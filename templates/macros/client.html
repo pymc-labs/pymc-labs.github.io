@@ -1,0 +1,16 @@
+{% macro render_client(client) %}
+<div class="card">
+    {% if client.logo_url %}
+    <img src="{{ client.logo_url }}" class="card-img-top client-logo" alt="{{ client.client_name }}">
+    {% endif %}
+    <div class="card-body">
+        {% if client.testimonial %}
+        <h5 class="card-title">{{ client.client_name }}</h5>
+        <p class="card-text">{{ client.testimonial }}</p>
+        {% if client.date %}
+        <p class="card-text"><small class="text-muted">{{ client.date }}</small></p>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}

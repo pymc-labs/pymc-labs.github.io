@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% from "macros/client.html" import render_client %}
+{% block title %}Clients - PyMC Labs{% endblock %}
+{% block og_description %}We are honoured to work with a wide variety of clients.
+Take a look to read about their experience.
+We're ready to help you now.{% endblock %}
+
+{% block body %}
+<div class="card-columns">
+    {% for child in this.children %}
+    {{ render_client(child) }}
+    {% endfor %}
+</div>
+
+{% endblock %}
