@@ -63,7 +63,7 @@ Another benefit of Bayesian statistics is that it allows you to incorporate the 
 
 When working with us we first gain a deep understanding of your data structure and the specific problem you want to solve. Together with you, we tailor a custom model that solves your specific problem and takes your unique data structure into account.
 
-The resulting model requires far fewer data points than in machine learning. For example, many data sets have a nested or hierarchical structure that is impossible to map adequately in a machine learning algorithm, but is very [naturally supported by PyMC3]((https://twiecki.io/blog/2014/03/17/bayesian-glms-3/)).
+The resulting model requires far fewer data points than in machine learning. For example, many data sets have a nested or hierarchical structure that is impossible to map adequately in a machine learning algorithm, but is [naturally supported by PyMC3]((https://twiecki.io/blog/2014/03/17/bayesian-glms-3/)).
 
 #### text ####
 section_header: Combine your expert domain knowledge with the insights learned from data
