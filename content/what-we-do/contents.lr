@@ -29,7 +29,7 @@ section_level: 1
 ----
 markdown:
 
-Bayesian modeling, as supported by our open source Python library PyMC3, allows you to solve data science problems that can hardly be solved any other way.
+Bayesian modeling, as supported by our open source Python library PyMC3, allows you to solve problems that can hardly be solved any other way.
 
 The tool is highly versatile and is being used successfully by various companies. For example, SpaceX used PyMC3 to optimize its supply chains
 (as explained in this [blog post](https://twiecki.io/blog/2019/01/14/supply_chain/)).
