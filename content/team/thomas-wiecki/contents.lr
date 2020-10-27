@@ -10,7 +10,14 @@ linkedin_url: https://www.linkedin.com/in/thomas-wiecki-46339244/
 ---
 personal_url: https://twiecki.io
 ---
-blurb: Making Bayesian modeling accessible to a wider audience.
+blurb: 
+* PyMC3 author
+* PhD on computational cognitive neuroscience from Brown University 
+* Former VP of data science and head of research at [Quantopian Inc](https://quantopian.com): building a team of data scientists to build a hedge fund from a pool of 300k crowd researchers.
+* Recognized public speaker: keynotes at the Open Data Science Conference (ODSC) & TACC as well as talks at Strata Hadoop & AI, Newsweek AI conference, and various PyData conferences around the world
+* Runs a [data science podcast](http://www.pydata-podcast.com/), [blogs about Bayesian statistics](https://twiecki.io), and is an [avid Twitter personality](https://twiecki.io).
+* Data scientist to follow of the year 2015, ODSC Open Source award 2018.
+
 ---
 specializations: Bayesian statistics, teaching
 ---
