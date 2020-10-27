@@ -1,7 +1,9 @@
 {% macro render_client(client) %}
 <div class="card">
-    {% if client.logo_url %}
-    <img src="{{ client.logo_url }}" class="card-img-top client-logo" alt="{{ client.client_name }}">
+    {% if client.logo_url%}
+    <a href="{{ client.homepage_url }}">
+        <img src="{{ client.logo_url }}" class="card-img-top client-logo" alt="{{ client.client_name }}">
+    </a>
     {% endif %}
     <div class="card-body">
         {% if client.testimonial %}
