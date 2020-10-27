@@ -2,3 +2,8 @@
     overflow: scroll;
     height:80vh;
 }
+
+
+.client-logo{
+    border: 10px solid #FFFFFF;
+}
