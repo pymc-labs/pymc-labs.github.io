@@ -15,11 +15,11 @@ We are the inventors of [PyMC3][pymc3], the leading platform for statistical dat
 
 [pymc3]: https://docs.pymc.io
 
-Our team consists of PhDs, mathematicians, neuroscientists, and a former Space-X rocket scientist, but what unites us is a deep expertise in and appreciation for Bayesian modeling as well as software design.
+Our team consists of PhDs, mathematicians, neuroscientists, and a former SpaceX rocket scientist. What unites us is our deep expertise and appreciation for Bayesian modeling as well as software design.
 
 We work according to the following principles:
 1. Provide value: We focus primarily on generating outcomes that positively affect your bottom line.
-1. Iterative development: We always start small and go for the low-hanging fruits first. From this bridgehead we venture into developing more complex solutions to bigger problems.
+1. Iterative development: We always start small and go for the low-hanging fruits first. From this bridgehead we venture into developing more complex solutions to solve bigger problems.
 1. Transparency & frequent communication: Rather than develop a finished product in isolation we keep close touch with our clients. 
 
 #### text ####
@@ -29,9 +29,9 @@ section_level: 1
 ----
 markdown:
 
-Bayesian modeling, as supported by our open source Python library PyMC3, allows you to solve data science problems that can hardly be solved any other way.
+Bayesian modeling, as supported by our open source Python library PyMC3, allows you to solve problems that can hardly be solved any other way.
 
-The tool is highly versatile and is being used successfully by various companies. For example, SpaceX used PyMC3 to optimize its supply chains
+The tool and metholodgy are highly versatile and is being used successfully by various companies. For example, SpaceX used PyMC3 to optimize its supply chains
 (as explained in this [blog post](https://twiecki.io/blog/2019/01/14/supply_chain/)).
 But it's also being used to [find planets outside of our solar-system](https://github.com/exoplanet-dev/exoplanet),
 [detect earthquakes](https://github.com/hvasbath/beat),
@@ -48,9 +48,9 @@ section_level: 3
 ----
 markdown: 
 
-Machine learning only cares about finding the solution that provides the highest predictive accuracy. The resulting models, however, are often impossible to interpret and investigate whether a sensible solution was found.
+Machine learning only cares about finding the solution that provides the highest predictive accuracy. The resulting models, however, are often impossible to interpret and investigate to determine whether a sensible solution was found.
 
-Bayesian models on the other hand are hand-tailored to the problem structure they are trying to solve. This makes the results inherently interpretable and can be investigated by you, the domain expert.
+Bayesian models on the other hand are hand-tailored to the problem structure they are solving. This makes the results inherently interpretable and can be investigated by you, the domain expert.
 
 #### text ####
 section_header: Models tailored to solve a specific problem
@@ -95,8 +95,8 @@ markdown:
 
 1. We usually start with an introductory call to introduce ourselves and get an understanding of the unique challenges you and your company face. 
 2. From there we identify the simplest but most impactful project which we then want to understand in more detail. From there we propose a unique model architecture that will solve your particular problem. 
-3. If you already have a Bayesian model you are using we will review it and propose improvements for scalability and more efficient sampling.
-4. We usually require a data set although we have also developed models with mock data that the client can then fit themselves on their data.
+3. If you already have a Bayesian model we will review it and propose improvements for scalability and efficiency.
+4. We determine the data needs to complete the project. This is determined with you to ensure the only relevation and applicable data shared.
 5. We then build the model in close collaboration with you and provide frequent updates on how the work is progressing. We pride ourselves on transparency, not just in our models but also in how we work.
 6. Our deliverables do not consist of fancy slide decks that solve theoretical problems but a packaged Python module with unit-tests, documentation, and training materials on how to understand and use the model to solve your problem.
 
@@ -110,9 +110,9 @@ markdown:
 
 If you meet one or more of these requirements, we are likely to add value to your business:
 
-* You want to learn something about your problem
+* You want to learn something about your business
     * Machine learning models are usually "black box" and do not give insight on what they actually learned
-    * Bayesian models are "open box" and can be inquired into to understand exactly why certain answers are produced
+    * Bayesian models are open books and can be inquired into to understand exactly why certain answers are produced
 * You have structured data with any of these properties:
     * Nested / hierarchical data
     * Time-series data
@@ -123,8 +123,12 @@ If you meet one or more of these requirements, we are likely to add value to you
 * You make decisions with real-world consequences based on noisy data
     * In this case it is important to take all possible interpretations of your data into account, not just the most likely
     * Bayesian statistics naturally supports this by modeling beliefs as distributions rather than scalar values
-    * This results in more robust decisions that work across a whole range of plausible assumptions
+    * This results in more robust decisions that work across a whole range of plausible assumptions 
+* You or your team has an interest in Bayesian statistics but don't know where to start
+    * Our team has experience working with statistics across industry and academia
+    * We also have experience teaching these concepts at all levels
 
-Problems in many domains meet these criteria as demonstrated by our customers in diverse fields ranging from finance, biotech, agriculture, pharma, adtech and more.
+
+Problems in many domains meet these criteria as demonstrated by our customers in diverse fields ranging from finance, biotech, agriculture, pharma, adtech, supply chains and more.
 
 If you are interested in learning more, please email us at [thomas.wiecki@pymc-labs.io](mailto:thomas.wiecki@pymc-labs.io). We look forward to hearing from you.
