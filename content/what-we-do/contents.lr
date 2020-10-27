@@ -1,0 +1,130 @@
+_model: generic_page
+---
+title: About Us
+---
+content:
+
+#### text ####
+section_header: Who we are
+----
+section_level: 1
+----
+markdown:
+
+We are the inventors of [PyMC3][pymc3], the leading platform for statistical data science. We have launched a consultancy to turn our expertise into your advantage. Our decades of experience in Bayesian modeling allows us to come up with unique and impactful solutions to your most challenging business problems. 
+
+[pymc3]: https://docs.pymc.io
+
+Our team consists of PhDs, mathematicians, neuroscientists, and a former Space-X rocket scientist, but what unites us is a deep expertise in and appreciation for Bayesian modeling as well as software design.
+
+We work according to the following principles:
+1. Provide value: We focus primarily on generating outcomes that positively affect your bottom line.
+1. Iterative development: We always start small and go for the low-hanging fruits first. From this bridgehead we venture into developing more complex solutions to bigger problems.
+1. Transparency & frequent communication: Rather than develop a finished product in isolation we keep close touch with our clients. 
+
+#### text ####
+section_header: How Bayesian statistics can help you
+----
+section_level: 1
+----
+markdown:
+
+Bayesian modeling, as supported by our open source Python library PyMC3, allows you to solve data science problems that can hardly be solved any other way.
+
+The tool is highly versatile and is being used successfully by various companies. For example, SpaceX used PyMC3 to optimize its supply chains
+(as explained in this [blog post](https://twiecki.io/blog/2019/01/14/supply_chain/)).
+But it's also being used to [find planets outside of our solar-system](https://github.com/exoplanet-dev/exoplanet),
+[detect earthquakes](https://github.com/hvasbath/beat),
+[predict elections](https://github.com/AlexAndorra/pollsposition_models)
+or [estimate the spread of COVID-19 on rt.live](https://rt.live/).
+The PyMC3 journal article is [the most cited paper on PeerJ where it was published][peerj_pm3].
+
+[peerj_pm3]: https://peerj.com/blog/post/115284882768/peerj-computer-sciences-most-cited-paper-probabilistic-programming-in-python-using-pymc3-author-interview-with-thomas-wiecki/
+
+#### text ####
+section_header: Interpretability of results
+----
+section_level: 3
+----
+markdown: 
+
+Machine learning only cares about finding the solution that provides the highest predictive accuracy. The resulting models, however, are often impossible to interpret and investigate whether a sensible solution was found.
+
+Bayesian models on the other hand are hand-tailored to the problem structure they are trying to solve. This makes the results inherently interpretable and can be investigated by you, the domain expert.
+
+#### text ####
+section_header: Models tailored to solve a specific problem
+----
+section_level: 3
+----
+markdown: 
+
+Another benefit of Bayesian statistics is that it allows you to incorporate the structure of your data into the model directly. This is different from machine learning which has to infer all structure from data -- there is no way to inform these models of structure ahead of time, which is why they require so much data.
+
+When working with us we first gain a deep understanding of your data structure and the specific problem you want to solve. Together with you, we tailor a custom model that solves your specific problem and takes your unique data structure into account.
+
+The resulting model requires far fewer data points than in machine learning. For example, many data sets have a nested or hierarchical structure that is impossible to map adequately in a machine learning algorithm, but is very [naturally supported by PyMC3]((https://twiecki.io/blog/2014/03/17/bayesian-glms-3/)).
+
+#### text ####
+section_header: Combine your expert domain knowledge with the insights learned from data
+----
+section_level: 3
+----
+markdown: 
+
+We realize that you already know much more about your problem domain than we ever will. Our solutions do not replace that hard-earned knowledge. In fact, we can include this knowledge to inform the Bayesian model where to look for a solution -- and where not to look.
+
+In order to quantify your domain knowledge we work with your team to calibrate the model by simulating data and asking how likely you think a particular pattern of data is to occur.
+
+#### text ####
+section_header: Account for all possible scenarios, not just the most likely
+----
+section_level: 3
+----
+markdown: 
+
+Classical data science approaches like machine learning usually just consider the single most likely scenario. Bayesian statistics, however, considers all possible scenarios according to the likelihood of their occurrence. This results in finding solutions that are robust across a whole distribution of scenarios, including tail-events.
+
+
+#### text ####
+section_header: How we work with you
+----
+section_level: 1
+----
+markdown:
+
+1. We usually start with an introductory call to introduce ourselves and get an understanding of the unique challenges you and your company face. 
+2. From there we identify the simplest but most impactful project which we then want to understand in more detail. From there we propose a unique model architecture that will solve your particular problem. 
+3. If you already have a Bayesian model you are using we will review it and propose improvements for scalability and more efficient sampling.
+4. We usually require a data set although we have also developed models with mock data that the client can then fit themselves on their data.
+5. We then build the model in close collaboration with you and provide frequent updates on how the work is progressing. We pride ourselves on transparency, not just in our models but also in how we work.
+6. Our deliverables do not consist of fancy slide decks that solve theoretical problems but a packaged Python module with unit-tests, documentation, and training materials on how to understand and use the model to solve your problem.
+
+
+#### text ####
+section_header: Who we're here for
+----
+section_level: 1
+----
+markdown:
+
+If you meet one or more of these requirements, we are likely to add value to your business:
+
+* You want to learn something about your problem
+    * Machine learning models are usually "black box" and do not give insight on what they actually learned
+    * Bayesian models are "open box" and can be inquired into to understand exactly why certain answers are produced
+* You have structured data with any of these properties:
+    * Nested / hierarchical data
+    * Time-series data
+    * Other non-trivially structured data sets
+* Your problem is not a simple prediction problem
+    * If you have a large set of tabular data with labels and only care about prediction accuracy, machine learning will be the best tool
+    * If you care about more than prediction, Bayesian modeling will be a good fit
+* You make decisions with real-world consequences based on noisy data
+    * In this case it is important to take all possible interpretations of your data into account, not just the most likely
+    * Bayesian statistics naturally supports this by modeling beliefs as distributions rather than scalar values
+    * This results in more robust decisions that work across a whole range of plausible assumptions
+
+Problems in many domains meet these criteria as demonstrated by our customers in diverse fields ranging from finance, biotech, agriculture, pharma, adtech and more.
+
+If you are interested in learning more, please email us at [thomas.wiecki@pymc-labs.io](mailto:thomas.wiecki@pymc-labs.io). We look forward to hearing from you.
