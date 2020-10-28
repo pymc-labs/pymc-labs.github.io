@@ -109,7 +109,20 @@ and be displayed on the right side of the case study page.
 If you don't upload any cover image,
 then the default Rev. Bayes image will be used.
 
-### Other stuff to edit?
+### Adding a client
+
+When adding a client,
+always ensure that you add a logo.
+The logo should be `.png` or `.jpg`, and should be high resolution.
+(If our clients' logos look good on our website, we look good too.)
+The file should be placed under the directory:
+`./assets/static/images/client_logos/<client_name>.<png/jpg>`
+
+When adding that client in the UI,
+make sure you enter the logo's filename
+exactly as you added it to the `client_logos/` directory.
+
+## Other questions?
 
 Consult:
 
