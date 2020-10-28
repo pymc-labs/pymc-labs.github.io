@@ -1,5 +1,5 @@
 client_name: Roche
 ---
-logo_url: https://github.com/pymc-labs/pymc-labs.github.io/raw/master/assets/static/images/client_logos/roche.png
+logo_filename: roche.png
 ---
 homepage_url: https://www.roche.com
