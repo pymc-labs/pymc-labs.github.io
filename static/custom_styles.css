@@ -1,0 +1,91 @@
+.scrollspy-content {
+  overflow: scroll;
+  height: 80vh;
+}
+
+.scrollspy-level2 {
+  font-size: smaller;
+  font-style: italic;
+}
+
+.client-logo {
+  border: 10px solid #ffffff;
+}
+
+.no-decoration {
+  text-decoration: none;
+}
+
+.navbar-logo {
+  max-height: 30px;
+}
+
+.hero-image {
+  max-width: 80%;
+}
+
+.border-white {
+  border-color: white;
+}
+
+.center {
+  display: block;
+  margin: 0 auto;
+}
+
+.text-center {
+  text-align: center;
+}
+
+img {
+  max-width: 100%;
+}
+
+.headshot {
+    max-width: 200px;
+    max-height: 200px;
+    display: block;
+    margin: auto;
+}
+
+.team-page {
+    max-width: 800px;
+    margin: auto;
+}
+
+
+/* https://www.w3schools.com/howto/howto_css_responsive_iframes.asp */
+.responsive-iframe-container {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio (divide 9 by 16 = 0.5625) */
+  }
+
+.responsive-iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+}
+
+
+/* The following two CSS classes enable smooth scaling on hover.
+Should be sparingly applied, as it gets cheesy real quickly. */
+.transition {
+  transition: all 500ms;
+}
+
+.card-hover:hover {
+  transform: scale(1.02);
+}
+
+
+/* This CSS styling is applied to dataframe tables exported using nbconvert */
+
+.dfdiv {
+  overflow-x: auto;
+}
