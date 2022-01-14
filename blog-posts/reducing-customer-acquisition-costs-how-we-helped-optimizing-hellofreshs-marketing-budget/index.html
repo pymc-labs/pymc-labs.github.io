@@ -1,0 +1,209 @@
+<!doctype html><html lang="en">
+
+    <head>
+        <style media="screen">
+            body {
+                padding-top: 70px;
+                padding-bottom: 70px;
+            }
+
+        </style>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+        <link rel="stylesheet" href="../../static/custom_styles.css?h=4f544444">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+
+        <!-- Extra meta tags: social site cards, browser icons... -->
+        <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+        <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+        <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+        <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+        <title>Improving the Speed and Accuracy of Bayesian Media Mix Models - PyMC Labs</title>
+        <meta name="twitter:card" content="summary">
+        <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/reducing-customer-acquisition-costs-how-we-helped-optimizing-hellofreshs-marketing-budget/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Improving the Speed and Accuracy of Bayesian Media Mix Models - PyMC Labs" />
+        <meta property="og:description" content="Using Bayesian MMM&#39;s to reduce customer acquisition costs" />
+        <meta property="og:image" content="../../static/images/pymc-labs-icon.png?h=77fcc5df" />
+
+        <!-- Highlight.js for syntax highlighting -->
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+        <!-- <script>hljs.highlightAll();</script> -->
+
+        <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+        <!-- We use this to do syntax highlighting -->
+        <link rel="stylesheet" href="../../static/pygments.css">
+
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+        </script>
+
+      </head>
+
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <div class="container">
+                <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+                <a class="navbar-brand" href="/"><img class="navbar-logo"
+                        src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/"><i class="fa fa-home"
+                                    aria-hidden="true"></i>
+                                Home</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                    aria-hidden="true"></i>
+                                What we do</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                    aria-hidden="true"></i>
+                                Team</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                    aria-hidden="true"></i>
+                                Clients</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                    aria-hidden="true"></i>
+                                Workshops</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                    aria-hidden="true"></i>
+                                Blog</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container">
+            
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-light h-100">
+            <div class="card-header">
+                <h2 class="card-title">Improving the Speed and Accuracy of Bayesian Media Mix Models</h2>
+                
+                <p class="card-subtitle mb-2 text-muted"><i>Using Bayesian MMM&#39;s to reduce customer acquisition costs</i></p>
+                
+                <p class="text-muted">
+Authored by
+
+
+
+Benjamin Vincent
+
+
+
+
+
+
+ on 2021-09-21</p>
+            </div>
+            <div class="card-body">
+                <p>The data scientists at <a href="https://www.hellofresh.com/">HelloFresh</a> have a big job on their hands. As part of a rapidly growing company with a worldwide reach, they influence the allocation of marketing dollars every year. One of their tasks is to maximize new customer acquisitions from data-driven insights.</p>
+<p>As part of their approach, the data scientists built a Bayesian <a href="https://en.wikipedia.org/wiki/Marketing_mix_modeling">Media Mix Model</a> (see <a href="https://www.youtube.com/watch?v=UznM_-_760Y">this video</a> for more details). If you want a refresher of the power of Bayesian Media Mix Models, check out our <a href="https://www.pymc-labs.io/blog-posts/bayesian-media-mix-modeling-for-marketing-optimization/">previous blog post</a>. But in short, MMM’s help us understand the characteristics and effectiveness of different marketing channels like TV, radio, podcasts, social media, daily deals, and more, based on how much we spent on each channel over time and how many new users we acquired.</p>
+<p>Given the scale of HelloFresh’s operations, even minor improvements in the insights gained by such models can have significant effects on new customer acquisitions. Recently HelloFresh’s data scientists challenged us to do precisely this - could we (PyMC Labs) help them improve their <a href="https://www.youtube.com/watch?v=UznM_-_760Y">already sophisticated Bayesian MMM</a>?</p>
+<h2 id="what-we-delivered-to-hellofresh">What we delivered to HelloFresh</h2><h3 id="more-accurate-and-precise-model-predictions">More accurate and precise model predictions</h3><p>Thanks to <a href="https://docs.pymc.io/">PyMC3</a>, we can build a model, feed in data, and press the Inference Button™. However, making high profile decisions requires due diligence! One crucial way of doing this is inspecting <strong>posterior predictive checks</strong>, which are plots comparing the model’s predicted customer acquisitions to the actual data. The closer the match between predictions and actuals, the greater confidence we can have in the model. By inspecting PPC plots, we could identify two key improvements to the model:</p>
+<ul>
+<li>We changed the outcome variable to be the <em>logarithm</em> of the number of new customers rather than the actual <em>raw</em> number. This can be useful in situations where there might be signal-dependent noise (i.e. more measurement error at higher customer levels) and allow the model to predict <em>proportional</em> changes in the number of customers.</li>
+<li>In addition, we reduced undesired effects on the parameter estimates by outlier data points by switching from a Normal likelihood function to a <a href="https://en.wikipedia.org/wiki/Student&#39;s_t-distribution">Student T</a> distribution which is more robust to outliers.</li>
+</ul>
+<p>With these two changes, we improved both the accuracy and precision of the model’s predictions. In the figure below the top panel shows the posterior of the original model and the bottom panel shows the posterior of the improved model. The comparison with actuals demonstrates reduced error and a 60% reduction in the variance of the predictions. The net result was that HelloFresh’s data science team could gain greater confidence that parameter estimates (such as channel efficiency or saturation) capture something meaningful about the world, providing greater confidence in making data-driven changes to marketing budgets.</p>
+<figure>
+  <img src="post_pred_improvement.png" alt="improvements in posterior predictions" style="width:100%">
+  <figcaption>The figure shows data (red points) and posterior predictions of the model (translucent grey points) for the existing versus the modified model</figcaption>
+</figure><p>In addition, we implemented the following enhancements:</p>
+<ul>
+<li>We changed the baseline static MMM by allowing parameters to evolve over time (we’ll expand upon this in the next blog post in this series).</li>
+<li>We changed how baseline customer levels and seasonal effects are added to the model.</li>
+<li>We performed a sensitivity analysis on the influence of COVID-19 on model stability.</li>
+</ul>
+<h3 id="10x-speed-up-and-additional-insights">10x speed up and additional insights</h3><p>As the developers of <a href="https://docs.pymc.io/">PyMC3</a>, we could leverage our considerable familiarity and expertise to deliver a 10x speedup to model inference time. By reducing a 20 min process down to just 2 mins, rapid iteration and experimentation become possible.</p>
+<p>This was achieved through multiple methods, but particular attention was paid to the <a href="https://www.pymc-labs.io/blog-posts/bayesian-media-mix-modeling-for-marketing-optimization/">adstock function</a>. Initially, this was implemented using an expensive convolution operation that scaled quadratically with the number of data points. We derived a linear-time algorithm for this specific case and implemented a custom <a href="https://theano-pymc.readthedocs.io/en/latest/">theano</a> operator with <a href="https://numba.pydata.org/">numba</a> JIT compilation to achieve significant speedups.</p>
+<p>Speeding up the model this much-allowed <strong>sensitivity analyses</strong> to be undertaken. We run hundreds of simulations under different priors to understand how it affected posterior estimates of the parameters. If parameter estimates are sensitive to priors’ variation, we know they are influenced less by the data and more by beliefs, which is not appropriate if priors are not supported by solid domain knowledge.</p>
+<h3 id="improved-interpretability-of-model-parameters">Improved interpretability of model parameters</h3><p>We also reparameterized the <a href="https://www.pymc-labs.io/blog-posts/bayesian-media-mix-modeling-for-marketing-optimization/">reach function</a> as:</p>
+<p>$$\beta \cdot \text{tanh} \Big(x /(\beta \cdot c_0) \Big)$$</p>
+<p>Where $\beta$ is the number of users at saturation, and $c_0$ is the initial cost per user (slope at zero dollars). This helps in interpreting model parameters because they are clearly related to money spent. It also makes it easier to use human knowledge and experience to define priors over these parameters. The plot below shows an example of the new parametrization using some fake data.</p>
+<p><img src="reach_func_new.png" alt=""></p>
+<h2 id="the-full-package">The full package</h2><p>We work closely with clients to make sure we help solve their problems. But the code is just one part of that. We provided:</p>
+<ul>
+<li>Fully documented Jupyter notebooks that demonstrated the use of the new code.</li>
+<li>Weekly calls and project presentations to troubleshoot, keep goals aligned, and summarize our ongoing progress.</li>
+<li>Full training in the modeling and methods used so that the data science team was left empowered, able to experiment and debug independently from PyMC Labs long after the project was over.</li>
+<li>This, and other projects, have also benefited from pre-release functionality of PyMC3. For example, this project used a new <code>ZeroSumNormal</code> distribution which was not publically available at the time.</li>
+</ul>
+<p>We and the HelloFresh data science team (check out their <a href="https://www.hellofresh.com/careers/">recruitment</a> page)  were delighted with the results of this project. But because Media Mix Modeling can be used in various ways, there are multiple routes for further progress. In fact, we are currently still working with the HelloFresh team on the topic. For example, Bayesian MMM’s can be used to optimally and automatically set budgets across media channels, rather than just <em>informing</em> those budgets. And those budgets can be used not only to maximize customer acquisitions but also to drive further learning and marketing experimentation where we have remaining uncertainty.</p>
+<h2 id="working-with-pymc-labs">Working with PyMC Labs</h2><p>If you are interested in seeing what we at PyMC Labs can do for you, then please contact Thomas Wiecki at <a href="mailto:thomas.wiecki@pymc-labs.io">thomas.wiecki@pymc-labs.io</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity. We can develop Bayesian Media Mix Models from scratch, explore the benefits of converting to a Bayesian MMM, or fine-tune and improve existing Media Mix Models.</p>
+<p>We also run <a href="https://www.pymc-labs.io/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics. And of course, we can offer workshops on Bayesian Media Mix Models made suitable to a variety of audiences.</p>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        </div>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+            integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+            crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+        <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+    </body>
+
+</html>

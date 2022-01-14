@@ -1,0 +1,127 @@
+.client-logo {
+  border: 10px solid #ffffff;
+}
+
+.no-decoration {
+  text-decoration: none;
+}
+
+.navbar-logo {
+  max-height: 30px;
+}
+
+.hero-image {
+  max-width: 80%;
+}
+
+.border-white {
+  border-color: white;
+}
+
+.center {
+  display: block;
+  margin: 0 auto;
+}
+
+.text-center {
+  text-align: center;
+}
+
+img {
+  max-width: 100%;
+}
+
+.headshot {
+    max-width: 200px;
+    max-height: 200px;
+    display: block;
+    margin: auto;
+}
+
+.team-page {
+    max-width: 800px;
+    margin: auto;
+}
+
+
+/* https://www.w3schools.com/howto/howto_css_responsive_iframes.asp */
+.responsive-iframe-container {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio (divide 9 by 16 = 0.5625) */
+  }
+
+.responsive-iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+}
+
+
+/* The following two CSS classes enable smooth scaling on hover.
+Should be sparingly applied, as it gets cheesy real quickly. */
+.transition {
+  transition: all 500ms;
+}
+
+.card-hover:hover {
+  transform: scale(1.02);
+}
+
+
+/* This CSS styling is applied to dataframe tables exported using nbconvert */
+
+.dfdiv {
+  overflow-x: auto;
+}
+
+
+/* https://css-tricks.com/snippets/css/simple-and-nice-blockquote-styling/ */
+blockquote {
+  background: #f9f9f9;
+  border-left: 10px solid lightblue;
+  border-radius: 4px;
+  margin: 1.5em 10px;
+  padding: 0.5em 10px;
+  quotes: "\201C""\201D";
+}
+blockquote:before {
+  color: #ccc;
+  content: open-quote;
+  font-size: 4em;
+  line-height: 0.1em;
+  margin-right: 0.25em;
+  vertical-align: -0.4em;
+}
+blockquote p {
+  display: inline;
+}
+
+
+/* Figure and caption */
+figure {
+  float: none;
+  width: 100%;
+  text-align: center;
+  font-style: italic;
+  font-size: smaller;
+  text-indent: 0;
+  margin: 0.5em;
+  padding: 0.5em;
+}
+
+img.scaled {
+  width: 100%;
+}
+
+
+pre {
+  background-color: #f7f3f3;
+  display: block;
+  padding: 20px;
+}

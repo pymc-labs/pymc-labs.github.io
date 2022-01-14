@@ -1,0 +1,221 @@
+<!doctype html><html lang="en">
+
+    <head>
+        <style media="screen">
+            body {
+                padding-top: 70px;
+                padding-bottom: 70px;
+            }
+
+        </style>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+        <link rel="stylesheet" href="../../static/custom_styles.css?h=4f544444">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+
+        <!-- Extra meta tags: social site cards, browser icons... -->
+        <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+        <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+        <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+        <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+        <title>Bayesian model to infer private equity returns from capital in and outflows - PyMC Labs</title>
+        <meta name="twitter:card" content="summary">
+        <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/everysk/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Bayesian model to infer private equity returns from capital in and outflows - PyMC Labs" />
+        <meta property="og:description" content="" />
+        <meta property="og:image" content="../../static/images/pymc-labs-icon.png?h=77fcc5df" />
+
+        <!-- Highlight.js for syntax highlighting -->
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+        <!-- <script>hljs.highlightAll();</script> -->
+
+        <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+        <!-- We use this to do syntax highlighting -->
+        <link rel="stylesheet" href="../../static/pygments.css">
+
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+        </script>
+
+      </head>
+
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <div class="container">
+                <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+                <a class="navbar-brand" href="/"><img class="navbar-logo"
+                        src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/"><i class="fa fa-home"
+                                    aria-hidden="true"></i>
+                                Home</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                    aria-hidden="true"></i>
+                                What we do</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                    aria-hidden="true"></i>
+                                Team</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                    aria-hidden="true"></i>
+                                Clients</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                    aria-hidden="true"></i>
+                                Workshops</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                    aria-hidden="true"></i>
+                                Blog</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container">
+            
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-light h-100">
+            <div class="card-header">
+                <h2 class="card-title">Bayesian model to infer private equity returns from capital in and outflows</h2>
+                
+                <p class="text-muted">
+Authored by
+
+
+
+Ravin Kumar
+
+
+
+
+
+
+ on 2021-02-25</p>
+            </div>
+            <div class="card-body">
+                <h2 id="business-challenge">Business challenge</h2><p>Everysk is the leading provider of risk workflows for multi-asset, global
+portfolios with portfolios that span many different asset classes. A key part of
+any financial risk assessment is understanding the time varying value added
+factors and exposure of the investment, as well as having an index against which
+to compare performance.</p>
+<p>In liquid markets indices can be readily calculated from public and relatively
+frequent transactions, allowing for comparison, risk assessment, and
+benchmarking of portfolios. Private Equity lacks similar transaction-based
+performance measures; estimating them is not a straightforward process, and
+requires some statistical estimation.  So how can we figure out the unknown from
+the things we know? The answer lies with Bayesian Statistics.</p>
+<p>Modern day Bayesian statistics is a combination of statistical expertise,
+business knowledge, and computing. By combining the strengths and using a
+principled approach, organizations are able to gain deeper insights than
+previously possible. The multifaceted nature of this challenge was a perfect
+match for a partnership between PyMC Labs and Everysk, as Everysk had the data
+and business expertise, and PyMC Labs lent the statistics and computational
+expertise.</p>
+<h2 id="from-understanding-to-implementation-to-extension">From understanding to implementation to extension</h2><p>PyMC Labs and Everysk set up an initial client meeting to jointly scope out the
+problem from a technical and business perspective. Everysk and PyMC Labs
+reviewed existing code together, briefly talked through <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2356553ß">the
+paper</a> Everysk
+wanted to implement, as well as what Everysk was looking to do with the model.
+From these conversations, the joint team was able to align on key latent (i.e
+hidden), factors of interest, and the “checkpoints” to ensure the analysis was
+on the right track.</p>
+<p>With understanding of the task and solution, PyMC Labs spent the first week
+exploring the data, understanding the details of the paper, and building an
+initial model. This initial model served as a testing ground, to ensure that
+modeling the hidden factors of interest was possible, that the results were
+sane, and that there was value for Everysk. Because the PyMC Labs developers are
+also the maintainers of PyMC, they were able to incorporate numerous
+improvements to the original paper that led to a faster and more accurate model.
+For example the original paper used first generation samplers, which were quite
+slow, while PyMC Labs upgraded the samplers to speed up the run time of the
+model, leading to faster iteration cycles.</p>
+<p>In particular, this approach was needed by Everysk, as it wasn’t seeking
+predictions but rather seeking understanding of why the trend line was behaving
+a certain way. This insight would not have been available from a standard
+machine learning analysis.</p>
+<p>With Everysk, PyMC Labs worked hand-in-hand to interpret the results, fix any
+outstanding issues, and run experiments. By having the team available for
+questions, Everysk was able to become more comfortable with the results.</p>
+<p><img src="cover.png" alt=""></p>
+<p><em>Cumulative private equity returns. Released with client permission.</em></p>
+<p>This plot shows the cumulative returns of the US stock market (blue), the
+private equity venture capital (VC) index that was produced by the Bayesian
+model (orange), as well as the VC Index produced by Cambridge Associates for
+comparison (green).</p>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        </div>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+            integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+            crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+        <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+    </body>
+
+</html>

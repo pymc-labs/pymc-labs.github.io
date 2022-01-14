@@ -1,0 +1,258 @@
+<!doctype html><html lang="en">
+
+    <head>
+        <style media="screen">
+            body {
+                padding-top: 70px;
+                padding-bottom: 70px;
+            }
+
+        </style>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+        <link rel="stylesheet" href="../../static/custom_styles.css?h=4f544444">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+
+        <!-- Extra meta tags: social site cards, browser icons... -->
+        <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+        <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+        <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+        <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+        <title>Introducing PyMC Labs - PyMC Labs</title>
+        <meta name="twitter:card" content="summary">
+        <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/saving-the-world/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Introducing PyMC Labs - PyMC Labs" />
+        <meta property="og:description" content="Saving the world with Bayesian modeling" />
+        <meta property="og:image" content="../../static/images/pymc-labs-icon.png?h=77fcc5df" />
+
+        <!-- Highlight.js for syntax highlighting -->
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+        <!-- <script>hljs.highlightAll();</script> -->
+
+        <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+        <!-- We use this to do syntax highlighting -->
+        <link rel="stylesheet" href="../../static/pygments.css">
+
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+        </script>
+
+      </head>
+
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <div class="container">
+                <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+                <a class="navbar-brand" href="/"><img class="navbar-logo"
+                        src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/"><i class="fa fa-home"
+                                    aria-hidden="true"></i>
+                                Home</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                    aria-hidden="true"></i>
+                                What we do</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                    aria-hidden="true"></i>
+                                Team</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                    aria-hidden="true"></i>
+                                Clients</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                    aria-hidden="true"></i>
+                                Workshops</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                    aria-hidden="true"></i>
+                                Blog</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container">
+            
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-light h-100">
+            <div class="card-header">
+                <h2 class="card-title">Introducing PyMC Labs</h2>
+                
+                <p class="card-subtitle mb-2 text-muted"><i>Saving the world with Bayesian modeling</i></p>
+                
+                <p class="text-muted">
+Authored by
+
+
+
+Thomas Wiecki
+
+
+
+
+
+
+ on 2021-02-18</p>
+            </div>
+            <div class="card-body">
+                <p>After I left Quantopian in 2020, something interesting happened: various companies contacted me inquiring about
+consulting to help them with their PyMC3 models.</p>
+<p>Usually, I don't hear how people are using <a href="https://docs.pymc.io/">PyMC3</a> -- they mostly show up on
+<a href="https://github.com/pymc-devs/pymc3">GitHub</a> or <a href="https://discourse.pymc.io/">Discourse</a> when something isn't working
+right. So, hearing about all these really cool projects was quite exciting. However, I couldn't possibly take all of
+these projects on by myself.</p>
+<p>Thus, it was time to assemble a team of the most badass Bayesian modelers the world had ever seen -- the Bayesian
+Avengers, if you will. Fortunately, I did not have to venture far, as PyMC3 had already attracted exactly these types
+of people.</p>
+<div class="text-center pt-1 pb-4">
+    <iframe src="https://giphy.com/embed/5cZbRBLhW4tc4" width="480" height="257"
+    frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+</div><p>This brings me to the Big Announcement: For the last few months, we have quietly been building
+<a href="https://pymc-labs.io">PyMC Labs</a>, a Bayesian modeling consultancy.
+<a href="https://www.pymc-labs.io/team/">We have an amazing team</a> consisting of three neuroscience PhDs, mathematicians,
+social scientists, a SpaceX rocket scientist, and the host of the famous
+<a href="https://www.learnbayesstats.com/">‘Learning Bayesian Statistics’ podcast</a>. All of us are united in our mission:</p>
+<blockquote class="blockquote text-center">
+    <p class="mb-0">Saving the world with Bayesian modeling</p>
+    <footer class="blockquote-footer">Someone famous who 💙 Bayesian stats</footer>
+</blockquote><p>Does this sound a bit grandiose? Probably. Is this true? I firmly believe it is. There are so many important problems
+the world faces today -- from climate change to COVID19, from education to poverty -- and Bayesian modeling can play a
+critical role in solving these problems. Let me explain why.</p>
+<h2 id="it-is-already-doing-it">It is already doing it</h2><p>I would not have imagined it when I started contributing to PyMC, but the science PyMC3 has directly enabled ranges
+from <a href="https://scholar.google.com/scholar?hl=en&amp;as_sdt=0%2C5&amp;q=pymc3+climate&amp;btnG=">climate science</a> and biology to
+astronomy and zoology, and everything in between.</p>
+<p>For instance, it was used to predict the spread of COVID19 in a recent
+<a href="https://science.sciencemag.org/content/369/6500/eabb9789.full">Science paper</a>,
+as well as <a href="https://rtlive.de/global.html">track the reproduction factor in real-time</a>.
+In both cases, the benefit of PyMC3 was its ease-of-use and the ability to integrate scientific domain knowledge and
+get honest uncertainty estimation in a highly volatile and uncertain situation.</p>
+<p>Now I know you’re very observant and I hear you thinking: “wait a minute, those benefits of Bayesian modeling sound
+quite general, so why would they be only valid for epidemiology?”. And indeed they aren’t! For similar benefits,
+PyMC3 is also used to <a href="https://github.com/exoplanet-dev/exoplanet">find planets outside of our solar system</a>
+and <a href="https://github.com/hvasbath/beat">analyze earthquakes</a>. One of my coworkers here at PyMC Labs uses it for
+<a href="https://share.streamlit.io/alexandorra/pollsposition_website/main/gp-popularity-app.py">electoral and political forecasting</a>,
+because polls are noisy, scarce and need to be completed by domain knowledge -- one of the perfect settings for
+Bayesian inference!</p>
+<p>With all of this, at the time of writing, the <a href="https://peerj.com/articles/cs-55/">PyMC3 paper</a> has been cited over 930
+times and is in the top 10 most cited articles of the entire PeerJ journal.</p>
+<h2 id="solving-business-problems">Solving Business Problems</h2><p>Beyond scientific research, I find that PyMC3 is the perfect tool to also solve various business problems.
+And indeed it’s already successfully used in production at companies as big and diverse as SpaceX, Roche,
+Netflix, Deliveroo and HelloFresh.</p>
+<p>This diversity means that the <a href="https://www.pymc-labs.io/clients/">PyMC Labs team intervenes</a> to, for instance,
+<a href="https://support.everysk.com/hc/en-us/articles/1500001040721-Private-Investments">build complex models from the latest finance research</a>;
+optimize supply chains for food delivery; build software from top to bottom for pharmaceutical applications;
+speed up and extend models for the farm tech industry; train and enhance any data science team’s Bayesian stats
+capacities, etc.</p>
+<h2 id="prediction-vs-inference">Prediction Vs Inference</h2><p>As data science has exploded in the last decade I have always been surprised by the over-emphasis on prediction-focused
+machine learning. For far too long, it has been hailed as the solution to most of our data science problems.</p>
+<p>I believe that the potential of this is way overblown. Not because it doesn't work -- algorithms like deep nets or
+random forests are extremely powerful at extracting non-linear predictive patterns from large data sets -- but rather
+because most data science problems are not simple <em>prediction</em> but rather <em>inference</em> problems.</p>
+<p>In addition, we often already have a lot of knowledge about our problem: knowledge of certain structure in our data
+set (like nested data, that some variables relate to some but not other parameters) and knowledge of which range of
+values we expect certain parameters of our model to fall into. Prediction-focused ML does not allow us to include any
+of this information, that's why it requires so much data.</p>
+<p>With Bayesian statistics, we don't have to learn everything from data as we translate this knowledge into a custom model.
+Thus, rather than changing our problem to fit the solution, as is common with ML, we can tailor the solution to best
+solve the problem at hand. I like to compare this with Playmobil vs Lego:</p>
+<p><img src="playlego.jpeg" alt=""></p>
+<p>Playmobil just gives you a single toy you can't change while Lego (i.e Bayes here) gives you building blocks to build
+the toy you actually want. In Bayesian modeling, these building blocks are probability distributions.</p>
+<p>But how do you do this in practice? This is where PyMC3 comes in, as it allows you to specify your models as Python
+code and automatically estimate it without requiring manual mathematical derivations. Due to recent theoretical and
+technological advances, this also runs quickly and scales to complex models on large(ish) data sets.</p>
+<h2 id="serving-our-mission">Serving our mission</h2><p>So how do we best make progress on our mission?</p>
+<p>First, we will continue to make PyMC3 the best, most user-friendly and scalable Bayesian modeling package out there.
+We are well set up to do this, having a friendly API, a huge user-base, and a large developer team of over 20 active
+members. With our renewed focus on
+<a href="https://pymc-devs.medium.com/the-future-of-pymc3-or-theano-is-dead-long-live-theano-d8005f8a0e9b">PyMC3 on Theano with a JAX backend</a>
+all our resources will go towards this goal.</p>
+<p>Second, our new PyMC consultancy will support this endeavour. It allows us to directly help clients use these powerful,
+customizable methods to solve their business problems, thereby increasing adoption and recognition.
+As a great side effect, these client projects also help us find things that need to be fixed, improved or optimized
+in PyMC3, thereby lifting all (Bayesian) boats instead of just the happy fews’.</p>
+<p>So far, this has been an incredibly rewarding and exhilarating journey. Even though it is still early, we are learning
+a lot about which areas Bayesian modeling is particularly well suited for but also what would make PyMC3 even better.
+Without spoiling a future blog post that will go into more detail about what we have learned applying these methods,
+the best use-cases include (but aren’t limited to) <strong>incorporating domain knowledge, building bespoke models and
+quantifying uncertainty around estimates</strong>.</p>
+<p><em>Sounds familiar? If you or your company has a problem for which prediction-based ML is not a good fit, I'd love to talk
+to you at <a href="mailto:thomas.wiecki@pymc-labs.io">thomas.wiecki@pymc-labs.io</a>. This is just the beginning and
+I hope you will join us on this marvelous journey.</em></p>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        </div>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+            integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+            crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+        <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+    </body>
+
+</html>

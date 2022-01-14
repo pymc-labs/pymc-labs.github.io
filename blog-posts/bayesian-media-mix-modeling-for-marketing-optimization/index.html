@@ -1,0 +1,231 @@
+<!doctype html><html lang="en">
+
+    <head>
+        <style media="screen">
+            body {
+                padding-top: 70px;
+                padding-bottom: 70px;
+            }
+
+        </style>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+        <link rel="stylesheet" href="../../static/custom_styles.css?h=4f544444">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+
+        <!-- Extra meta tags: social site cards, browser icons... -->
+        <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+        <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+        <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+        <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+        <title>Bayesian Media Mix Modeling for Marketing Optimization - PyMC Labs</title>
+        <meta name="twitter:card" content="summary">
+        <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/bayesian-media-mix-modeling-for-marketing-optimization/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Bayesian Media Mix Modeling for Marketing Optimization - PyMC Labs" />
+        <meta property="og:description" content="Learn about Bayesian Media Mix Modeling" />
+        <meta property="og:image" content="../../static/images/pymc-labs-icon.png?h=77fcc5df" />
+
+        <!-- Highlight.js for syntax highlighting -->
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+        <!-- <script>hljs.highlightAll();</script> -->
+
+        <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+        <!-- We use this to do syntax highlighting -->
+        <link rel="stylesheet" href="../../static/pygments.css">
+
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+        </script>
+
+      </head>
+
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <div class="container">
+                <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+                <a class="navbar-brand" href="/"><img class="navbar-logo"
+                        src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/"><i class="fa fa-home"
+                                    aria-hidden="true"></i>
+                                Home</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                    aria-hidden="true"></i>
+                                What we do</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                    aria-hidden="true"></i>
+                                Team</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                    aria-hidden="true"></i>
+                                Clients</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                    aria-hidden="true"></i>
+                                Workshops</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                    aria-hidden="true"></i>
+                                Blog</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container">
+            
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-light h-100">
+            <div class="card-header">
+                <h2 class="card-title">Bayesian Media Mix Modeling for Marketing Optimization</h2>
+                
+                <p class="card-subtitle mb-2 text-muted"><i>Learn about Bayesian Media Mix Modeling</i></p>
+                
+                <p class="text-muted">
+Authored by
+
+
+
+Benjamin Vincent
+
+
+
+
+
+
+ on 2021-09-17</p>
+            </div>
+            <div class="card-body">
+                <p>A problem faced by many companies is how to allocate marketing budgets across different media channels. For example, how should funds be allocated across TV, radio, social media, direct mail, or daily deals?</p>
+<p>One approach might be to use heuristics, i.e. sensible rules of thumb, about what might be most appropriate for your company. For instance, a widely used approach is to simply set your marketing budget as a percentage of expected revenues. But this involves guesswork - something we want to avoid regardless of the size of the marketing budget involved.</p>
+<p>Fortunately, with Bayesian modeling, we can do better than this! So-called <a href="https://en.wikipedia.org/wiki/Marketing_mix_modeling">Media Mix Modeling</a> (MMM) can estimate how effective each advertising channel is in gaining new customers. Once we have estimated each channel’s effectiveness we can optimize our budget allocation to maximize customer acquisition and sales.</p>
+<p>We at PyMC Labs had an opportunity to unleash our skills on Bayesian MMM’s in partnership with <a href="https://www.hellofresh.com/careers/">HelloFresh</a> (check their <a href="https://www.hellofresh.com/careers/">careers page</a>). Our collaboration started after HelloFresh <a href="https://www.youtube.com/watch?v=UznM_-_760Y">presented their Bayesian MMM</a> at <a href="https://discourse.pymc.io/c/pymcon/12">PyMCCon 2020</a> (make sure to check out their <a href="https://engineering.hellofresh.com/bayesian-media-mix-modeling-using-pymc3-for-fun-and-profit-2bd4667504e6">MMM blog post</a>). Out of the natural post-presentation discussion, we decided to work together to see how the PyMC Labs team could build upon the great work by HelloFresh’s data science team.</p>
+<p><img src="logos.png" alt=""></p>
+<p>In this blog post, we outline what you can do with MMM’s, introduce how they work, summarise some of the benefits they can provide, as well as covering some of the modeling challenges. In a follow-up blog post, we will discuss the specific model improvements we implemented.</p>
+<h2 id="what-can-you-do-with-media-mix-modeling">What can you do with Media Mix Modeling?</h2><p>Media Mix Modeling gives rich insights and is used in many ways, but here are some of the highlights:</p>
+<ol>
+<li><strong>Understand the effectiveness of different media channels in driving customer acquisition.</strong> Not only can you learn from data about the most influential media channels for your business, but you can update this understanding over time. By incorporating new marketing and customer acquisition data on an ongoing basis, you can learn about the changing effectiveness of each channel over time.</li>
+<li><strong>Avoid being misled by other factors.</strong> If the rate of customer acquisitions dramatically changes, was this caused by changes in marketing spend across media channels? Or was it caused by other factors such as changes in seasonality, consumer sentiment, economic factors, pricing changes, etc.?</li>
+<li><strong>Inform media spending decisions.</strong> Having gained an understanding of the effectiveness of different media channels, such as knowing the customer acquisition cost per channel or the degree of channel saturation, this could be used to inform future marketing spend across channels.</li>
+<li><strong>Optimize future marketing decisions.</strong> Rather than just inform future budget spending decisions, it is actually possible to optimize these spending decisions. For example, it is possible to calculate budgets across media channels that maximize new customers for a given total budget. See <a href="https://twiecki.io/blog/2019/01/14/supply_chain/">this blog post on Bayesian decision-making</a> for more information.</li>
+<li><strong>Inspire marketing experiments.</strong> If there is uncertainty about the effectiveness or saturation of channels, we can intelligently respond to this by running lift or incrementality tests to resolve some of this uncertainty.</li>
+<li><strong>Validate your understanding through predictions.</strong> We gain confidence in our knowledge of the world by making predictions and comparing them to what happens. MMM also generates forecasts that we can check against reality. As a result, we can improve our understanding and modeling iteratively to become more accurate over time.</li>
+</ol>
+<p><img src="bayesian_mmm_workflow2.png" alt=""></p>
+<h2 id="how-does-media-mix-modeling-work">How does Media Mix Modeling work?</h2><p>In simple terms, we can understand MMMs as regression modeling applied to business data. The goal is to estimate the impact of marketing activities and other drivers on a metric of interest, such as the number of new customers per week.</p>
+<p>To do this, we use two main types of predictor variables:</p>
+<ol>
+<li>The level of spend for each media channel over time.</li>
+<li>A set of control measurements that could capture seasonality or economic indicators.</li>
+</ol>
+<p>The basic approach to MMMs uses linear regression to estimate a set of coefficients for the relative importance of each of these predictors, but real-world MMMs commonly incorporate also non-linear factors to more accurately capture the effect of marketing activities on consumer behaviour:</p>
+<ul>
+<li><strong>The reach function:</strong> Rather than model the number of customers acquired as a linear function of marketing spend, the reach function models the potential saturation of different channels: While the initial money spent on an advertising channel might have a big impact on customer acquisition, further investment will often lead to diminishing returns as people get used to the message. When we think about optimization, modeling this effect is critical. Some channels may be nowhere close to being saturated and yield significant increases in customer acquisitions for spending for that channel. Knowing the saturation of each channel is vital in making future marketing spend decisions.</li>
+</ul>
+<p><img src="reach-function.png" alt=""></p>
+<ul>
+<li><strong>The adstock function:</strong> The marketing spend for a given channel may have a short-term effect or long-term impact. Remember that jingle from a TV ad you’ve seen 20 years ago? That’s a great long-term impact. The adstock function captures these time-course effects of different advertising channels. Knowing this is crucial - if we know some channels have short-term effects that quickly decay over time, we could plan to do more frequent marketing. But suppose another channel has a long, drawn-out impact on driving customer acquisitions. In that case, it may be more effective to use that channel more infrequently.</li>
+</ul>
+<p><img src="adstock_function.png" alt=""></p>
+<p>Thus we can summarize the full MMM with this image:</p>
+<p><img src="bayesian_mmm.png" alt=""></p>
+<h2 id="the-benefits-of-a-bayesian-media-mix-model">The benefits of a Bayesian Media Mix Model</h2><p>Traditionally, one fits an MMM model using frequentist methods such as <a href="https://en.wikipedia.org/wiki/Ordinary_least_squares">Ordinary Least Squares</a> (which often provide a reasonable pointwise estimate for the coefficients) but it is becoming increasingly common to use the Bayesian approach, which was first introduced by Google in 2017 [<a href="https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/46001.pdf">Jin et al 2017</a>]. Some of the core benefits that <em>Bayesian Media Mix Modeling</em> have are:</p>
+<ul>
+<li><strong>We can incorporate our prior knowledge.</strong> Prior knowledge about marketing channel effectiveness can come from various sources—and we want to be able to use that knowledge. One source could be the intuition that marketing managers have accumulated running hundreds of campaigns, or their knowledge about changes in the price of a competitor’s product, etc. Another source of prior knowledge could be the results of carefully conducted field experiments such as lift or incrementality tests. The Bayesian approach allows prior knowledge to be elegantly incorporated into the model and quantified with the appropriate mathematical distributions.</li>
+<li><strong>We can optimally combine that prior knowledge with data.</strong> At the heart of the Bayesian approach is how we update our knowledge in the light of new data. Using a Bayesian approach enables you to combine your team’s valuable knowledge with modeling insights from the MMM’s data-driven strategy. No longer will models overrule human knowledge; with Bayesian methods, they augment human knowledge.</li>
+<li><strong>We can know how sure we are.</strong> Another significant benefit of the Bayesian approach is that we know how confident we are. Yes, we want to make data-driven decisions. Still, we only want to do so when the data provides us with a sufficient level of confidence in our understanding. Parameters pertaining to Marketing channels that are estimated with high level of uncertainty can motivate targeted marketing efforts (i.e. incrementality tests) to resolve this uncertainty.</li>
+</ul>
+<p>Did you spot the recurring theme of uncertainty? If we already knew everything and had no uncertainty then our job would already be done. But the Bayesian approach offers a principled way of describing, dealing with, and reducing our uncertainty based upon data.</p>
+<h2 id="challenges-with-bayesian-mmms">Challenges with Bayesian MMM’s</h2><p>In one way, MMMs are conceptually simple. So how hard can it be to implement these kinds of models in a Bayesian framework? Well, not so fast! Things can get tricky when moving from concepts to implementation. Here is a list of possible stumbling points—which are precisely the kind of modeling decisions that our team at PyMC Labs can help with:</p>
+<ul>
+<li><strong>Which likelihood function to choose?</strong> There are several feasible options here. Suppose we are modeling customer counts. We could consider discrete distributions like the <a href="https://en.wikipedia.org/wiki/Poisson_distribution">Poisson distribution</a> but also the <a href="https://en.wikipedia.org/wiki/Negative_binomial_distribution">Negative binomial distribution</a> would be a potential option. Alternatively, if the number of customers is very large, we may also choose a <a href="https://en.wikipedia.org/wiki/Normal_distribution">Normal distribution</a>; or perhaps a distribution with longer tails, such as the <a href="https://en.wikipedia.org/wiki/Cauchy_distribution">Cauchy</a> or <a href="https://en.wikipedia.org/wiki/Student%27s_t-distribution">Student’s T</a> distribution.</li>
+<li><strong>What priors to use?</strong> Bayesian MMM’s will require priors over numerous parameters, such as regression coefficients on the control measures and the parameters in the reach and adstock functions. It is easy to end up with hundreds of parameters for state-of-the-art models. Some choices of priors may be less appropriate than others and lead to bad convergence problems. And how, exactly, should we use the data from lift tests to improve these priors?</li>
+<li><strong>How should the reach and adstock functions be parameterized?</strong> The parametric forms of reach and adstock functions also have many options. Some ways of parameterizing these functions will be more interpretable than others and more readily provide insights to drive decision-making.</li>
+<li><strong>How to select the correct model?</strong> In all likelihood, at least during development, dozens of different MMM variations may be considered. How can we rapidly assess which ones are most promising? It may be useful to have a system in place that allows rapid experimentation, allowing different background variables to be brought in and out of the MMM. Having a coherent and easy-to-change setup is very useful in supporting experimentation and evaluation of ‘what if’ questions.</li>
+<li><strong>How can we ensure rigorous, correct, and fast inference?</strong> While Bayesian modeling is very powerful when working with real-world models for decision making it is crucial to ensure the inference is correct. There can be a number of problems that may trap a novice here, such as the correlation between MCMC chains, divergences in sampling, over-specified models… and even subtle aspects about interpreting the interplay between the model, the priors, and the data.</li>
+</ul>
+<h2 id="pymc-labs-services">PyMC Labs services</h2><p>Here at PyMC Labs, we offer bespoke Bayesian Media Mix Modeling services. For this particular project with <a href="https://www.hellofresh.com/careers/">HelloFresh</a>  (who are currently recruiting) our core contributions were:</p>
+<ol>
+<li>Reparameterization of the model to make it much more interpretable.</li>
+<li>Speeding up the sampling process and fixing MCMC chain convergence problems, and</li>
+<li>Building a software framework around the existing code to increase usability and maintainability.</li>
+</ol>
+<p>If you are interested in learning what we did in more detail, then check out the <a href="https://www.pymc-labs.io/blog-posts/reducing-customer-acquisition-costs-how-we-helped-optimizing-hellofreshs-marketing-budget/">second blog post</a> in this series on Bayesian MMM’s.</p>
+<p>In addition, if you are interested in exploring how we could add value to your marketing efforts through advanced statistical modeling, contact Thomas Wiecki at <a href="mailto:thomas.wiecki@pymc-labs.io">thomas.wiecki@pymc-labs.io</a>. We can develop Bayesian Media Mix Models from scratch, explore the benefits of converting to a Bayesian MMM or fine-tune and improve existing Media Mix Models.</p>
+<p>We also run <a href="https://www.pymc-labs.io/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics. And of course, we can offer workshops on Bayesian Media Mix Models made suitable to a variety of audiences.</p>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        </div>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+            integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+            crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+        <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+    </body>
+
+</html>

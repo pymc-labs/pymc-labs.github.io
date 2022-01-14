@@ -1,0 +1,273 @@
+<!doctype html><html lang="en">
+
+    <head>
+        <style media="screen">
+            body {
+                padding-top: 70px;
+                padding-bottom: 70px;
+            }
+
+        </style>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+        <link rel="stylesheet" href="../../static/custom_styles.css?h=4f544444">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+
+        <!-- Extra meta tags: social site cards, browser icons... -->
+        <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+        <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+        <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+        <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+        <title>The Quickest Migration Guide Ever from PyMC3 to PyMC v4.0 - PyMC Labs</title>
+        <meta name="twitter:card" content="summary">
+        <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/the-quickest-migration-guide-ever-from-pymc3-to-pymc-v40/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="The Quickest Migration Guide Ever from PyMC3 to PyMC v4.0 - PyMC Labs" />
+        <meta property="og:description" content="Discover how few changes are needed to upgrade to PyMC v4.0!" />
+        <meta property="og:image" content="../../static/images/pymc-labs-icon.png?h=77fcc5df" />
+
+        <!-- Highlight.js for syntax highlighting -->
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+        <!-- <script>hljs.highlightAll();</script> -->
+
+        <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+        <!-- We use this to do syntax highlighting -->
+        <link rel="stylesheet" href="../../static/pygments.css">
+
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+        </script>
+
+      </head>
+
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <div class="container">
+                <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+                <a class="navbar-brand" href="/"><img class="navbar-logo"
+                        src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/"><i class="fa fa-home"
+                                    aria-hidden="true"></i>
+                                Home</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                    aria-hidden="true"></i>
+                                What we do</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                    aria-hidden="true"></i>
+                                Team</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                    aria-hidden="true"></i>
+                                Clients</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                    aria-hidden="true"></i>
+                                Workshops</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                    aria-hidden="true"></i>
+                                Blog</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container">
+            
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-light h-100">
+            <div class="card-header">
+                <h2 class="card-title">The Quickest Migration Guide Ever from PyMC3 to PyMC v4.0</h2>
+                
+                <p class="card-subtitle mb-2 text-muted"><i>Discover how few changes are needed to upgrade to PyMC v4.0!</i></p>
+                
+                <p class="text-muted">
+Authored by
+
+
+
+Eric J. Ma
+
+
+
+
+
+
+ on 2022-01-03</p>
+            </div>
+            <div class="card-body">
+                <p><a href="https://github.com/pymc-devs/pymc/releases/tag/v4.0.0b1">PyMC v4.0</a> is out in beta!
+PyMC Labs is thrilled to have worked with the PyMC development team
+to get this release out the door.
+Usually, a new version implies code changes.
+In this short post, we’d like to highlight
+how to migrate your code from PyMC3 to PyMC v4.0.</p>
+<p>The tl;dr?
+While there’s a lot of really cool improvements we’ve made underneath the hood
+(stay tuned for a full post on this),
+the number of things you’ll need to change are <em>minimal</em>!</p>
+<h2 id="installation">Installation</h2><p>PyMC v4.0 is now available via <code>pip</code> and <code>conda</code>.</p>
+<p>To install by <code>pip</code>:</p>
+<div class="hll"><pre><span></span>pip install pymc
+</pre></div>
+<p>To install by <code>conda</code>:</p>
+<div class="hll"><pre><span></span>conda install -c conda-forge pymc
+<span class="c1"># OR USE MAMBA FOR BLAZING FAST INSTALLATIONS:</span>
+mamba install -c conda-forge pymc
+</pre></div>
+<h2 id="imports">Imports</h2><p>The biggest change you’ll see is probably this one.
+You probably imported PyMC3 as follows:</p>
+<div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">pymc3</span> <span class="k">as</span> <span class="nn">pm</span>  <span class="c1"># DO NOT DO THIS!</span>
+</pre></div>
+<p>With PyMC v4.0, you’ll do the following import instead:</p>
+<div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">pymc</span> <span class="k">as</span> <span class="nn">pm</span>  <span class="c1"># DO THIS INSTEAD!</span>
+</pre></div>
+<h2 id="sampling">Sampling</h2><p>In PyMC3, we used to return a <code>MultiTrace</code> object.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+</pre></div>
+<p>In PyMC v4.0, we instead return an ArviZ <code>InferenceData</code> object instead:</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">idata</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>  <span class="c1"># THE NEW CONVENTION!</span>
+</pre></div>
+<p>Underneath the hood, the <code>InferenceData</code> object is a richer data structure
+than the MultiTrace object,
+and is essentially a wrapper around xarray.
+Xarray provides the ability to do much saner indexing and labelling of coordinates.
+You can think of xarray as “pandas for n-dimensional arrays”.
+You can read more about the <code>InferenceData</code> object
+on <a href="https://arviz-devs.github.io/arviz/schema/schema.html">the official ArviZ docs</a>.</p>
+<p>In addition to that the <code>InferenceData</code> object supports storing
+prior predictive and posterior predictive samples
+that you can use to sanity-check your models.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">model</span><span class="p">:</span>
+    <span class="n">idata</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+    <span class="n">idata</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">sample_prior_predictive</span><span class="p">())</span>
+    <span class="n">idata</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span><span class="n">idata</span><span class="p">))</span>
+</pre></div>
+<p>If you do this often, stay tuned for API updates to PyMC v4.0:
+<a href="https://github.com/pymc-devs/pymc/issues/5299">we are discussing</a>
+making prior and posterior predictive samples a standard part of <code>pm.sample()</code> itself!</p>
+<h2 id="arviz">ArviZ</h2><p>In the past, you may have used PyMC3’s built-in visualization capabilities:</p>
+<div class="hll"><pre><span></span><span class="n">pm</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+<span class="n">pm</span><span class="o">.</span><span class="n">plot_forest</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+</pre></div>
+<p>Since PyMC3, we’ve started delegating these visualization capabilities to ArviZ,
+and as of PyMC v4.0, it’s considered idiomatic to just use ArviZ instead.</p>
+<div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">arviz</span> <span class="k">as</span> <span class="nn">az</span>
+<span class="n">az</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">idata</span><span class="p">)</span>
+<span class="n">az</span><span class="o">.</span><span class="n">plot_forest</span><span class="p">(</span><span class="n">idata</span><span class="p">)</span>
+<span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span><span class="p">(</span><span class="n">idata</span><span class="p">)</span>
+</pre></div>
+<p>ArviZ has a rich library of
+Good Bayesian Workflow-supporting
+<a href="https://arviz-devs.github.io/arviz/api/plots.html">visual diagnostics</a>,
+and we’d encourage you to check it out!</p>
+<h2 id="what-about-all-of-those-custom-things">What about all of those custom things?</h2><p>Perhaps you’ve made something custom using the old Theano library,
+and are unsure about what to do there?</p>
+<div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">theano.tensor</span> <span class="k">as</span> <span class="nn">tt</span>
+</pre></div>
+<p>Well, Theano has been replaced by Aesara,
+and it’s basically a one-to-one replacement (with minor exceptions).</p>
+<div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">aesara.tensor</span> <span class="k">as</span> <span class="nn">at</span>
+</pre></div>
+<p><em>For those who are curious,
+<a href="https://en.wikipedia.org/wiki/Aesara">in one Greek tradition</a>,
+Aesara is the daughter of Theano and Pythagoras.</em></p>
+<p>Aesara and Theano are both symbolic tensor libraries.
+Since <a href="https://mila.quebec/en/">MILA</a>’s discontinued efforts developing Theano,
+the PyMC dev team took over Theano and,
+with the upgrades made thus far,
+we’ve repackaged it into Aesara.
+You can check out the <a href="https://aesara.readthedocs.io/en/latest/">Aesara docs</a>
+and <a href="https://github.com/aesara-devs">GitHub organization</a>
+to learn more about PyMC’s backing library.
+While previously Theano was backed by C++,
+Aesara adds Numba and JAX backends while striving for 100% NumPy API compatibility.
+It’s an exciting time to be a Pythonista!</p>
+<p>And if there’s something that’s really custom that you need,
+such as a custom JAX-backed operation or high performance custom code in Aesara,
+then <a href="https://www.pymc-labs.io">PyMC Labs</a> is here to help!</p>
+<h2 id="summary">Summary</h2><p>In summary, for the vast majority of users of PyMC3,
+migrating from PyMC3 to PyMC v4.0 is a matter of switching a few lines of code.
+A few find-and-replace operations throughout your repository,
+and you should be fine.
+For the more advanced users, you can use Aesara like Theano.
+And for those really technically challenging yet high business value problems,
+PyMC Labs is here for you — just get in touch with us 🙂!</p>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        </div>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+            integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+            crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+        <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+    </body>
+
+</html>
