@@ -1,0 +1,615 @@
+<!doctype html><html lang="en">
+
+    <head>
+        
+
+        <style media="screen">
+            body {
+                padding-top: 70px;
+                padding-bottom: 70px;
+            }
+
+        </style>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+            <link rel="stylesheet" href="../../static/css/style.css?h=70597643">
+
+        <link rel="stylesheet" href="../../static/custom_styles.css?h=e75d7755">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+
+        <!-- Extra meta tags: social site cards, browser icons... -->
+        <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+        <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+        <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+        <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+        <title>Modeling spatial data with Gaussian processes in PyMC - PyMC Labs</title>
+        <meta name="twitter:card" content="summary">
+        <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/spatial-gaussian-process-01/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Modeling spatial data with Gaussian processes in PyMC - PyMC Labs" />
+        <meta property="og:description" content="We build a Gaussian process model on a geospatial dataset with the goal of predicting expected concentrations of a radioactive gas in households depending on the county the houses belong to." />
+        <meta property="og:image" content="https://pymc-labs.github.io/blog-posts/spatial-gaussian-process-01/cover.png" />
+
+        <!-- Highlight.js for syntax highlighting -->
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+        <!-- <script>hljs.highlightAll();</script> -->
+
+        <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+        <!-- We use this to do syntax highlighting -->
+        <link rel="stylesheet" href="../../static/pygments.css">
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+        </script>
+        
+<script src="../../static/scripts/toggle_code.js?h=3a00c72f" defer></script>
+
+    </head>
+
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <div class="container">
+                <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+                <a class="navbar-brand" href="/"><img class="navbar-logo"
+                        src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                    aria-hidden="true"></i>
+                                What we do</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                    aria-hidden="true"></i>
+                                Products</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                    aria-hidden="true"></i>
+                                Team</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                    aria-hidden="true"></i>
+                                Clients</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                    aria-hidden="true"></i>
+                                Workshops</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                    aria-hidden="true"></i>
+                                Blog</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container">
+            
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+        <h2 class="font-roboto">Modeling spatial data with Gaussian processes in PyMC</h2>
+        
+        <p class="mb-2 text-muted">We build a Gaussian process model on a geospatial dataset with the goal of predicting expected concentrations of a radioactive gas in households depending on the county the houses belong to.</p>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-6 author_name">
+                <small class="text-muted">AUTHORED BY</small>
+                <p class="font-bold">
+                    
+
+
+
+    
+
+
+
+    
+        Luciano Paz
+    
+
+
+
+                </p>
+            </div>
+            <div class="col-md-6 author_date">
+                <!-- <p>2022-08-17</p> -->
+                
+<small class="text-muted">DATE</small>
+<p class="font-lighter">2022-08-17</p>
+
+<!--<div class="cover-blogposts"><img src="../../static/images/blog_post/cover.jpg?h=653e9b57"></div>-->
+
+            </div>
+        
+	    <div class="blog-cover-container">
+	   	 <img class="cover-blogposts" src="cover.png">
+	    
+	    </div>
+        
+	</div>
+        <hr> <h2 id="beyond-naive-hierarchical-models">Beyond naive hierarchical models</h2><p>So many times I've found myself having to work with geospatial data. It's everywhere: from advertisement, to product inventories, to electoral polls. While I was learning Bayesian modeling, I used to think about geographical information as some categorical value that grouped some observations together. The nice thing about this approach is that observations coming from the exact same geographical area will share a common feature, and this feature will be used (somehow) to explain the similarities between both observations. The bad thing about this approach is that observations from neighboring geographical areas are assumed to have absolutely nothing in common. Sounds weird, right? Usually we would picture some kind of continuous latent geographical feature that makes observations taken from nearby places be similar to each other. Surely there must be a better way of modeling geospatial data!</p>
+<p>Completely independently from me modeling geospatial data, I learned how to work with Gaussian processes (GPs). GPs provide a very nice and flexible way of setting a prior that essentially says: <em>"nearby observations should be similar to each other, and as the observations go further away, they become uncorrelated"</em>. This really clicked with what I wanted to do with geospatial data! The only problem was that there weren't many sources targeting general audiences that explained how to use GPs on geospatial data. That's why I wanted to put together a small example that showcases how you can use GPs with geospatial data using PyMC.</p>
+<h2 id="our-dataset">Our dataset</h2><p>We will be revisiting a classic: the radon dataset, from <a href="https://www.cambridge.org/highereducation/books/data-analysis-using-regression-and-multilevel-hierarchical-models/32A29531C7FD730C3A68951A17C9D983#overview">Gelman and Hill 2006</a> (if you haven't read the <a href="https://www.pymc.io/projects/examples/en/latest/case_studies/multilevel_modeling.html">PyMC case study</a> yet, you really should go ahead and do that now, it's an excellent resource!). Just to give you a quick refresher, Gelman and Hill studied a dataset of radon measurements that were performed in 919 households from 85 counties of the state of Minnesota. The case study cited above, focuses on how to use the county information to group households together, and then try to estimate a state-wide expected radon level, and the expected radon for each observed county. This is exactly the same as my old grouping approach to geospatial data!</p>
+<p>The grouping approach comes with the crucial drawback I mentioned before: measurements from neighboring counties are uncorrelated from each other. This makes no sense! Why should the radon concentration in Earth's crust follow some county boundary line?! It makes much more sense to imagine that radon concentration varies continuously on the surface of the Earth, and then simply use the household locations to estimate it. This would actually give us the information of the radon we expect to measure in neighboring states or countries! Let's see how we can do this using PyMC!</p>
+<h2 id="but-first-let-s-look-at-some-maps">But first, let's look at some maps</h2><p>We can't start our modeling without first looking at our data on a map. So we'll do a small detour on how I used <a href="https://scitools.org.uk/cartopy/docs/latest/">cartopy</a> to plot the radon dataset.</p>
+<div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">arviz</span> <span class="k">as</span> <span class="nn">az</span>
+<span class="kn">import</span> <span class="nn">cartopy</span>
+<span class="kn">import</span> <span class="nn">cartopy.crs</span> <span class="k">as</span> <span class="nn">ccrs</span>
+<span class="kn">import</span> <span class="nn">cartopy.feature</span> <span class="k">as</span> <span class="nn">cfeature</span>
+<span class="kn">import</span> <span class="nn">cartopy.io.shapereader</span> <span class="k">as</span> <span class="nn">shpreader</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pymc</span> <span class="k">as</span> <span class="nn">pm</span>
+<span class="kn">from</span> <span class="nn">aesara</span> <span class="kn">import</span> <span class="n">tensor</span> <span class="k">as</span> <span class="n">at</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+</pre></div>
+<p>Cartopy can be used to get shape files from some public sources, like <a href="https://www.naturalearthdata.com/">Natural Earth</a>. One of these are the shape files for counties in the United States. The county shapes have a lot of meta information. One important field is called FIPS, that stands for <a href="https://en.wikipedia.org/wiki/Federal_Information_Processing_Standards">Federal Information Processing System</a>. At the time the radon measurements were performed, the counties were identified using their FIPS codes, and we will use these to align our observations to the corresponding shape files.</p>
+<div class="hll"><pre><span></span><span class="c1"># Load the radon dataset and add the US FIPS prefix</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;radon.csv&quot;</span><span class="p">),</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;fips&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">})</span>
+<span class="n">df</span><span class="p">[</span><span class="s2">&quot;fips&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;US&quot;</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;fips&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">)</span>
+<span class="n">county_idx</span><span class="p">,</span> <span class="n">counties</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">county</span><span class="o">.</span><span class="n">factorize</span><span class="p">(</span><span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">unique_fips</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">fips</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+</pre></div>
+<div class="hll"><pre><span></span><span class="c1"># Get the state of Minnesota shapefile</span>
+<span class="n">reader</span> <span class="o">=</span> <span class="n">shpreader</span><span class="o">.</span><span class="n">Reader</span><span class="p">(</span>
+    <span class="n">shpreader</span><span class="o">.</span><span class="n">natural_earth</span><span class="p">(</span>
+        <span class="n">resolution</span><span class="o">=</span><span class="s2">&quot;10m&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s2">&quot;cultural&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;admin_1_states_provinces&quot;</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="n">minnesota</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">s</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">records</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;admin&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;United States of America&quot;</span>
+    <span class="ow">and</span> <span class="n">s</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Minnesota&quot;</span>
+<span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+<div class="hll"><pre><span></span><span class="c1"># Get Minnesota counties and neighboring counties shape files</span>
+<span class="n">reader</span> <span class="o">=</span> <span class="n">shpreader</span><span class="o">.</span><span class="n">Reader</span><span class="p">(</span>
+    <span class="n">shpreader</span><span class="o">.</span><span class="n">natural_earth</span><span class="p">(</span>
+        <span class="n">resolution</span><span class="o">=</span><span class="s2">&quot;10m&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s2">&quot;cultural&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;admin_2_counties&quot;</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="n">minnesota_counties</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">county</span>
+    <span class="k">for</span> <span class="n">county</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">records</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">county</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">minnesota</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+    <span class="ow">and</span> <span class="n">county</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">minnesota</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span><span class="o">.</span><span class="n">area</span> <span class="o">/</span> <span class="n">county</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">area</span>
+    <span class="o">&lt;</span> <span class="mf">0.01</span>
+<span class="p">]</span>
+<span class="n">minnesota_neighbor_counties</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">county</span>
+    <span class="k">for</span> <span class="n">county</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">records</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">county</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">minnesota</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+    <span class="ow">and</span> <span class="n">county</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">minnesota</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span><span class="o">.</span><span class="n">area</span> <span class="o">/</span> <span class="n">county</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">area</span> <span class="o">&gt;</span> <span class="mf">0.5</span>
+<span class="p">]</span>
+<span class="n">counties_with_measurements</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">minnesota_counties</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;FIPS&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">unique_fips</span>
+<span class="p">]</span>
+<span class="n">counties_without_measurements</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">minnesota_counties</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;FIPS&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_fips</span>
+<span class="p">]</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">counties_with_measurements</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">counties_without_measurements</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span>
+    <span class="n">minnesota_neighbor_counties</span>
+<span class="p">)</span>
+</pre></div>
+<pre><code>(85, 2, 37)
+</code></pre>
+<p>Now that we have loaded the dataset and extracted all the necessary shape files, we notice something interesting. The dataset has measurements for 85 out of 87 counties from Minnesota. We will use our model to predict the expected level of radon that we should see in the remaining 2 counties and also on the 37 neighboring counties from the neighboring states. Let's have a look at where these counties are on a map:</p>
+<p><img src="output_14_0.png" alt="png"></p>
+<p>The green counties are the ones where we have at least one household measurement. The red ones are where we don't have measurements. The blue dots are points that are within the county. Since the radon dataset doesn't have the precise coordinates of each household (I imagine for privacy reasons), we will use the coordinates of the blue dots to impute the county households locations.</p>
+<p>Now let's look at the average radon measurement for each county. To view this, we first need to use a dictionary that maps from the county measured in the radon dataframe to the shapefile record for said county.</p>
+<div class="hll"><pre><span></span><span class="c1"># Get a mapping from county names to latitude/longitude</span>
+<span class="c1"># and another mapping from county names to shapefile records for plotting</span>
+<span class="n">county_fips</span> <span class="o">=</span> <span class="p">{</span><span class="n">counties</span><span class="p">[</span><span class="n">idx</span><span class="p">]:</span> <span class="n">df</span><span class="o">.</span><span class="n">fips</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">county_idx</span><span class="p">)}</span>
+<span class="n">fips_to_records</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">record</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;FIPS&quot;</span><span class="p">]:</span> <span class="n">record</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">counties_with_measurements</span>
+<span class="p">}</span>
+<span class="n">county_to_records</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="n">fips_to_records</span><span class="p">[</span><span class="n">county_fips</span><span class="p">[</span><span class="n">c</span><span class="p">]]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">counties</span><span class="p">}</span>
+<span class="n">county_lonlat</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">c</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">county_to_records</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">],</span>
+            <span class="n">county_to_records</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">],</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">counties</span>
+<span class="p">}</span>
+<span class="n">cond_counties</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;NAME&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">counties_without_measurements</span>
+<span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
+    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;NAME&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="s1">&#39;REGION&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">minnesota_neighbor_counties</span>
+<span class="p">]</span>
+<span class="n">county_to_records</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">record</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">record</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">cond_counties</span><span class="p">,</span> <span class="n">counties_without_measurements</span> <span class="o">+</span> <span class="n">minnesota_neighbor_counties</span>
+        <span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+<span class="n">cond_county_lonlat</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">c</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">county_to_records</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">],</span>
+            <span class="n">county_to_records</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">],</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cond_counties</span>
+<span class="p">}</span>
+</pre></div>
+<div class="hll"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">projection</span> <span class="o">=</span> <span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">()</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="n">projection</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">add_feature</span><span class="p">(</span>
+    <span class="n">cfeature</span><span class="o">.</span><span class="n">ShapelyFeature</span><span class="p">([</span><span class="n">minnesota</span><span class="o">.</span><span class="n">geometry</span><span class="p">],</span> <span class="n">projection</span><span class="p">),</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span>
+    <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">expected_radon</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;county&quot;</span><span class="p">)[</span><span class="s2">&quot;log_radon&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">vmin</span> <span class="o">=</span> <span class="n">expected_radon</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+<span class="n">vmax</span> <span class="o">=</span> <span class="n">expected_radon</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="n">color_getter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;viridis&quot;</span><span class="p">)(</span><span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+<span class="k">for</span> <span class="n">county</span> <span class="ow">in</span> <span class="n">counties</span><span class="p">:</span>
+    <span class="n">county_record</span> <span class="o">=</span> <span class="n">county_to_records</span><span class="p">[</span><span class="n">county</span><span class="p">]</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">expected_radon</span><span class="p">[</span><span class="n">county</span><span class="p">]</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">add_feature</span><span class="p">(</span>
+        <span class="n">cfeature</span><span class="o">.</span><span class="n">ShapelyFeature</span><span class="p">([</span><span class="n">county_record</span><span class="o">.</span><span class="n">geometry</span><span class="p">],</span> <span class="n">projection</span><span class="p">),</span>
+        <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span>
+        <span class="n">facecolor</span><span class="o">=</span><span class="n">color_getter</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">data</span><span class="p">),</span>
+    <span class="p">)</span>
+
+<span class="n">cbar</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">))</span>
+<span class="n">cbar</span><span class="o">.</span><span class="n">set_ticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">cbar</span><span class="o">.</span><span class="n">set_ticklabels</span><span class="p">(</span>
+    <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="n">vmin</span><span class="p">,</span><span class="w"> </span><span class="n">vmax</span><span class="p">]),</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cbar</span><span class="o">.</span><span class="n">get_ticks</span><span class="p">()]</span>
+<span class="p">)</span>
+<span class="n">cbar</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s2">&quot;Observed mean Log Radon&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">add_feature</span><span class="p">(</span><span class="n">cfeature</span><span class="o">.</span><span class="n">LAKES</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">add_feature</span><span class="p">(</span><span class="n">cfeature</span><span class="o">.</span><span class="n">RIVERS</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="o">-</span><span class="mi">99</span><span class="p">,</span> <span class="o">-</span><span class="mi">87</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">42</span><span class="p">,</span> <span class="mi">50</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">gridlines</span><span class="p">(</span><span class="n">draw_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">x_inline</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">y_inline</span><span class="o">=</span><span class="kc">False</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_18_0.png" alt="png"></p>
+<p>We can see a small pattern forming here. It looks like radon is denser to the south west, and sparser in the north east. We're almost ready to take this data to the next level!</p>
+<h2 id="gaussian-processes-on-a-sphere">Gaussian processes on a sphere</h2><p>Even though the above plot seems flat, Earth is round (kind of):</p>
+<p><img src="output_22_0.png" alt="png"></p>
+<p>And this makes it a bit harder for us to define Gaussian processes. Thankfully, there is <a href="https://marcgenton.github.io/2017.JJG.StatSci.pdf">a very nice review paper</a> by Jeong, Jun and Genton that talks exactly about how one could write down covariance functions for Gaussian process that occur on the surface of a sphere. We will basically follow one of their simplest approaches: use a Matérn kernel that relies on the chordal distance between points.</p>
+<p>Wait, the <em>what</em> distance?!</p>
+<p>The chordal distance simply is the distance between two points on the surface of the Earth if you could travel between them using a straight line that went through the planet. On the other hand, the Geodesic distance is the shortest distance between two points if one was forced to travel on the surface of the globe.</p>
+<p><img src="chordal_geodesic.png" alt="geodesic_vs_chordal_distance"></p>
+<h2 id="custom-pymc-covariance-kernel-on-a-sphere">Custom PyMC covariance kernel on a sphere</h2><p>PyMC comes with many <a href="https://www.pymc.io/projects/docs/en/stable/api/gp/cov.html">covariance kernels</a>, but they all assume that the distance between two points is the Euclidean distance. Since we will be working with longitude and latitude pairs, we will need to write a custom <code>Covariance</code> subclass that operates using the metric we actually want - the chordal distance between points on a sphere.</p>
+<p>To do this, we basically need to inherit from <code>pymc.gp.cov.Stationary</code> and overload the <code>full</code> method. This method computes the covariance between a set of points. To do this, we will copy the implementation from <code>pymc.gp.cov.Matern32</code> but change the distance function used. Instead of using the assumed <code>euclidean_dist</code>, we will write a custom method, the <code>chordal_dist</code>. To compute the chordal distance, we only need to convert the longitude/latitude coordinates into their 3-D position counterparts. The chordal distance then simply is the Euclidean distance between the 3-D position coordinates.</p>
+<div class="hll"><pre><span></span><span class="k">class</span> <span class="nc">Matern32Chordal</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">cov</span><span class="o">.</span><span class="n">Stationary</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dims</span><span class="p">,</span> <span class="n">ls</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mf">6378.137</span><span class="p">,</span> <span class="n">active_dims</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">input_dims</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Chordal distance is only defined on 2 dimensions&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">input_dims</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="n">ls</span><span class="p">,</span> <span class="n">active_dims</span><span class="o">=</span><span class="n">active_dims</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">=</span> <span class="n">r</span>
+
+    <span class="k">def</span> <span class="nf">lonlat2xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lonlat</span><span class="p">):</span>
+        <span class="n">lonlat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">lonlat</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">*</span> <span class="n">at</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">at</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lonlat</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">at</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lonlat</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+                <span class="n">at</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lonlat</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">at</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lonlat</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+                <span class="n">at</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lonlat</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+            <span class="p">],</span>
+            <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">chordal_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Xs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">Xs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">Xs</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Xs</span> <span class="o">=</span> <span class="n">at</span><span class="o">.</span><span class="n">broadcast_arrays</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lonlat2xyz</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">lonlat2xyz</span><span class="p">(</span><span class="n">Xs</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">at</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">at</span><span class="o">.</span><span class="n">sum</span><span class="p">(((</span><span class="n">X</span> <span class="o">-</span> <span class="n">Xs</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">ls</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-12</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">full</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Xs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slice</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Xs</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chordal_dist</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Xs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">at</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">)</span>
+</pre></div>
+<h2 id="gaussian-process-geospatial-model">Gaussian process geospatial model</h2><p>It's been a long road up until now, but we are finally ready to write our PyMC model of the geospatial dataset! Let's go step by step, and start by simply creating the model instance and populating it with some data.</p>
+<div class="hll"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">county_lonlat</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span>
+    <span class="n">coords</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;county&quot;</span><span class="p">:</span> <span class="n">counties</span><span class="p">,</span>
+        <span class="s2">&quot;household&quot;</span><span class="p">:</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+        <span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span><span class="p">],</span>
+    <span class="p">}</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">m</span><span class="p">:</span>
+    <span class="n">_county_idx</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">ConstantData</span><span class="p">(</span><span class="s2">&quot;county_idx&quot;</span><span class="p">,</span> <span class="n">county_idx</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;household&quot;</span><span class="p">)</span>
+    <span class="n">_X</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">ConstantData</span><span class="p">(</span><span class="s2">&quot;county_X&quot;</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;county&quot;</span><span class="p">,</span> <span class="s2">&quot;feature&quot;</span><span class="p">))</span>
+</pre></div>
+<p>Now, we will basically assume that the observed radon comes from a state level mean plus some deviation due to the county. The county deviation will be represented by a GP. Let's first create the state level random variables.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">m</span><span class="p">:</span>
+    <span class="n">state_mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;state_mu&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">state_scale</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;state_scale&quot;</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">)</span>
+</pre></div>
+<p>We create the GP prior for the county deviations. We will try to infer the length scale and a priori assume that it's around 200 km with a standard deviation of about 50 km.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">m</span><span class="p">:</span>
+    <span class="n">ls</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Gamma</span><span class="p">(</span><span class="s2">&quot;ls&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">latent</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">gp</span><span class="o">.</span><span class="n">Latent</span><span class="p">(</span><span class="n">cov_func</span><span class="o">=</span><span class="n">Matern32Chordal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">ls</span><span class="p">),)</span>
+    <span class="n">county_eps</span> <span class="o">=</span> <span class="n">latent</span><span class="o">.</span><span class="n">prior</span><span class="p">(</span><span class="s2">&quot;county_eps&quot;</span><span class="p">,</span> <span class="n">_X</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;county&quot;</span><span class="p">,</span> <span class="n">jitter</span><span class="o">=</span><span class="mf">1e-7</span><span class="p">)</span>
+</pre></div>
+<p>We piece everything together and compute the expected radon measurement of each household:</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">m</span><span class="p">:</span>
+    <span class="n">county_mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span>
+        <span class="s2">&quot;county_mu&quot;</span><span class="p">,</span> <span class="n">state_mu</span> <span class="o">+</span> <span class="n">state_scale</span> <span class="o">*</span> <span class="n">county_eps</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;county&quot;</span>
+    <span class="p">)</span>
+    <span class="n">household_mu</span> <span class="o">=</span> <span class="n">county_mu</span><span class="p">[</span><span class="n">_county_idx</span><span class="p">]</span>
+</pre></div>
+<p>Now, the final piece of the puzzle: the observational distribution. We will model the log radon values</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">m</span><span class="p">:</span>
+    <span class="n">measurement_error</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;measurement_error&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">observed</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span>
+        <span class="s2">&quot;log_radon&quot;</span><span class="p">,</span>
+        <span class="n">mu</span><span class="o">=</span><span class="n">household_mu</span><span class="p">,</span>
+        <span class="n">sigma</span><span class="o">=</span><span class="n">measurement_error</span><span class="p">,</span>
+        <span class="n">observed</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">log_radon</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+        <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;household&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="n">pm</span><span class="o">.</span><span class="n">model_to_graphviz</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+</pre></div>
+<p><img src="output_39_0.svg" alt="svg"></p>
+<p>If you are familiar with the radon dataset you will have noted that we haven't included any information about whether the radon was recorded at the basement or not. We could exploit this extra information to make the model better. We decided to go with the simplest geospatial model posible to begin with, but if you want more, just ping us on Twitter <a href="https://twitter.com/pymc_labs">@pymc_labs</a>, and we'll write up a follow up blog post on how you could add this extra piece of information to the model.</p>
+<p>Now let's sample from the model and see what the model learns about the measured counties:</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">m</span><span class="p">:</span>
+    <span class="n">idata</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+        <span class="n">init</span><span class="o">=</span><span class="s2">&quot;jitter+adapt_diag_grad&quot;</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">target_accept</span><span class="o">=</span><span class="mf">0.9</span>
+    <span class="p">)</span>
+</pre></div>
+<pre><code>Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag_grad...
+Multiprocess sampling (4 chains in 2 jobs)
+NUTS: [state_mu, state_scale, ls, county_eps_rotated_, measurement_error]
+</code></pre>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [8000/8000 05:31<00:00 Sampling 4 chains, 0 divergences]
+</div><pre><code>Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 332 seconds.
+</code></pre>
+<div class="hll"><pre><span></span><span class="n">axs</span> <span class="o">=</span> <span class="n">az</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">idata</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;~county_mu&quot;</span><span class="p">,</span> <span class="s2">&quot;~county_eps&quot;</span><span class="p">],</span> <span class="n">filter_vars</span><span class="o">=</span><span class="s2">&quot;like&quot;</span><span class="p">)</span>
+<span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span>
+</pre></div>
+<p><img src="output_43_0.png" alt="png"></p>
+<p>Finally, the most important piece, extrapolating what we learned to unobserved counties! To do this, we will have to create conditional GP's on the unobserved coordinates, and then create the conditional observed log radon random variables:</p>
+<div class="hll"><pre><span></span><span class="n">cond_X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">cond_county_lonlat</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+<span class="k">with</span> <span class="n">m</span><span class="p">:</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">add_coords</span><span class="p">({</span><span class="s2">&quot;cond_county&quot;</span><span class="p">:</span> <span class="n">cond_counties</span><span class="p">})</span>
+    <span class="n">_cond_X</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">ConstantData</span><span class="p">(</span><span class="s2">&quot;cond_X&quot;</span><span class="p">,</span> <span class="n">cond_X</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cond_county&quot;</span><span class="p">,</span> <span class="s2">&quot;feature&quot;</span><span class="p">])</span>
+    <span class="n">cond_county_eps</span> <span class="o">=</span> <span class="n">latent</span><span class="o">.</span><span class="n">conditional</span><span class="p">(</span>
+        <span class="s2">&quot;cond_county_eps&quot;</span><span class="p">,</span> <span class="n">_cond_X</span><span class="p">,</span> <span class="n">jitter</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;cond_county&quot;</span>
+    <span class="p">)</span>
+    <span class="n">cond_mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span>
+        <span class="s2">&quot;cond_county_mu&quot;</span><span class="p">,</span> <span class="n">state_mu</span> <span class="o">+</span> <span class="n">state_scale</span> <span class="o">*</span> <span class="n">cond_county_eps</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;cond_county&quot;</span>
+    <span class="p">)</span>
+    <span class="n">observed</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span>
+        <span class="s2">&quot;cond_log_radon&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">cond_mu</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">measurement_error</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cond_county&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+<span class="n">pm</span><span class="o">.</span><span class="n">model_to_graphviz</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+</pre></div>
+<p><img src="output_46_0.svg" alt="svg"></p>
+<p>Afterwards, predicting on these new counties is as easy as sampling from the posterior predictive distribution.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">m</span><span class="p">:</span>
+    <span class="n">pp</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span>
+        <span class="n">idata</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cond_county_mu&quot;</span><span class="p">,</span> <span class="s2">&quot;cond_log_radon&quot;</span><span class="p">],</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">42</span>
+    <span class="p">)</span>
+</pre></div>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 00:07<00:00]
+</div><div class="hll"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">projection</span> <span class="o">=</span> <span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">()</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="n">projection</span><span class="p">)</span>
+<span class="n">expected_radon</span> <span class="o">=</span> <span class="n">idata</span><span class="o">.</span><span class="n">posterior</span><span class="o">.</span><span class="n">county_mu</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="s2">&quot;chain&quot;</span><span class="p">,</span> <span class="s2">&quot;draw&quot;</span><span class="p">])</span>
+<span class="n">pp_expected_radon</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">posterior_predictive</span><span class="o">.</span><span class="n">cond_county_mu</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="s2">&quot;chain&quot;</span><span class="p">,</span> <span class="s2">&quot;draw&quot;</span><span class="p">])</span>
+<span class="n">vmin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">expected_radon</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">pp_expected_radon</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">])</span>
+<span class="n">vmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">expected_radon</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">pp_expected_radon</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">])</span>
+<span class="n">color_getter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;viridis&quot;</span><span class="p">)(</span><span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+<span class="k">for</span> <span class="n">county</span> <span class="ow">in</span> <span class="n">counties</span><span class="p">:</span>
+    <span class="n">county_record</span> <span class="o">=</span> <span class="n">county_to_records</span><span class="p">[</span><span class="n">county</span><span class="p">]</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">expected_radon</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">county</span><span class="o">=</span><span class="n">county</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">add_feature</span><span class="p">(</span>
+        <span class="n">cfeature</span><span class="o">.</span><span class="n">ShapelyFeature</span><span class="p">([</span><span class="n">county_record</span><span class="o">.</span><span class="n">geometry</span><span class="p">],</span> <span class="n">projection</span><span class="p">),</span>
+        <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span>
+        <span class="n">facecolor</span><span class="o">=</span><span class="n">color_getter</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">data</span><span class="p">),</span>
+    <span class="p">)</span>
+<span class="k">for</span> <span class="n">county</span> <span class="ow">in</span> <span class="n">cond_counties</span><span class="p">:</span>
+    <span class="n">county_record</span> <span class="o">=</span> <span class="n">county_to_records</span><span class="p">[</span><span class="n">county</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">county_record</span> <span class="ow">in</span> <span class="n">counties_without_measurements</span><span class="p">:</span>
+        <span class="n">edgecolor</span> <span class="o">=</span> <span class="s2">&quot;red&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">edgecolor</span> <span class="o">=</span> <span class="s2">&quot;gray&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">pp_expected_radon</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">cond_county</span><span class="o">=</span><span class="n">county</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">add_feature</span><span class="p">(</span>
+        <span class="n">cfeature</span><span class="o">.</span><span class="n">ShapelyFeature</span><span class="p">([</span><span class="n">county_record</span><span class="o">.</span><span class="n">geometry</span><span class="p">],</span> <span class="n">projection</span><span class="p">),</span>
+        <span class="n">edgecolor</span><span class="o">=</span><span class="n">edgecolor</span><span class="p">,</span>
+        <span class="n">facecolor</span><span class="o">=</span><span class="n">color_getter</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">data</span><span class="p">),</span>
+    <span class="p">)</span>
+
+<span class="n">cbar</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">))</span>
+<span class="n">cbar</span><span class="o">.</span><span class="n">set_ticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">cbar</span><span class="o">.</span><span class="n">set_ticklabels</span><span class="p">(</span>
+    <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="n">vmin</span><span class="p">,</span><span class="w"> </span><span class="n">vmax</span><span class="p">]),</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cbar</span><span class="o">.</span><span class="n">get_ticks</span><span class="p">()]</span>
+<span class="p">)</span>
+<span class="n">cbar</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s2">&quot;Expected Log Radon&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">add_feature</span><span class="p">(</span><span class="n">cfeature</span><span class="o">.</span><span class="n">LAKES</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">add_feature</span><span class="p">(</span><span class="n">cfeature</span><span class="o">.</span><span class="n">RIVERS</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="o">-</span><span class="mi">99</span><span class="p">,</span> <span class="o">-</span><span class="mi">87</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">42</span><span class="p">,</span> <span class="mi">50</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">add_feature</span><span class="p">(</span>
+    <span class="n">cfeature</span><span class="o">.</span><span class="n">ShapelyFeature</span><span class="p">([</span><span class="n">minnesota</span><span class="o">.</span><span class="n">geometry</span><span class="p">],</span> <span class="n">projection</span><span class="p">),</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span>
+    <span class="n">facecolor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">gridlines</span><span class="p">(</span><span class="n">draw_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">x_inline</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">y_inline</span><span class="o">=</span><span class="kc">False</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_49_0.png" alt="png"></p>
+<p>Beautiful! Our model learned the north-east south-west pattern of radon from the observations! I also takes advantage of the discovered pattern to make predictions of the expected radon in the neighboring counties, and in the two counties without measurements in Minnesota.</p>
+<p>And, of course, we can also visualize the uncertainty we have on our predicted expected log radon measurements by plotting the standard deviation of the posterior predictive distribution:</p>
+<p><img src="output_51_0.png" alt="png"></p>
+<p>The model is quite certain in its prediction for the Minnesota counties, and the standard deviation of expected radon is small. But as the model is forced to make predictions outside of Minnesota, the standard deviation increases, meaning that the model is less certain about its mean predicted value. We can also see that the model is fairly certain about the predicted value for the two Minnesota counties without measurements, which makes sense, given that we have a bunch of recordings all around them.</p>
+<h2 id="wrap-up">Wrap up</h2><p>That was quite a ride! We managed to build a Gaussian process prior for the radon dataset, which allowed us to learn a geospatial pattern of expected radon concentration, and to predict measurement concentrations in neighboring, unmeasured counties. To compare this against the grouping approach, which is sometimes called a hierarchical model, we are able to see a more informed extrapolation from observed counties to unobserved counties. The grouping approach, at its core, assumes that a priori all groups are exchangeable. In other words, a naive hierarchical model would only be able to predict that counties to the east and west of Minnesota would have exactly the same expected radon concentration.</p>
+<p>As we mentioned earlier in this post, this model doesn't exploit part of the information present in the dataset. It can be improved to leverage whether a recording was taken in a basement or not, and it could also exploit the measured Uranium similarly to how it's shown in the <a href="https://www.pymc.io/projects/examples/en/latest/case_studies/multilevel_modeling.html#adding-group-level-predictors">group level predictors example</a> using the naive hierarchical model. If you're interested in reading a future blog post that shows this, feel free to reach out on <a href="https://twitter.com/pymc_labs">twitter</a>.</p>
+<h4 id="acknowledgements">Acknowledgements</h4><p>Cover photo by <a href="https://unsplash.com/@greg_rosenke?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Greg Rosenke</a> on <a href="https://unsplash.com/s/photos/globe?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Unsplash</a></p>
+<h4 id="references">References</h4><ol>
+<li>Gelman, A., &amp; Hill, J. (2006). Data Analysis Using Regression and Multilevel/Hierarchical Models (Analytical Methods for Social Research). Cambridge: Cambridge University Press. doi:10.1017/CBO9780511790942</li>
+<li><a href="https://www.pymc.io/projects/examples/en/latest/case_studies/multilevel_modeling.html">PyMC radon dataset Case study</a></li>
+<li>Jaehong Jeong. Mikyoung Jun. Marc G. Genton. "Spherical Process Models for Global Spatial Statistics." Statist. Sci. 32 (4) 501 - 513, November 2017. <a href="https://doi.org/10.1214/17-STS620">https://doi.org/10.1214/17-STS620</a></li>
+<li><a href="http://www.stat.columbia.edu/~gelman/arm/examples/radon/srrs2.dat">Radon dataset from Gelman &amp; Hill (2006)</a>. We only consider the recordings performed in Minnesota (MN) that go from row 5081 to 5999. A file with the relevant subset is available in the <a href="https://github.com/pymc-devs/pymc-examples/blob/main/examples/data/radon.csv">pymc-examples repository</a></li>
+</ol>
+
+	<!--THIS IS THE FOOTER OF THE BLOGPSOT-->
+	<hr> 
+		<!--div class="container"-->
+			<h2 class="font-roboto">Work with PyMC Labs</h2>
+			<p>If you are interested in seeing what we at PyMC Labs can do for you, then please email <a href="mailto:info@pymc-labs.io">info@pymc-labs.io</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity.
+
+We also run <a href="https://www.pymc-labs.io/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics.
+			</p>
+		<!--/div-->
+    
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+
+        </div>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+            integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+            crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+            <div class="container">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-twitter"
+                                    aria-hidden="true"></i>
+                                Twitter</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-github"
+                                    aria-hidden="true"></i>
+                                GitHub</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-linkedin"
+                                    aria-hidden="true"></i>
+                                LinkedIn</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-youtube"
+                                    aria-hidden="true"></i>
+                                YouTube</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-meetup"
+                                    aria-hidden="true"></i>
+                                Meetup</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                    aria-hidden="true"></i>
+                                Newsletter</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+    </body>
+
+</html>

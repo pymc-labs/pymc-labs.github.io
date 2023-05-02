@@ -1,0 +1,1586 @@
+<!doctype html><html lang="en">
+
+    <head>
+        
+
+        <style media="screen">
+            body {
+                padding-top: 70px;
+                padding-bottom: 70px;
+            }
+
+        </style>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+            <link rel="stylesheet" href="../../static/css/style.css?h=70597643">
+
+        <link rel="stylesheet" href="../../static/custom_styles.css?h=e75d7755">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+
+        <!-- Extra meta tags: social site cards, browser icons... -->
+        <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+        <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+        <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+        <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+        <title>Likelihood Approximations with Neural Networks in PyMC - PyMC Labs</title>
+        <meta name="twitter:card" content="summary">
+        <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/likelihood-approximations-through-neural-networks/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Likelihood Approximations with Neural Networks in PyMC - PyMC Labs" />
+        <meta property="og:description" content="We use an example from cognitive modeling to show how differentiable likelihoods learned from simulators can be used with PyMC." />
+        <meta property="og:image" content="https://pymc-labs.github.io/blog-posts/likelihood-approximations-through-neural-networks/cover.png" />
+
+        <!-- Highlight.js for syntax highlighting -->
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+        <!-- <script>hljs.highlightAll();</script> -->
+
+        <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+        <!-- We use this to do syntax highlighting -->
+        <link rel="stylesheet" href="../../static/pygments.css">
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+        </script>
+        
+<script src="../../static/scripts/toggle_code.js?h=3a00c72f" defer></script>
+
+    </head>
+
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <div class="container">
+                <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+                <a class="navbar-brand" href="/"><img class="navbar-logo"
+                        src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                    aria-hidden="true"></i>
+                                What we do</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                    aria-hidden="true"></i>
+                                Products</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                    aria-hidden="true"></i>
+                                Team</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                    aria-hidden="true"></i>
+                                Clients</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                    aria-hidden="true"></i>
+                                Workshops</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                    aria-hidden="true"></i>
+                                Blog</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container">
+            
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+        <h2 class="font-roboto">Likelihood Approximations with Neural Networks in PyMC</h2>
+        
+        <p class="mb-2 text-muted">We use an example from cognitive modeling to show how differentiable likelihoods learned from simulators can be used with PyMC.</p>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-6 author_name">
+                <small class="text-muted">AUTHORED BY</small>
+                <p class="font-bold">
+                    
+
+
+
+    
+
+
+
+    
+        
+            Ricardo Vieira,
+        
+    
+        
+            Alexander Fengler,
+        
+    
+        
+            Aisulu Omar,
+        
+    
+        
+            and Yang Xu
+        
+    
+
+
+                </p>
+            </div>
+            <div class="col-md-6 author_date">
+                <!-- <p>2023-03-31</p> -->
+                
+<small class="text-muted">DATE</small>
+<p class="font-lighter">2023-03-31</p>
+
+<!--<div class="cover-blogposts"><img src="../../static/images/blog_post/cover.jpg?h=653e9b57"></div>-->
+
+            </div>
+        
+	    <div class="blog-cover-container">
+	   	 <img class="cover-blogposts" src="cover.png">
+	    
+	    </div>
+        
+	</div>
+        <hr> <h1 id="likelihood-approximations-with-flax-in-pymc">Likelihood Approximations with Flax in PyMC</h1><p>Leaning on an applied data-analysis problem in the cognitive modeling space, this post develops the tools to use neural networks trained with the Flax package (a neural network library based on <a href="https://jax.readthedocs.io/en/latest/">JAX</a>) as approximate likelihoods in likelihood-free inference scenarios. We will spend some time setting up the data analysis problem first, including the modeling framework used and computational bottlenecks that may arise (however if you don't care about the particulars, feel free to skip this part). Then, step by step, we will develop the tools necessary to go from a simple data simulator without access to a likelihood function to Bayesian Inference with <a href="https://www.pymc.io/welcome.html">PyMC</a> via a custom distribution.</p>
+<p>We will try to keep the code as general as possible, to facilitate other use cases with minimal hassle.</p>
+<h2 id="table-of-contents">Table of Contents</h2><ul>
+<li><a href="#setting_the_stage">Setting the Stage</a><ul>
+<li><a href="#data_analysis_problem">The Data Analysis Problem</a><ul>
+<li><a href="#kind_of_data">What kind of Data?</a></li>
+<li><a href="#the_models">The model(s)</a></li>
+<li><a href="#motivating_lfi">Motivating likelihood free inference</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#towards_pymc">From model simulation to PyMC model</a><ul>
+<li><a href="#data_simulation">Simulating Data</a></li>
+<li><a href="#training_data">Turning it into Training Data</a></li>
+<li><a href="#build_and_train">Building and Training the Network</a></li>
+<li><a href="#pymc">Connecting to PyMC</a><ul>
+<li><a href="#custom_distribution">Building a custom distribution</a></li>
+<li><a href="#pymc_model">Plug the custom distribution into a PyMC model</a></li>
+<li><a href="#inference_example">Inference example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="setting-the-stage-a-class-anchor-id-setting-the-stage/a">Setting the Stage <a class="anchor" id="setting_the_stage"></a></h2><p>To motivate the modeling effort expounded upon below, let's start by building the case for a particular class of models, beginning with an (somewhat stylized) original data analysis problem.</p>
+<p>Consider a dataset from the <a href="https://www.nature.com/articles/nature12486">NeuroRacer</a> experiment, illustrated below with an adapted figure from the original paper.</p>
+<p align="center" width="100%">
+    <img width="100%" src=neuroracer_exp.png>
+</p><p>The <em>player/subject</em> in this experiment is tasked with steering a racing car along a curvy racetrack, while reacting appropriately to appearing traffic signs under time pressure. Traffic signs are either of the <strong>target</strong> or <strong>no target</strong> type, the players' reaction appropriately being a <strong>button press</strong> or <strong>no button press</strong> respectively.</p>
+<p>In the lingo of cognitive scientists, we may consider this game a Go / NoGo type task (press or withhold depending on traffic sign), under extra cognitive load (steering the car across the racetrack).</p>
+<p>This leaves us with <strong>four types of responses</strong> to analyse (see the figure below):</p>
+<ol>
+<li>Correct button press (Correct Go)</li>
+<li>Correct withhold (Correct NoGo)</li>
+<li>False button press (False Go)</li>
+<li>False withhold (False NoGo)</li>
+</ol>
+<p align="center" width="100%">
+    <img width="60%" src=four_response_types.png>
+</p><h3 id="what-kind-of-data-a-class-anchor-id-kind-of-data/a">What kind of data <a class="anchor" id="kind_of_data"></a></h3><p>Collecting <em>reaction times</em> (rt) and <em>choices</em> (responses) for each of the trials, our dataset will eventually look as follows.</p>
+<div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="c1"># Generate example data</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="mi">1</span><span class="p">)),</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;rt&#39;</span><span class="p">])</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;response&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;go&#39;</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;response&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">):]</span> <span class="o">=</span> <span class="s1">&#39;nogo&#39;</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;trial_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;target&#39;</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;trial_type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">):]</span> <span class="o">=</span> <span class="s1">&#39;notarget&#39;</span>
+
+<span class="n">data</span>
+</pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>rt</th>
+      <th>response</th>
+      <th>trial_type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.776609</td>
+      <td>go</td>
+      <td>target</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.706098</td>
+      <td>go</td>
+      <td>target</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.395347</td>
+      <td>go</td>
+      <td>target</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.337480</td>
+      <td>go</td>
+      <td>target</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.751433</td>
+      <td>go</td>
+      <td>target</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+  </tbody>
+</table>
+<p>100 rows × 3 columns</p>
+</div><h3 id="the-model-s-a-class-anchor-id-the-models/a">The model(s) <a class="anchor" id="the_models"></a></h3><p>Cognitive scientists have powerful framework for the joint analysis of <strong>reaction time</strong> and <strong>choice</strong> data: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5112760/">Sequential Sampling Models</a> (SSMs).</p>
+<p>The canonical model in this framework is the <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2474742/">Drift Diffusion Model</a> (or Diffusion Decision Model). We will take this model as a starting point to explain how it applies to the analysis of <a href="https://www.nature.com/articles/nature12486">NeuroRacer</a> data.</p>
+<p>The basic idea behind the <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2474742/">Drift Diffusion Model</a> is the following. 
+We represent the decision process between two options as a Gaussian random walk of a so-called <em>evidence state</em>. The random walk starts after some <em>non-decision time</em> period $ndt$ following the stimulus appearance. The process then starts at a specific value (parameter $z$) and evolves according to a deterministic drift (parameter $v$), perturbed by Gaussian noise. Eventually this process reaches a value that crosses one of two boundaries, which determines the response given by the participant: go or no-go. The distance between the two boundaries is given by a fourth parameter ($a$).</p>
+<p><em>Which bound</em> is reached, and the <em>time of crossing</em>, jointly determine the reaction time and choice. Hence, this model specifies a <em>stochastic data generating process</em> and we can define a likelihood function for this.</p>
+<p>However, this likelihood function may be quite hard to derive, and possibly too computationally expensive. As an alternative, we will use a general function approximation via Neural Networks in this tutorial.</p>
+<p>Let's first look at an illustration of the model and identify the quantities relevant for our example.</p>
+<p>A nice aspect of the <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2474742/">Drift Diffusion Model</a> (or Diffusion Decision Model) is that the parameters are interpretationally distinct.</p>
+<p align="center" width="100%">
+    <img width="60%" src=ddm_example_with_likelihoods.png>
+</p><ol>
+<li>$ndt$, the non-decision time component captures all aspects of decision-time not explicitly modeled as per the random walk process (e.g. motor-preparation, initial time-to-attentive-state etc. etc.)</li>
+<li>$z$, provides global bias of the process towards one or the other choice. One can think of it as an a priori estimate of the underlying frequency of correct choices as per the experiment design.</li>
+<li>$v$, is the rate with which evidence is consistently accumulated toward one or the other bound (in favor of one or the other choice). One can think of it as speed of processing.</li>
+<li>$a$, represent a measure of the desired level of certainty before a decision is committed to. It is also referred to as <em>decision caution</em>.</li>
+</ol>
+<p>The two quantities we will make explicit in the analyses are the following are (see also figure above),</p>
+<ol>
+<li>$f_{Go}(t|v,a,z,ndt)$, the likelihood of observing a <strong>Go</strong> choice at time $t$</li>
+<li>$p(choice = NoGo)$, the likelihood of "observing" a withheld button press, defined as the integral of $f_{NoGo}(t|v,a,z,ndt)$ over $t$.</li>
+</ol>
+<p>We will focus on a simple analysis case, in which we observe hypothetical data from a single player, who plays the game for $1000$ trials, $500$ of which are <strong>Go / target</strong> trials (the participant should press the button) and $500$ of which are <strong>NoGo / no target</strong> trials (the participant should not press the button).</p>
+<p>We will make a simplifying modeling assumption: the rate of evidence accumulation for a <strong>NoGo</strong> has the same magnitude as that of <strong>Go</strong> trials but with a flipped sign, meaning participants are less likely to press a button as time goes by. This allows us to estimate a single $v_{Go}$ parameter.</p>
+<p>Hence we get <span> $$ v_{Go}  =  - v_{NoGo}$$ </span>.</p>
+<h3 id="motivating-simulation-based-inference-a-class-anchor-id-motivating-lfi/a">Motivating Simulation Based Inference <a class="anchor" id="motivating_lfi"></a></h3><p>The <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2474742/">Drift Diffusion Model</a> actually has a (cumbersome) <a href="https://philpapers.org/rec/FELAIT-4">analytical likelihood</a>, with specialized <a href="https://psycnet.apa.org/record/2009-11068-003">algorithms</a> for fast evaluation. There are however many interesting variants for which fast computations are hampered by a lack of closed form solutions (see for example <a href="https://pyddm.readthedocs.io/en/stable/">here</a> and <a href="https://elifesciences.org/articles/65074">here</a>).</p>
+<p>Take as one example the model illustrated in the figure below,</p>
+<p align="center" width="100%">
+    <img width="60%" src=weibull.gif>
+</p><p>Conceptually the only difference is that the <em>decision criterion</em>, described in our simple <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2474742/">Drift Diffusion Model</a> above with a single parameter $a$, does now vary with time (as a parametric function). This makes sense if e.g. the decision is supposed to be completed under deadline pressure (in fact this would be the case in our NeuroRacer example). As time progresses, it may be rational to decrease ones <em>decision caution</em> to force an, at least somewhat, informed decision over a guaranteed failure due to missing the deadline (for some reasearch along those lines see for example <a href="https://www.jneurosci.org/content/29/37/11560">this paper</a>).</p>
+<p>On the other hand simulators for such variants tend to remain easy to code up (often a few lines in python do the job). 
+A simulator but no likelihood? Welcome to the world of <a href="https://www.pnas.org/doi/10.1073/pnas.1912789117"><strong>simulation based inference</strong></a> (SBI).</p>
+<p>Surveying the field of SBI is beyond the scope of this blog post (the paper above is a good start for those interested), but let it be said that SBI is the overarching paradigm from which we pick a specific <a href="https://elifesciences.org/articles/65074">method</a> to construct our approach below.</p>
+<p>The idea is the following. We start with a simulator for the DDM from which, given a set of parameters ($v$, $a$, $z$, $ndt$) we can construct empirical likelihood  functions for both <span> $f_{Go}(t|v,a,z,ndt)$ </span> and  <span> $p(choice=Nogo|v,a,z,ndt)$ </span>. For $f_{Go}(t|v,a,z,ndt)$ we construct smoothed histograms (or <a href="https://en.wikipedia.org/wiki/Kernel_density_estimation">Kernel Density Estimates</a>), while for $p(choice=NoGo|v,a,z,ndt)$ we simply collect the respective choice probability from simulation runs.</p>
+<p>From these building blocks, we will construct training data to train two <a href="https://en.wikipedia.org/wiki/Multilayer_perceptron">Multilayer Perceptrons</a> (MLPs, read: small Neural Networks), one for each of the two parts of the overall likelihood.</p>
+<p>These MLPs are going to act as our likelihood functions. We will call the network which represents $f_{Go}(t|v,a,z,ndt)$ a <strong>LAN</strong>, for Likelihood Approximation Network. The network for $p(choice=NoGo|v,a,z,ndt)$ will be called a <strong>CPN</strong>, for Choice Probability Network. As we will see later, can then evaluate our data-likelihood via forward passes through the LAN and CPN.</p>
+<p>We will then proceed by wrapping these trained networks into a custom PyMC distribution and finally get samples from our posterior of interest $p(v,a,z,ndt|x)$ via the <a href="https://github.com/blackjax-devs/blackjax">Blackjax</a> NUTS sampler, completing our walkthrough.</p>
+<p>With all these steps ahead, let's get going!</p>
+<h2 id="from-model-simulation-to-pymc-model-a-class-anchor-id-towards-pymc/a">From model simulation to PyMC model  <a class="anchor" id="towards_pymc"></a></h2><h3 id="simulating-data-a-class-anchor-id-data-simulation/a">Simulating Data  <a class="anchor" id="data_simulation"></a></h3><p>In favor of a digestible reading experience, we will use a convenience package to simulate data from the DDM model.
+This package not only allows us to simulate trajectories, but also includes utilities to directly produce data in a format suitable for downstream neural network training (which is our target here). The mechanics behind training data generation are described in <a href="https://elifesciences.org/articles/65074">this paper</a>.</p>
+<p>For some intuition, let's start with simulating and plotting a simple collection of $1000$ DDM trajectories, setting the parameters ${v,a,z,ndt}$ as ${1.0 , 1.5, 0.5, 0.5}$.</p>
+<div class="hll"><pre><span></span><span class="kn">from</span> <span class="nn">ssms.basic_simulators</span> <span class="kn">import</span> <span class="n">simulator</span>
+
+<span class="n">n_trajectories</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">parameter_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+
+<span class="n">simulation_data</span> <span class="o">=</span> <span class="n">simulator</span><span class="p">(</span><span class="n">model</span> <span class="o">=</span> <span class="s1">&#39;angle&#39;</span><span class="p">,</span>
+                            <span class="n">theta</span> <span class="o">=</span> <span class="n">parameter_vector</span><span class="p">,</span>
+                            <span class="n">n_samples</span> <span class="o">=</span> <span class="n">n_trajectories</span><span class="p">,</span>
+                            <span class="n">random_state</span> <span class="o">=</span> <span class="mi">42</span><span class="p">)</span>
+
+<span class="n">simulation_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+</pre></div>
+<pre><code>dict_keys(['rts', 'choices', 'metadata'])
+</code></pre>
+<p>The simulator returns a <code>dictionary</code> with three keys.</p>
+<ol>
+<li><code>rts</code>, the reaction times for each choice under 2.</li>
+<li><code>choices</code>, here coded as $-1$ for lower boundary crossings and $1$ for upper boundary crossings.</li>
+<li><code>metadata</code>, extra information about the simulator settings</li>
+</ol>
+<p>Let's use this to plot the reaction time distribution (negative reals refer to $-1$ choices) and choice probabilities.
+We will plot this for a few parameter settings to give some intuition about how the model behaves in response. Specifically we will vary the $v$ parameter, holding all other parameters constant the values reported above.</p>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode0" aria-expanded="false" aria-controls="collapseibleCode0">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode0" class="collapse">
+                <div class="hll"><pre><span></span><span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="n">parameter_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+<span class="c1"># vary the first parameter across rows (the &#39;v&#39; parameter in our case&#39;)</span>
+<span class="n">parameter_matrix</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+<span class="c1"># set the rest to the values used above</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="n">parameter_matrix</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameter_vector</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+<span class="c1"># Make Figure</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;DDM Simulations: vary v&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">simulation_data_tmp</span> <span class="o">=</span> <span class="n">simulator</span><span class="p">(</span><span class="n">model</span> <span class="o">=</span> <span class="s1">&#39;ddm&#39;</span><span class="p">,</span>
+                                <span class="n">theta</span> <span class="o">=</span> <span class="n">parameter_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span>
+                                <span class="n">n_samples</span> <span class="o">=</span> <span class="n">n_trajectories</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Reaction Times + Choices</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">simulation_data_tmp</span><span class="p">[</span><span class="s1">&#39;rts&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">simulation_data_tmp</span><span class="p">[</span><span class="s1">&#39;choices&#39;</span><span class="p">]),</span>
+                       <span class="n">histtype</span> <span class="o">=</span> <span class="s1">&#39;step&#39;</span><span class="p">,</span>
+                       <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>
+                       <span class="n">bins</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span>
+                       <span class="p">)</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;v = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">parameter_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">)))</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Reaction Times&#39;</span><span class="p">)</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Freq&#39;</span><span class="p">)</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="c1"># Choice probabilities</span>
+            <span class="n">p_up</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">simulation_data_tmp</span><span class="p">[</span><span class="s1">&#39;choices&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mf">1.</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_trajectories</span>
+            <span class="n">choice_ps</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="n">p_up</span><span class="p">,</span> <span class="n">p_up</span><span class="p">]</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">bar</span><span class="p">([</span><span class="s1">&#39;choice = -1&#39;</span><span class="p">,</span> <span class="s1">&#39;choice = 1&#39;</span><span class="p">],</span> <span class="n">choice_ps</span><span class="p">,</span> <span class="n">fill</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Probability&#39;</span><span class="p">)</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+            </div>
+            <p><img src="pymc_lans_blog_post_potential_15_0.png" alt="png"></p>
+<h3 id="turning-it-into-training-data-a-class-anchor-id-training-data/a">Turning it into Training Data  <a class="anchor" id="training_data"></a></h3><p>We will now use a couple of convenience functions from the <a href="https://github.com/AlexanderFengler/ssm-simulators">ssm-simulators</a> package, to generate training data for our Neural Networks.
+This will proceed in <em>two</em> steps. We first define two config dictionaries to specify properties of the simulation runs that will serve as the basis for our training data set.</p>
+<ol>
+<li>The <code>generator_config</code> which specifies how to construct training data on top of basic simulations runs.</li>
+<li>The <code>model_config</code> which specifies the properties of the core simulator.</li>
+</ol>
+<p>Second, we will actually run the necessary simulations.</p>
+<p>Let's make the config dictionaries.</p>
+<p><strong>NOTE:</strong></p>
+<p>The details here are quite immaterial. We simply need some way of generating training data of two types.</p>
+<ol>
+<li><p>One (for the LAN), which has as features vectors of the kind $(v, a, z, ndt, rt, c)$ and as labels corresponding empirical log-likelihood evaluations $log \ \hat{\ell}(v, a, z, ndt| rt, c)$.</p>
+</li>
+<li><p>One (for the CPN), which takes as features simply the parameter vectors $(v, a, z, ndt)$ and as labels corresponding empirical choice probabilities $\hat{p}(choice = 1)$.</p>
+</li>
+</ol>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode1" aria-expanded="false" aria-controls="collapseibleCode1">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode1" class="collapse">
+                <div class="hll"><pre><span></span><span class="c1"># MAKE CONFIGS</span>
+<span class="kn">from</span> <span class="nn">ssms.config</span> <span class="kn">import</span> <span class="n">data_generator_config</span>
+<span class="kn">from</span> <span class="nn">ssms.config</span> <span class="kn">import</span> <span class="n">model_config</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="c1"># Generator Config</span>
+
+<span class="c1"># (We start from a supplied example in the ssms package)</span>
+<span class="n">ddm_generator_config</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">data_generator_config</span><span class="p">[</span><span class="s1">&#39;lan&#39;</span><span class="p">])</span> 
+
+<span class="c1"># Specify generative model </span>
+<span class="c1"># (one from the list of included models in the ssms package / or a single string)</span>
+<span class="n">ddm_generator_config</span><span class="p">[</span><span class="s1">&#39;dgp_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;ddm&#39;</span>
+
+<span class="c1"># Specify number of parameter sets to simulate</span>
+<span class="n">ddm_generator_config</span><span class="p">[</span><span class="s1">&#39;n_parameter_sets&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1000</span>
+
+<span class="c1"># Specify how many samples a simulation run should entail</span>
+<span class="c1"># (To construct an empirical likelihood)</span>
+<span class="n">ddm_generator_config</span><span class="p">[</span><span class="s1">&#39;n_samples&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10000</span>
+
+<span class="c1"># Specify how many training examples to extract from </span>
+<span class="c1"># a single parameter vector</span>
+<span class="n">ddm_generator_config</span><span class="p">[</span><span class="s1">&#39;n_training_samples_by_parameter_set&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2000</span>
+
+<span class="c1"># Specify folder in which to save generated data</span>
+<span class="n">ddm_generator_config</span><span class="p">[</span><span class="s1">&#39;output_folder&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;data/training_data/ddm_high_prec/&#39;</span>
+
+<span class="c1"># Model Config</span>
+<span class="n">ddm_model_config</span> <span class="o">=</span> <span class="n">model_config</span><span class="p">[</span><span class="s1">&#39;ddm&#39;</span><span class="p">]</span>
+</pre></div>
+
+            </div>
+            <p>We are now in the position to actually run the simulations.</p>
+<p>If you run this by yourself,</p>
+<ol>
+<li>Be aware that the next cell may run for a while (between a few minutes and an hour)</li>
+<li>Make sure the <code>output_folder</code> specified above exists.</li>
+</ol>
+<div class="hll"><pre><span></span><span class="c1"># MAKE DATA</span>
+<span class="kn">from</span> <span class="nn">ssms.dataset_generators</span> <span class="kn">import</span> <span class="n">data_generator</span>
+<span class="n">n_datasets</span> <span class="o">=</span> <span class="mi">20</span>
+
+<span class="c1"># Instantiate a data generator (we pass our configs)</span>
+<span class="n">my_dataset_generator</span> <span class="o">=</span> <span class="n">data_generator</span><span class="p">(</span><span class="n">generator_config</span> <span class="o">=</span> <span class="n">ddm_generator_config</span><span class="p">,</span>
+                                      <span class="n">model_config</span> <span class="o">=</span> <span class="n">ddm_model_config</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_datasets</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Dataset: &#39;</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39; of &#39;</span><span class="p">,</span> <span class="n">n_datasets</span><span class="p">)</span>
+    <span class="n">training_data</span> <span class="o">=</span> <span class="n">my_dataset_generator</span><span class="o">.</span><span class="n">generate_data_training_uniform</span><span class="p">(</span><span class="n">save</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                                                        <span class="n">verbose</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+<p>Let's take a quick look at the type of data we generated here (if you run this by yourself, pick one of the unique file names generated during your run):</p>
+<div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">pickle</span>
+<span class="n">training_data_example</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s1">&#39;data/training_data/ddm_high_prec/training_data_167fc318b85511ed81623ceceff2f96e.pickle&#39;</span><span class="p">,</span> 
+                                         <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+</pre></div>
+<div class="hll"><pre><span></span><span class="n">training_data_example</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+</pre></div>
+<pre><code>dict_keys(['data', 'labels', 'choice_p', 'thetas', 'binned_128', 'binned_256', 'generator_config', 'model_config'])
+</code></pre>
+<p>Under the <code>data</code> key (this is a legacy name, it might more appropriately called <code>features</code> directly) we find the <em>feature set</em> we need for LANS. A matrix that contains columns <code>[v, a, z, ndt, rt, choice]</code>. In general, across simulator models, the leading columns contain the parameters of the model, the remaining columns contain columns concerning the output data (in our case: <em>responses</em> and <em>choices</em>).</p>
+<div class="hll"><pre><span></span><span class="n">training_data_example</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][:</span><span class="mi">10</span><span class="p">,</span> <span class="p">:]</span>
+</pre></div>
+<pre><code>array([[-1.320654 ,  2.4610643,  0.7317903,  1.5463215,  3.5173764,
+        -1.       ],
+       [-1.320654 ,  2.4610643,  0.7317903,  1.5463215,  5.126489 ,
+        -1.       ],
+       [-1.320654 ,  2.4610643,  0.7317903,  1.5463215,  4.1766562,
+        -1.       ],
+       [-1.320654 ,  2.4610643,  0.7317903,  1.5463215,  5.331864 ,
+        -1.       ],
+       [-1.320654 ,  2.4610643,  0.7317903,  1.5463215,  3.1934366,
+        -1.       ],
+       [-1.320654 ,  2.4610643,  0.7317903,  1.5463215,  3.8244245,
+        -1.       ],
+       [-1.320654 ,  2.4610643,  0.7317903,  1.5463215,  5.069471 ,
+        -1.       ],
+       [-1.320654 ,  2.4610643,  0.7317903,  1.5463215,  6.12916  ,
+        -1.       ],
+       [-1.320654 ,  2.4610643,  0.7317903,  1.5463215,  4.563048 ,
+        -1.       ],
+       [-1.320654 ,  2.4610643,  0.7317903,  1.5463215,  4.2055674,
+        -1.       ]], dtype=float32)
+</code></pre>
+<p>The <code>labels</code> key, contains the empirical $\hat{log \ \ell}(v,a,z,ndt|rt,choice)$ labels.</p>
+<div class="hll"><pre><span></span><span class="n">training_data_example</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">][:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+<pre><code>array([-0.9136966 , -1.7495332 , -1.1017948 , -1.9210151 , -1.0180298 ,
+       -0.96904343, -1.7043545 , -2.6625948 , -1.3647802 , -1.1204832 ],
+      dtype=float32)
+</code></pre>
+<p>The final keys we will be interested in, concern the feature and label data useful for training the CPN networks.
+This network is a function from the model parameters (<code>theta</code> key) directly to choice probabilities (<code>choice_p</code> key).</p>
+<div class="hll"><pre><span></span><span class="n">training_data_example</span><span class="p">[</span><span class="s1">&#39;thetas&#39;</span><span class="p">][:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+<pre><code>array([[-1.320654  ,  2.4610643 ,  0.7317903 ,  1.5463215 ],
+       [ 0.6651015 ,  2.032305  ,  0.43455952,  0.39412627],
+       [-0.50315803,  2.434122  ,  0.225012  ,  0.9221967 ],
+       [-0.2956373 ,  1.1780746 ,  0.3984416 ,  1.361724  ],
+       [-0.39936534,  1.170804  ,  0.57806057,  1.2206811 ],
+       [-1.1943408 ,  0.68256736,  0.6976298 ,  1.172115  ],
+       [ 0.7937759 ,  2.049422  ,  0.45930618,  0.48710603],
+       [-2.0405245 ,  2.453905  ,  0.7521208 ,  1.9120167 ],
+       [-2.8156106 ,  2.2226427 ,  0.69219965,  1.0444195 ],
+       [ 0.37362418,  1.775074  ,  0.42867982,  0.22735284]],
+      dtype=float32)
+</code></pre>
+<div class="hll"><pre><span></span><span class="n">training_data_example</span><span class="p">[</span><span class="s1">&#39;choice_p&#39;</span><span class="p">][:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+<pre><code>array([2.930e-02, 9.146e-01, 1.540e-02, 2.471e-01, 3.542e-01, 3.422e-01,
+       9.555e-01, 6.300e-03, 7.000e-04, 7.356e-01], dtype=float32)
+</code></pre>
+<p>There are a few other keys in the <code>training_data_example</code> dictionary. We can ignore these for the purposes of this blog post.</p>
+<p>We are ready to move forward by turning our raw training data into a <code>DataLoader</code> object, which directly prepares for ingestion by the Neural Networks.</p>
+<p>The <code>DataLoader</code> is supposed take care of:</p>
+<ol>
+<li>Efficiently <em>reading in datafiles</em> and </li>
+<li><em>turning them into batches</em> to be ingested when training a Neural Network. </li>
+</ol>
+<p>As has become somewhat of a standard, will work off of the <code>Dataset</code> class supplied by the <code>torch.utils.data</code> module in the  <strong>PyTorch</strong> deep learning framework.</p>
+<p>The key methods to define in our custom dataset are <code>__getitem__()</code> and <code>__len__()</code>.</p>
+<p><code>__len__()</code> helps us to understand the amount of batches contained in a complete run through the data (<em>epoch</em> in machine learning lingo). <code>__getitem_()</code> is the method called to retrieve the next batch of data.</p>
+<p>Let's construct it.</p>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode2" aria-expanded="false" aria-controls="collapseibleCode2">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode2" class="collapse">
+                <div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span>
+
+<span class="k">class</span> <span class="nc">DatasetTorch</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">file_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+                 <span class="n">label_lower_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">features_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span>
+                 <span class="n">label_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;labels&#39;</span><span class="p">,</span>
+                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">dataDataset</span><span class="p">]:</span>
+
+        <span class="c1"># Initialization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_ids</span> <span class="o">=</span> <span class="n">file_ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_ids</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_lower_bound</span> <span class="o">=</span> <span class="n">label_lower_bound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">features_key</span> <span class="o">=</span> <span class="n">features_key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_key</span> <span class="o">=</span> <span class="n">label_key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tmp_data</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Get metadata from loading a test file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__init_file_shape</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates number of batches per epoch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_ids</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">file_shape_dict</span><span class="p">[</span><span class="s1">&#39;inputs&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">))</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return next batch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check if it is time to load the next file from disk</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">batches_per_file</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">tmp_data</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__load_file</span><span class="p">(</span><span class="n">file_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexes</span><span class="p">[</span><span class="n">index</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">batches_per_file</span><span class="p">])</span>
+
+        <span class="c1"># Generate batch_ids</span>
+        <span class="n">batch_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(((</span><span class="n">index</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">batches_per_file</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">),</span> 
+                              <span class="p">((</span><span class="n">index</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">batches_per_file</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Make corresponding batch</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tmp_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">features_key</span><span class="p">][</span><span class="n">batch_ids</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">label_key</span><span class="p">][</span><span class="n">batch_ids</span><span class="p">],</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Apply lower bound on labels</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_lower_bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">y</span><span class="p">[</span><span class="n">y</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_lower_bound</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_lower_bound</span> 
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
+
+    <span class="k">def</span> <span class="nf">__load_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load new file if requested.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Load file and shuffle the indices</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tmp_data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_ids</span><span class="p">[</span><span class="n">file_index</span><span class="p">],</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+        <span class="n">shuffle_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">features_key</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> 
+                                        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tmp_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">features_key</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                         <span class="n">replace</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tmp_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">features_key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tmp_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">features_key</span><span class="p">][</span><span class="n">shuffle_idx</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tmp_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">label_key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tmp_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">label_key</span><span class="p">][</span><span class="n">shuffle_idx</span><span class="p">]</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">__init_file_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set data shapes during initialization.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Function gets dimensionalities form a test data file </span>
+        <span class="c1"># (first in the supplied list of file names)</span>
+        <span class="n">init_file</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_shape_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;inputs&#39;</span><span class="p">:</span> <span class="n">init_file</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">features_key</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> 
+                                <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="n">init_file</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">label_key</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batches_per_file</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_shape_dict</span><span class="p">[</span><span class="s1">&#39;inputs&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_shape_dict</span><span class="p">[</span><span class="s1">&#39;inputs&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_shape_dict</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_shape_dict</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label_dim</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">return</span>
+</pre></div>
+
+            </div>
+            <p>Let's construct our training dataloaders for both our LAN and CPN networks (which we will define next). We use the <code>DataLoader</code> class in the <code>torch.utils.data</code> module to turn our <code>Dataset</code> class into an <code>iterator</code>.</p>
+<p><strong>NOTE:</strong></p>
+<p>To not explode code blocks in this blog post, we will only concern ourselves with <code>training</code> data here, instead of including (as one should in a serious machine learning application) <code>DataLoader</code> classes for <code>validation</code> data as well. Defining <code>validation</code> data works analogously.</p>
+<p>Notice how we change the <code>features_key</code> and <code>label_key</code> arguments to access the relevant part of our training data files respectively for the LAN and CPN.</p>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode3" aria-expanded="false" aria-controls="collapseibleCode3">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode3" class="collapse">
+                <div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">os</span> 
+<span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="c1"># MAKE DATALOADERS</span>
+
+<span class="c1"># List of datafiles (here only one)</span>
+<span class="n">folder_</span> <span class="o">=</span> <span class="s1">&#39;data/training_data/ddm_high_prec/&#39;</span>
+<span class="n">file_list_</span> <span class="o">=</span> <span class="p">[</span><span class="n">folder_</span> <span class="o">+</span> <span class="n">file_</span> <span class="k">for</span> <span class="n">file_</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">folder_</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;.ipynb&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">file_</span><span class="p">]</span>
+
+<span class="c1"># Training datasets</span>
+<span class="n">training_dataset_lan</span> <span class="o">=</span> <span class="n">DatasetTorch</span><span class="p">(</span><span class="n">file_ids</span> <span class="o">=</span> <span class="n">file_list_</span><span class="p">,</span>
+                                    <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">8192</span><span class="p">,</span>
+                                    <span class="n">label_lower_bound</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1e-7</span><span class="p">),</span>
+                                    <span class="n">features_key</span> <span class="o">=</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span>
+                                    <span class="n">label_key</span> <span class="o">=</span> <span class="s1">&#39;labels&#39;</span><span class="p">,</span>
+                                    <span class="p">)</span>
+
+<span class="n">training_dataset_cpn</span> <span class="o">=</span> <span class="n">DatasetTorch</span><span class="p">(</span><span class="n">file_ids</span> <span class="o">=</span> <span class="n">file_list_</span><span class="p">,</span>
+                                    <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">512</span><span class="p">,</span>
+                                    <span class="n">features_key</span> <span class="o">=</span> <span class="s1">&#39;thetas&#39;</span><span class="p">,</span>
+                                    <span class="n">label_key</span> <span class="o">=</span> <span class="s1">&#39;choice_p&#39;</span><span class="p">,</span>
+                                    <span class="p">)</span>
+
+<span class="c1"># Training dataloaders</span>
+<span class="n">training_dataloader_lan</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">training_dataset_lan</span><span class="p">,</span>
+                                                      <span class="n">shuffle</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                                      <span class="n">batch_size</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                                      <span class="n">num_workers</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                                                      <span class="n">pin_memory</span> <span class="o">=</span> <span class="kc">True</span>
+                                                     <span class="p">)</span>
+
+<span class="n">training_dataloader_cpn</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">training_dataset_cpn</span><span class="p">,</span>
+                                                      <span class="n">shuffle</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                                                      <span class="n">batch_size</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                                      <span class="n">num_workers</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                                                      <span class="n">pin_memory</span> <span class="o">=</span> <span class="kc">True</span>
+                                                     <span class="p">)</span>
+</pre></div>
+
+            </div>
+            <h3 id="building-and-training-the-network-a-class-anchor-id-build-and-train/a">Building and Training the Network <a class="anchor" id="build_and_train"></a></h3><p>We used the simulator to construct training data and constructed dataloaders on top of that. 
+It is time to build and train our networks!</p>
+<p>We will use the <a href="https://github.com/google/flax">Flax</a> python package for this purpose.
+Let's first define a basic neural network class, constrained to minimal functionality.
+We build such a class by inheriting from the <code>nn.Module</code> class in the <code>flax.linen</code> module and specifying two methods.</p>
+<ol>
+<li>The <code>setup()</code> method, which will be run as a preparatory step upon instantiation.</li>
+<li>The <code>__call__()</code> metod defines the forward pass through the network.</li>
+</ol>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode4" aria-expanded="false" aria-controls="collapseibleCode4">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode4" class="collapse">
+                <div class="hll"><pre><span></span><span class="kn">from</span> <span class="nn">flax</span> <span class="kn">import</span> <span class="n">linen</span> <span class="k">as</span> <span class="n">nn</span>
+<span class="kn">from</span> <span class="nn">frozendict</span> <span class="kn">import</span> <span class="n">frozendict</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
+
+<span class="k">class</span> <span class="nc">MLPJax</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Basic Neural Network class as per the Flax package for neural network </span>
+<span class="sd">    modeling with Jax.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">layer_sizes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">activations</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;tanh&#39;</span><span class="p">,</span> <span class="s1">&#39;tanh&#39;</span><span class="p">,</span> <span class="s1">&#39;tanh&#39;</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+    <span class="n">train</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># if train = False, output applies transform f such that: f(train_output_type) = logprob</span>
+    <span class="n">train_output_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;logprob&#39;</span>
+    <span class="n">activations_dict</span> <span class="o">=</span> <span class="n">frozendict</span><span class="p">({</span><span class="s1">&#39;relu&#39;</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+                                   <span class="s1">&#39;tanh&#39;</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">tanh</span><span class="p">,</span>
+                                   <span class="s1">&#39;sigmoid&#39;</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span>
+                                  <span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Assign layers and activation functions as class attributes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="n">layer_size</span><span class="p">)</span> <span class="k">for</span> <span class="n">layer_size</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer_sizes</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation_funs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">activations_dict</span><span class="p">[</span><span class="n">activation</span><span class="p">]</span> <span class="k">for</span> \
+                                <span class="n">activation</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">activations</span> <span class="k">if</span> <span class="p">(</span><span class="n">activation</span> <span class="o">!=</span> <span class="s1">&#39;linear&#39;</span><span class="p">)]</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">jax</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">jax</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is used to define the forward pass, which will later be called via</span>
+<span class="sd">        mymodel.apply(state, input)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Define forward pass</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">inputs</span>
+
+        <span class="c1"># Cycle through layers</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">lyr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">lyr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation_funs</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">activations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span> 
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation_funs</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="c1"># Apply potential transform of outputs if in eval model</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_output_type</span> <span class="o">==</span> <span class="s1">&#39;logits&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span> <span class="n">jax</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">jax</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">x</span>
+
+    <span class="k">def</span> <span class="nf">make_forward_partial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                             <span class="n">state</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make a single-argument forward pass function (only network input needed instead</span>
+<span class="sd">        of needing to pass the network state as well).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">net_forward</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apply</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+        <span class="n">net_forward_jitted</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">net_forward</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">net_forward</span><span class="p">,</span> <span class="n">net_forward_jitted</span>
+</pre></div>
+
+            </div>
+            <p>Next we define a Neural Network trainer class. This will take a <code>MLPJax</code> instance and build the necessary infrastructure for network training around it. The approach roughly follows the suggestions in the <a href="https://flax.readthedocs.io/en/latest/">Flax documentation</a>.</p>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode5" aria-expanded="false" aria-controls="collapseibleCode5">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode5" class="collapse">
+                <div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">jax</span>
+<span class="kn">import</span> <span class="nn">optax</span>
+<span class="kn">from</span> <span class="nn">optax</span> <span class="kn">import</span> <span class="n">warmup_cosine_decay_schedule</span>
+<span class="kn">from</span> <span class="nn">optax</span> <span class="kn">import</span> <span class="n">huber_loss</span>
+<span class="kn">from</span> <span class="nn">optax</span> <span class="kn">import</span> <span class="n">sigmoid_binary_cross_entropy</span>
+<span class="kn">from</span> <span class="nn">optax</span> <span class="kn">import</span> <span class="n">l2_loss</span>
+
+<span class="kn">from</span> <span class="nn">flax.training</span> <span class="kn">import</span> <span class="n">train_state</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="k">class</span> <span class="nc">ModelTrainerJaxMLP</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">model</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">loss</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">train_dl</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="c1"># Provide some options for loss functions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;huber&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;fun&#39;</span><span class="p">:</span> <span class="n">huber_loss</span><span class="p">,</span>
+                               <span class="s1">&#39;kwargs&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;delta&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}},</span>
+                          <span class="s1">&#39;mse&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;fun&#39;</span><span class="p">:</span> <span class="n">l2_loss</span><span class="p">,</span>
+                                 <span class="s1">&#39;kwargs&#39;</span><span class="p">:</span> <span class="p">{}},</span>
+                          <span class="s1">&#39;bcelogit&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;fun&#39;</span><span class="p">:</span> <span class="n">sigmoid_binary_cross_entropy</span><span class="p">,</span>
+                                      <span class="s1">&#39;kwargs&#39;</span><span class="p">:</span> <span class="p">{}}</span>
+                         <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_dl</span> <span class="o">=</span> <span class="n">train_dl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_dl</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__get_loss</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__make_apply_model</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__make_update_model</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__get_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">][</span><span class="s1">&#39;fun&#39;</span><span class="p">],</span> 
+                            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">][</span><span class="s1">&#39;kwargs&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">__make_apply_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct jitted forward and backward pass.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+        <span class="k">def</span> <span class="nf">apply_model_core</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">loss_fn</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+                <span class="n">pred</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">apply_fn</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">features</span><span class="p">)</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loss</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">labels</span><span class="p">))</span>
+                <span class="k">return</span> <span class="n">loss</span><span class="p">,</span> <span class="n">pred</span>
+
+            <span class="n">grad_fn</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="n">loss_fn</span><span class="p">,</span> <span class="n">has_aux</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">pred</span><span class="p">),</span> <span class="n">grads</span> <span class="o">=</span> <span class="n">grad_fn</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">grads</span><span class="p">,</span> <span class="n">loss</span>
+
+        <span class="k">return</span> <span class="n">apply_model_core</span>
+
+    <span class="k">def</span> <span class="nf">__make_update_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct jitted optimizer step</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+        <span class="k">def</span> <span class="nf">update_model</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">grads</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">state</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="n">grads</span> <span class="o">=</span> <span class="n">grads</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">update_model</span>
+
+    <span class="k">def</span> <span class="nf">create_train_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a TrainState object that is essentially a convenience object for </span>
+<span class="sd">        storing a given networks&#39; foward pass, parameter state, and optimizer state.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="n">jax</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_dl</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">input_dim</span><span class="p">)))</span>
+        <span class="n">lr_schedule</span> <span class="o">=</span> <span class="n">warmup_cosine_decay_schedule</span><span class="p">(</span><span class="n">init_value</span> <span class="o">=</span> <span class="mf">0.0002</span><span class="p">,</span>
+                                                   <span class="n">peak_value</span> <span class="o">=</span> <span class="mf">0.02</span><span class="p">,</span>
+                                                   <span class="n">warmup_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_len</span><span class="p">,</span>
+                                                   <span class="n">decay_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_len</span> <span class="o">*</span> \
+                                                                 <span class="n">n_epochs</span><span class="p">,</span>
+                                                   <span class="n">end_value</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">tx</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">adam</span><span class="p">(</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="n">lr_schedule</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">train_state</span><span class="o">.</span><span class="n">TrainState</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">apply_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">apply</span><span class="p">,</span>
+                                             <span class="n">params</span> <span class="o">=</span> <span class="n">params</span><span class="p">,</span>
+                                             <span class="n">tx</span> <span class="o">=</span> <span class="n">tx</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">run_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                  <span class="n">state</span><span class="p">,</span>
+                  <span class="n">train</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run single epoch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">epoch_loss</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_dl</span><span class="p">):</span>
+            <span class="n">X_jax</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">y_jax</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+            <span class="n">grads</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_model</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">X_jax</span><span class="p">,</span> <span class="n">y_jax</span><span class="p">)</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_model</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">grads</span><span class="p">)</span>
+            <span class="n">epoch_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+
+        <span class="n">mean_epoch_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">epoch_loss</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state</span><span class="p">,</span> <span class="n">mean_epoch_loss</span>
+
+    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+              <span class="n">n_epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">25</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Train the network for the chosen number of epochs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Initialize network</span>
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">rng</span><span class="p">,</span> <span class="n">init_rng</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_train_state</span><span class="p">(</span><span class="n">init_rng</span><span class="p">,</span>
+                                        <span class="n">n_epochs</span> <span class="o">=</span> <span class="n">n_epochs</span><span class="p">)</span>
+
+        <span class="c1"># Training loop over epochs</span>
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_epochs</span><span class="p">):</span>
+            <span class="n">state</span><span class="p">,</span> <span class="n">train_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_epoch</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">train</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Epoch: </span><span class="si">{}</span><span class="s1"> / </span><span class="si">{}</span><span class="s1">, test_loss: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">n_epochs</span><span class="p">,</span> 
+                                                         <span class="n">train_loss</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="k">return</span> <span class="n">state</span>
+</pre></div>
+
+            </div>
+            <p>Preparations are all you need!
+We can now train our LAN and CPN with a few lines of code, making use of our 
+previously defined classes.</p>
+<div class="hll"><pre><span></span><span class="c1"># Initialize LAN</span>
+<span class="n">network_lan</span> <span class="o">=</span> <span class="n">MLPJax</span><span class="p">(</span><span class="n">train</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="c1"># if train = False, output applies transform f such that: f(train_output_type) = logprob</span>
+                     <span class="n">train_output_type</span> <span class="o">=</span> <span class="s1">&#39;logprob&#39;</span><span class="p">)</span>
+
+<span class="c1"># Set up the model trainer                                </span>
+<span class="n">ModelTrainerLAN</span> <span class="o">=</span> <span class="n">ModelTrainerJaxMLP</span><span class="p">(</span><span class="n">model</span> <span class="o">=</span> <span class="n">network_lan</span><span class="p">,</span>
+                                     <span class="n">train_dl</span> <span class="o">=</span> <span class="n">training_dataloader_lan</span><span class="p">,</span>
+                                     <span class="n">loss</span> <span class="o">=</span> <span class="s1">&#39;huber&#39;</span><span class="p">,</span>
+                                     <span class="n">seed</span> <span class="o">=</span> <span class="mi">123</span><span class="p">)</span>
+</pre></div>
+<div class="hll"><pre><span></span><span class="c1"># Train LAN</span>
+<span class="n">model_state_lan</span> <span class="o">=</span> <span class="n">ModelTrainerLAN</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">n_epochs</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+</pre></div>
+<pre><code>100%|██████████| 4880/4880 [00:30&lt;00:00, 159.70it/s]
+
+
+Epoch: 1 / 10, test_loss: 0.14862245321273804
+
+
+ ...
+
+
+100%|██████████| 4880/4880 [00:28&lt;00:00, 169.85it/s]
+
+
+Epoch: 10 / 10, test_loss: 0.01756889559328556
+</code></pre>
+<div class="hll"><pre><span></span><span class="c1"># Initialize CPN</span>
+<span class="n">network_cpn</span> <span class="o">=</span> <span class="n">MLPJax</span><span class="p">(</span><span class="n">train</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                     <span class="n">train_output_type</span> <span class="o">=</span> <span class="s1">&#39;logits&#39;</span><span class="p">)</span>
+
+<span class="c1"># Set up the model trainer                                </span>
+<span class="n">ModelTrainerCPN</span> <span class="o">=</span> <span class="n">ModelTrainerJaxMLP</span><span class="p">(</span><span class="n">model</span> <span class="o">=</span> <span class="n">network_cpn</span><span class="p">,</span>
+                                     <span class="n">train_dl</span> <span class="o">=</span> <span class="n">training_dataloader_cpn</span><span class="p">,</span>
+                                     <span class="n">loss</span> <span class="o">=</span> <span class="s1">&#39;bcelogit&#39;</span><span class="p">,</span>
+                                     <span class="n">seed</span> <span class="o">=</span> <span class="mi">456</span><span class="p">)</span>
+</pre></div>
+<div class="hll"><pre><span></span><span class="c1"># Train CPN</span>
+<span class="n">model_state_cpn</span> <span class="o">=</span> <span class="n">ModelTrainerCPN</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">n_epochs</span> <span class="o">=</span> <span class="mi">20</span><span class="p">)</span>
+</pre></div>
+<pre><code>100%|██████████| 20/20 [00:02&lt;00:00,  9.14it/s]
+
+
+Epoch: 1 / 20, test_loss: 0.42765116691589355
+
+
+...
+
+
+100%|██████████| 20/20 [00:00&lt;00:00, 27.14it/s]
+
+Epoch: 20 / 20, test_loss: 0.30409830808639526
+</code></pre>
+<h2 id="connecting-to-pymc-a-class-anchor-id-pymc/a">Connecting to PyMC <a class="anchor" id="pymc"></a></h2><p>At this point we have two networks ready (we will later see example output that illustrate the behavior / quality of the approximation), which can be used as <em>differentiable approximations to likelihood evaluations</em>.
+The figure below should illustrate the respective function of each network (e.g. in the <strong>Go</strong> condition). This may help as a guiding visualization for the subsequent content.</p>
+<p align="center" width="100%">
+    <img width="100%" src=ddm_example_with_likelihoods_and_nets.png>
+</p><p>A <strong>CPN</strong>, which we will use as an approximator to,</p>
+<p><span> $$ p(choice = Go) = \int f_{Go} (t|v, a, z, ndt) dt $$ </span></p>
+<p>and,</p>
+<p><span> $$ p(choice = NoGo) = \int f_{NoGo} (t|v, a, z, ndt) dt = 1 - p(choice = Go)$$ </span></p>
+<p>A <strong>LAN</strong>, which we will use as an approximator to,</p>
+<p><span> $$ \log \ell(v,a,z,ndt|rt,c) = f_{c}(t|v,a,z,ndt) $$ </span></p>
+<p>where $ \log \ell $ refers to the <strong>log-likelihood</strong>.</p>
+<p>Together the CPN and the LAN allow us to construct a likelihood for a complete dataset from the <a href="https://www.nature.com/articles/nature12486">NeuroRacer</a> game.</p>
+<p>Take the complete likelihood for a dataset of size $n$, for trials in which the <em>traffic</em> sign warrants a button press (<strong>Go Condition</strong>). We can split our dataset into two parts.</p>
+<ol>
+<li>Go condition, Go choice (we observe a reaction time): 
+<span> $D_{Go, Go} = \{ (rt,c)_{1}, ..., (rt, c)_{n_{Go, Go}} \} $ </span></li>
+<li>Go condition, NoGo choice (we don't observe a reaction time): <span> $D_{Go, NoGo} = \{(-,c )_1, ..., (-, c)_{n_{Go, NoGo}} \}$ </span></li>
+</ol>
+<p>The <em>log likelihood of the Go condition data</em> can now be represented as:
+   <span> $$ \log \ell_{Go}(v_{Go}, a, z, ndt| D_{Go, Go}, D_{Go, NoGo}) \approx \sum_{i = 0}^{n_{Go, Go}} LAN(v_{Go},a,z,ndt|(rt_i, c_i)) + \\ 
+n_{Go, NoGo} * \log (1 - CPN(v_{Go},a,z,ndt)) $$ </span></p>
+<p>For the <em>NoGo Condition</em>, we essentially apply the same logic so that the <em>log likelihood of the NoGo condition data</em> can now be represented as:
+  <span>  $$ \log \ell_{NoGo}(v_{NoGo}, a, z, ndt|D_{NoGo, Go}, D_{NoGo, NoGo}) \approx \sum_{i = 0}^{n_{NoGo, Go}} LAN(v_{NoGo},a,z,ndt|(rt_i, c_i)) + \\
+n_{NoGo, NoGo} * \log (1 - CPN(v_{NoGo},a,z,ndt)) $$ </span></p>
+<p>As per our modeling assumption we switch set <span> $v_{NoGo} = -v_{Go}$ </span>, to get the <strong>full data log-likelihood</strong>,</p>
+<p><span> $$ \log \hat{\ell}_{full}(v_{Go}, a, z, ndt|D) \approx \log \hat{\ell}_{Go}(v_{Go}, a, z, ndt| D_{Go, Go}, D_{Go, NoGo}) + \\
+ \log \hat{\ell}_{NoGo}(-v_{Go}, a, z, ndt|D_{NoGo, Go}, D_{NoGo, NoGo})$$ </span></p>
+<h3 id="building-a-custom-distribution-a-class-anchor-id-custom-distribution/a">Building a custom distribution <a class="anchor" id="custom_distribution"></a></h3><p>All pieces are lined up to start building a custom distribution for eventual use in a PyMC model. 
+The starting point has to be the construction of a <em>custom likelihood</em>, as a valid <code>PyTensor Op</code>.
+For this purpose we use the <code>NetworkLike</code> class below. It allows us to construct proper log-likelihoods from our two networks.</p>
+<p>What do we mean by proper log-likelihood?</p>
+<p>A valid Jax function that takes in parameters, processes the input data, performs the appropriate forward pass through the networks, and finally sums the resulting trial-wise log-likelihoods to give us a data-log-likelihood. This is taken care of by the <code>make_logp_jax_funcs()</code> method.</p>
+<p>Finally we need to turn these isolated likelihood functions into a valid <code>PyTensor Op</code>, which is taken care of by the <code>make_jax_logp_ops()</code> function. Note how we also register our log-likelihood function directly as a Jax log-likelihood (unwrap it) using the <code>jax.funcify</code> decorator with the <code>logp_op_dispatch()</code> method. This log-likelihood function does not need to be compiled (note how we pass the <code>logp_nojit</code> likelihood there), which will instead be taken care of by any of the Jax sampler that PyMC provides (via <a href="https://num.pyro.ai/en/latest/index.html#introductory-tutorials">NumPyro</a>, or <a href="https://github.com/blackjax-devs/blackjax">BlackJax</a>)</p>
+<p><strong>NOTE:</strong></p>
+<p>The below code is a little involved and could be hard to digest on a first pass. Consider looking into the excellent tutorials in the <a href="https://www.pymc.io/projects/docs/en/stable/learn/core_notebooks/pymc_overview.html">PyMC docs</a> and the <a href="https://www.pymc-labs.io/blog-posts/">PyMC Labs Blog</a> on similar topics.</p>
+<p>Specifically, the tutorial on using a <a href="https://www.pymc.io/projects/examples/en/latest/case_studies/blackbox_external_likelihood_numpy.html">blackbox likelihood function</a>, the tutorial on <a href="https://www.pymc.io/projects/examples/en/latest/howto/custom_distribution.html">custom distributions</a>, the tutorial on <a href="https://www.pymc.io/projects/examples/en/latest/case_studies/wrapping_jax_function.html">wrapping jax functions into PyTensor Ops</a>.</p>
+<p>Finally there is an excellent <a href="https://www.pymc-labs.io/blog-posts/jax-functions-in-pymc-3-quick-examples/">tutorial from PyMC Labs</a>, which incorporates <a href="https://flax.readthedocs.io/en/latest/">Flax</a> to train <a href="https://www.cs.toronto.edu/~duvenaud/distill_bayes_net/public/">Bayesian Neural Networks</a> (amongst other things): A different spin on our story here, not exactly equivalent, but helpful to understand the scope of use-cases encompassed at the intersection of  Neural Networks and the Bayesian workflow.</p>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode6" aria-expanded="false" aria-controls="collapseibleCode6">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode6" class="collapse">
+                <div class="hll"><pre><span></span><span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">PathLike</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">pytensor</span> 
+<span class="n">pytensor</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">floatX</span> <span class="o">=</span> <span class="s2">&quot;float32&quot;</span>
+<span class="kn">import</span> <span class="nn">pytensor.tensor</span> <span class="k">as</span> <span class="nn">pt</span>
+<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pytensor.graph</span> <span class="kn">import</span> <span class="n">Apply</span><span class="p">,</span> <span class="n">Op</span>
+<span class="kn">from</span> <span class="nn">pytensor.link.jax.dispatch</span> <span class="kn">import</span> <span class="n">jax_funcify</span>
+<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">grad</span><span class="p">,</span> <span class="n">jit</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+
+<span class="n">LogLikeFunc</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]</span>
+<span class="n">LogLikeGrad</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">pymc</span> <span class="k">as</span> <span class="nn">pm</span>
+<span class="kn">from</span> <span class="nn">pytensor.tensor.random.op</span> <span class="kn">import</span> <span class="n">RandomVariable</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span> 
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">NetworkLike</span><span class="p">:</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">make_logp_jax_funcs</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_params</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;lan&#39;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">LogLikeFunc</span><span class="p">,</span> <span class="n">LogLikeGrad</span><span class="p">,</span> <span class="n">LogLikeFunc</span><span class="p">,]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Makes a jax log likelihood function from flax network forward pass.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            model: A path or url to the ONNX model, or an ONNX Model object</span>
+<span class="sd">            already loaded.</span>
+<span class="sd">            compile: Whether to use jit in jax to compile the model.</span>
+<span class="sd">        Returns: A triple of jax or Python functions. The first calculates the</span>
+<span class="sd">            forward pass, the second calculates the gradient, and the third is</span>
+<span class="sd">            the forward-pass that&#39;s not jitted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;lan&#39;</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">logp_lan</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">*</span><span class="n">dist_params</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Computes the sum of the log-likelihoods given data and arbitrary</span>
+<span class="sd">                numbers of parameters assuming the trial by trial likelihoods</span>
+<span class="sd">                are derived from a LAN.</span>
+<span class="sd">                Args:</span>
+<span class="sd">                    data: response time with sign indicating direction.</span>
+<span class="sd">                    dist_params: a list of parameters used in the likelihood computation.</span>
+<span class="sd">                Returns:</span>
+<span class="sd">                    The sum of log-likelihoods.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+
+                <span class="c1"># Makes a matrix to feed to the LAN model</span>
+                <span class="n">params_matrix</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span>
+                    <span class="n">jnp</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">dist_params</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Set &#39;v&#39; parameters depending on condition</span>
+                <span class="n">params_matrix</span> <span class="o">=</span> <span class="n">params_matrix</span><span class="o">.</span><span class="n">at</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">params_matrix</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+
+                <span class="c1"># Stack parameters and data to have full input</span>
+                <span class="n">input_matrix</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">params_matrix</span><span class="p">,</span> <span class="n">data</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]])</span>
+
+                <span class="c1"># Network forward and sum</span>
+                <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                    <span class="n">jnp</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">model</span><span class="p">(</span><span class="n">input_matrix</span><span class="p">))</span>
+                <span class="p">)</span>
+
+            <span class="n">logp_grad_lan</span> <span class="o">=</span> <span class="n">grad</span><span class="p">(</span><span class="n">logp_lan</span><span class="p">,</span> <span class="n">argnums</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">n_params</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">jit</span><span class="p">(</span><span class="n">logp_lan</span><span class="p">),</span> <span class="n">jit</span><span class="p">(</span><span class="n">logp_grad_lan</span><span class="p">),</span> <span class="n">logp_lan</span>
+
+        <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;cpn&#39;</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">logp_cpn</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">*</span><span class="n">dist_params</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArrayLike</span><span class="p">:</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Computes the sum of the log-likelihoods given data and arbitrary</span>
+<span class="sd">                numbers of parameters assuming the trial-by-trial likelihood derive for a CPN.</span>
+<span class="sd">                Args:</span>
+<span class="sd">                    data: response time with sign indicating direction.</span>
+<span class="sd">                    dist_params: a list of parameters used in the likelihood computation.</span>
+<span class="sd">                Returns:</span>
+<span class="sd">                    The sum of log-likelihoods.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+
+                <span class="c1"># Makes a matrix to feed to the LAN model</span>
+                <span class="n">n_nogo_go_condition</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">data</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">n_nogo_nogo_condition</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">data</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">dist_params_go</span>  <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">dist_params</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="c1"># AF-TODO Bugfix here !</span>
+                <span class="n">dist_params_nogo</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">dist_params</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">dist_params_nogo</span> <span class="o">=</span> <span class="n">dist_params_nogo</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">dist_params_nogo</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                <span class="n">net_in</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">dist_params_go</span><span class="p">,</span> <span class="n">dist_params_nogo</span><span class="p">])</span>
+
+                <span class="n">net_out</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">model</span><span class="p">(</span><span class="n">net_in</span><span class="p">))</span>
+
+                <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">net_out</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">*</span> <span class="n">n_nogo_go_condition</span><span class="p">)</span> <span class="o">+</span> \
+                        <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">net_out</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="o">*</span> <span class="n">n_nogo_nogo_condition</span><span class="p">)</span>
+
+                <span class="k">return</span> <span class="n">out</span>
+
+            <span class="n">logp_grad_cpn</span> <span class="o">=</span> <span class="n">grad</span><span class="p">(</span><span class="n">logp_cpn</span><span class="p">,</span> <span class="n">argnums</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">n_params</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">jit</span><span class="p">(</span><span class="n">logp_cpn</span><span class="p">),</span> <span class="n">jit</span><span class="p">(</span><span class="n">logp_grad_cpn</span><span class="p">),</span> <span class="n">logp_cpn</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">make_jax_logp_ops</span><span class="p">(</span>
+        <span class="n">logp</span><span class="p">:</span> <span class="n">LogLikeFunc</span><span class="p">,</span>
+        <span class="n">logp_grad</span><span class="p">:</span> <span class="n">LogLikeGrad</span><span class="p">,</span>
+        <span class="n">logp_nojit</span><span class="p">:</span> <span class="n">LogLikeFunc</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LogLikeFunc</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wraps the JAX functions and its gradient in Pytensor Ops.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            logp: A JAX function that represents the feed-forward operation of the</span>
+<span class="sd">                LAN network.</span>
+<span class="sd">            logp_grad: The derivative of the above function.</span>
+<span class="sd">            logp_nojit: A Jax function</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            An pytensor op that wraps the feed-forward operation and can be used with</span>
+<span class="sd">            pytensor.grad.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">class</span> <span class="nc">LogpOp</span><span class="p">(</span><span class="n">Op</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Wraps a JAX function in an pytensor Op.&quot;&quot;&quot;</span>
+
+            <span class="k">def</span> <span class="nf">make_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">dist_params</span><span class="p">):</span>
+                <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">pt</span><span class="o">.</span><span class="n">as_tensor_variable</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+                <span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">pt</span><span class="o">.</span><span class="n">as_tensor_variable</span><span class="p">(</span><span class="n">dist_param</span><span class="p">)</span> <span class="k">for</span> <span class="n">dist_param</span> <span class="ow">in</span> <span class="n">dist_params</span><span class="p">]</span>
+
+                <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">pt</span><span class="o">.</span><span class="n">scalar</span><span class="p">()]</span>
+
+                <span class="k">return</span> <span class="n">Apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">output_storage</span><span class="p">):</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;Performs the Apply node.</span>
+<span class="sd">                Args:</span>
+<span class="sd">                    inputs: This is a list of data from which the values stored in</span>
+<span class="sd">                        output_storage are to be computed using non-symbolic language.</span>
+<span class="sd">                    output_storage: This is a list of storage cells where the output</span>
+<span class="sd">                        is to be stored. A storage cell is a one-element list. It is</span>
+<span class="sd">                        forbidden to change the length of the list(s) contained in</span>
+<span class="sd">                        output_storage. There is one storage cell for each output of</span>
+<span class="sd">                        the Op.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">logp</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">)</span>
+                <span class="n">output_storage</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">output_grads</span><span class="p">):</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="n">lan_logp_grad_op</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">)</span>
+                <span class="n">output_gradient</span> <span class="o">=</span> <span class="n">output_grads</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">return</span> <span class="p">[</span>
+                    <span class="n">pytensor</span><span class="o">.</span><span class="n">gradient</span><span class="o">.</span><span class="n">grad_not_implemented</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                <span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">output_gradient</span> <span class="o">*</span> <span class="n">result</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
+
+        <span class="k">class</span> <span class="nc">LogpGradOp</span><span class="p">(</span><span class="n">Op</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Wraps the gradient opearation of a jax function in an pytensor op.&quot;&quot;&quot;</span>
+
+            <span class="k">def</span> <span class="nf">make_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">dist_params</span><span class="p">):</span>
+                <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">pt</span><span class="o">.</span><span class="n">as_tensor_variable</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+                <span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">pt</span><span class="o">.</span><span class="n">as_tensor_variable</span><span class="p">(</span><span class="n">dist_param</span><span class="p">)</span> <span class="k">for</span> <span class="n">dist_param</span> <span class="ow">in</span> <span class="n">dist_params</span><span class="p">]</span>
+                <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">inp</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+
+                <span class="k">return</span> <span class="n">Apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">):</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="n">logp_grad</span><span class="p">(</span><span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">*</span><span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
+                    <span class="n">outputs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+        <span class="n">lan_logp_op</span> <span class="o">=</span> <span class="n">LogpOp</span><span class="p">()</span>
+        <span class="n">lan_logp_grad_op</span> <span class="o">=</span> <span class="n">LogpGradOp</span><span class="p">()</span>
+
+        <span class="c1"># Unwraps the JAX function for sampling with JAX backend.</span>
+        <span class="nd">@jax_funcify</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">LogpOp</span><span class="p">)</span> <span class="c1"># Can fail in notebooks</span>
+        <span class="k">def</span> <span class="nf">logp_op_dispatch</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=W0612,W0613</span>
+            <span class="k">return</span> <span class="n">logp_nojit</span>
+
+        <span class="k">return</span> <span class="n">lan_logp_op</span>
+</pre></div>
+
+            </div>
+            <p>The likelihood class will come in handy when defining our <code>PyMC</code> model <a href="#pymc_model"> below </a>.</p>
+<p>We now construct simple forward functions for our networks (<code>lan_forward()</code>, <code>cpn_forward()</code>). We use the <code>make_forward_partial()</code> method of our previously defined <code>MLPJax</code> class.</p>
+<p>First we instantiate the networks in evaluation mode. The <code>make_forward_partial()</code> function then attaches our trained parameters to the usual Flax forward call (which takes in two arguments, the parameters and the model input) so that we can call <code>lan_forward()</code> and <code>cpn_forward()</code> with a single argument, the input data to be pushed through the respective network.</p>
+<p>As you can check above, the work is done by the <code>partial()</code> function.</p>
+<div class="hll"><pre><span></span><span class="c1"># Initialize LAN in evaluation mode</span>
+<span class="n">network_lan_eval</span> <span class="o">=</span> <span class="n">MLPJax</span><span class="p">(</span><span class="n">train</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                          <span class="n">train_output_type</span> <span class="o">=</span> <span class="s1">&#39;logprob&#39;</span><span class="p">)</span>
+
+<span class="c1"># Make jitted forward passes (with fixed weights)</span>
+<span class="n">lan_forward</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">network_lan_eval</span><span class="o">.</span><span class="n">make_forward_partial</span><span class="p">(</span><span class="n">state</span> <span class="o">=</span> <span class="n">ModelTrainerLAN</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+
+
+<span class="c1"># Initialize CPN in evaluation mode</span>
+<span class="n">network_cpn_eval</span> <span class="o">=</span> <span class="n">MLPJax</span><span class="p">(</span><span class="n">train</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                          <span class="n">train_output_type</span> <span class="o">=</span> <span class="s1">&#39;logits&#39;</span><span class="p">)</span>
+
+
+<span class="c1"># Make jitted forward passes (with fixed weights)</span>
+<span class="n">cpn_forward</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">network_cpn_eval</span><span class="o">.</span><span class="n">make_forward_partial</span><span class="p">(</span><span class="n">state</span> <span class="o">=</span> <span class="n">ModelTrainerCPN</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+</pre></div>
+<p>As a quick aside, to illustrate the performance of the Networks, we plot their behavior below.</p>
+<p>First, consider the LAN, which gives us choice / reaction time distributions directly. 
+We will vary the $v$ parameter to illustrate how the likelihood produced by the network varies in response.</p>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode7" aria-expanded="false" aria-controls="collapseibleCode7">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode7" class="collapse">
+                <div class="hll"><pre><span></span><span class="c1"># Loop over parameter configurations to plot</span>
+<span class="c1"># multiple LAN outputs</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mi">20</span><span class="p">):</span>
+    <span class="n">inp_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">inp_</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> <span class="c1"># v parameter --&gt; varies</span>
+    <span class="n">inp_</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="c1"># a parameter</span>
+    <span class="n">inp_</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="c1"># z parameter</span>
+    <span class="n">inp_</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="c1"># ndt parameter</span>
+    <span class="n">inp_</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span>
+                                 <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)])</span> <span class="c1"># rt</span>
+    <span class="n">inp_</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1000</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1000</span><span class="p">)])</span> <span class="c1"># choices</span>
+
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">inp_</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">inp_</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">lan_forward</span><span class="p">(</span><span class="n">inp_</span><span class="p">)),</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;LAN likelihood for varying v parameter&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Reaction Time&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Density&#39;</span><span class="p">)</span>
+</pre></div>
+
+            </div>
+            <p><img src="pymc_lans_blog_post_potential_54_0.png" alt="png"></p>
+<p>Next we consider the performance of the CPN which, remember, spits out choice probabilities only.
+In this plot we vary the $v$ parameter on the x-axis, and show how the choice probabilities produced by the network vary in reponse. This is repeated for multiple levels of the $z$ (or bias) parameter.</p>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode8" aria-expanded="false" aria-controls="collapseibleCode8">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode8" class="collapse">
+                <div class="hll"><pre><span></span><span class="c1"># Vary z in outer loop</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
+    <span class="n">dat_tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="n">dat_tmp</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span> <span class="c1"># vary v parameter</span>
+    <span class="n">dat_tmp</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="c1"># a</span>
+    <span class="n">dat_tmp</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> <span class="c1"># z</span>
+    <span class="n">dat_tmp</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span> <span class="c1"># ndt / t</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dat_tmp</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">cpn_forward</span><span class="p">(</span><span class="n">dat_tmp</span><span class="p">)),</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;CPN choice probabilities for varying z&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;v parameter value&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;P(choice = 1)&#39;</span><span class="p">)</span>
+</pre></div>
+
+            </div>
+            <p><img src="pymc_lans_blog_post_potential_56_1.png" alt="png"></p>
+<p>The outputs of the networks behave very regularly which is reassuring. To see if they match the real data generation process well, let's consider our previous figure on simulator behavior.</p>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode9" aria-expanded="false" aria-controls="collapseibleCode9">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode9" class="collapse">
+                <div class="hll"><pre><span></span><span class="n">parameter_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+<span class="c1"># vary the first parameter across rows (the &#39;v&#39; parameter in our case&#39;)</span>
+<span class="n">parameter_matrix</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+<span class="c1"># set the rest to the values used above</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="n">parameter_matrix</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameter_vector</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+<span class="c1"># Make Figure</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;DDM Simulations: vary v&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">simulation_data_tmp</span> <span class="o">=</span> <span class="n">simulator</span><span class="p">(</span><span class="n">model</span> <span class="o">=</span> <span class="s1">&#39;ddm&#39;</span><span class="p">,</span>
+                                <span class="n">theta</span> <span class="o">=</span> <span class="n">parameter_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span>
+                                <span class="n">n_samples</span> <span class="o">=</span> <span class="n">n_trajectories</span><span class="p">)</span>
+
+    <span class="c1"># LAN</span>
+    <span class="n">inp_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">inp_</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameter_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># v parameter --&gt; varies</span>
+    <span class="n">inp_</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameter_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="c1"># a parameter</span>
+    <span class="n">inp_</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameter_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="c1"># z parameter</span>
+    <span class="n">inp_</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameter_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="c1"># ndt parameter</span>
+    <span class="n">inp_</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span>
+                                 <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)])</span> <span class="c1"># rt</span>
+    <span class="n">inp_</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1000</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1000</span><span class="p">)])</span> <span class="c1"># choices</span>
+
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Reaction Times + Choices</span>
+            <span class="c1"># Simulator</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">simulation_data_tmp</span><span class="p">[</span><span class="s1">&#39;rts&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">simulation_data_tmp</span><span class="p">[</span><span class="s1">&#39;choices&#39;</span><span class="p">]),</span>
+                       <span class="n">histtype</span> <span class="o">=</span> <span class="s1">&#39;step&#39;</span><span class="p">,</span>
+                       <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>
+                       <span class="n">bins</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span>
+                       <span class="n">density</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                       <span class="p">)</span>
+
+            <span class="c1"># LAN</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">inp_</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">inp_</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">lan_forward</span><span class="p">(</span><span class="n">inp_</span><span class="p">)),</span> 
+                           <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span>
+
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;v = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">parameter_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">)))</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Reaction Times&#39;</span><span class="p">)</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Freq&#39;</span><span class="p">)</span>
+
+
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="c1"># Choice probabilities</span>
+            <span class="n">p_up</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">simulation_data_tmp</span><span class="p">[</span><span class="s1">&#39;choices&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mf">1.</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_trajectories</span>
+            <span class="n">choice_ps</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="n">p_up</span><span class="p">,</span> <span class="n">p_up</span><span class="p">]</span>
+
+            <span class="c1"># Simulator</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">bar</span><span class="p">([</span><span class="s1">&#39;choice = -1&#39;</span><span class="p">,</span> <span class="s1">&#39;choice = 1&#39;</span><span class="p">],</span> <span class="n">choice_ps</span><span class="p">,</span> <span class="n">fill</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="c1"># CPN</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">([</span><span class="s1">&#39;choice = -1&#39;</span><span class="p">,</span> <span class="s1">&#39;choice = 1&#39;</span><span class="p">],</span> 
+                              <span class="p">[(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">cpn_forward</span><span class="p">(</span><span class="n">parameter_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]))),</span> 
+                               <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">cpn_forward</span><span class="p">(</span><span class="n">parameter_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]))],</span>
+                              <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span>
+
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Probability&#39;</span><span class="p">)</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+            </div>
+            <p><img src="networks_vs_simulation.png" alt="png"></p>
+<p>As we can see, the network outputs (shown in <span style="color:blue">  blue </span> ) follow the simulation data very well.</p>
+<p><strong>NOTE:</strong></p>
+<p>We emphasize that for serious applications we are better served using a much <em>larger training data set</em>. The scale of the simulation run here was chosen to make running the code in this blog-post feasible on local machines in a reasonable amount of time.</p>
+<h3 id="plug-the-custom-likelihoods-into-a-pymc-model-a-class-anchor-id-pymc-model/a">Plug the custom likelihoods into a PyMC model <a class="anchor" id="pymc_model"></a></h3><p>Now the hard work in the previous section culminates into actual results. We are able to construct our <a href="https://www.pymc.io/welcome.html">PyMC</a> model by assembling the pieces we built in the previous sections. We instantiate our LAN and CPN based <em>likelihood ops</em> using the methods defined in our <code>NetworkLike</code> class.  First, we define simple like likelihood functions via the <code>make_logp_jax_funcs()</code> method, then we construct the actual <a href="https://pytensor.readthedocs.io/en/latest/">PyTensor</a> <code>LogOp</code>'s, which will be used directly in the <a href="https://www.pymc.io/welcome.html">PyMC</a> model below.</p>
+<div class="hll"><pre><span></span><span class="c1"># Instantiate LAN logp functions</span>
+<span class="n">lan_logp_jitted</span><span class="p">,</span> <span class="n">lan_logp_grad_jitted</span><span class="p">,</span> <span class="n">lan_logp</span> <span class="o">=</span> <span class="n">NetworkLike</span><span class="o">.</span><span class="n">make_logp_jax_funcs</span><span class="p">(</span>
+                                                                                                 <span class="n">model</span> <span class="o">=</span> <span class="n">lan_forward</span><span class="p">,</span>
+                                                                                                 <span class="n">n_params</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+                                                                                                 <span class="n">kind</span> <span class="o">=</span> <span class="s2">&quot;lan&quot;</span><span class="p">)</span>
+
+<span class="c1"># Turn into logp op</span>
+<span class="n">lan_logp_op</span> <span class="o">=</span> <span class="n">NetworkLike</span><span class="o">.</span><span class="n">make_jax_logp_ops</span><span class="p">(</span>
+                                <span class="n">logp</span> <span class="o">=</span> <span class="n">lan_logp_jitted</span><span class="p">,</span>
+                                <span class="n">logp_grad</span> <span class="o">=</span> <span class="n">lan_logp_grad_jitted</span><span class="p">,</span>
+                                <span class="n">logp_nojit</span> <span class="o">=</span> <span class="n">lan_logp</span><span class="p">)</span>
+
+<span class="c1"># Instantiate CPN logp functions</span>
+<span class="n">cpn_logp_jitted</span><span class="p">,</span> <span class="n">cpn_logp_grad_jitted</span><span class="p">,</span> <span class="n">cpn_logp</span> <span class="o">=</span> <span class="n">NetworkLike</span><span class="o">.</span><span class="n">make_logp_jax_funcs</span><span class="p">(</span>
+                                                                                                    <span class="n">model</span> <span class="o">=</span> <span class="n">cpn_forward</span><span class="p">,</span>
+                                                                                                    <span class="n">n_params</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+                                                                                                    <span class="n">kind</span> <span class="o">=</span> <span class="s2">&quot;cpn&quot;</span><span class="p">)</span>
+
+<span class="c1"># Turn into logp op</span>
+<span class="n">cpn_logp_op</span> <span class="o">=</span> <span class="n">NetworkLike</span><span class="o">.</span><span class="n">make_jax_logp_ops</span><span class="p">(</span>
+                                <span class="n">logp</span> <span class="o">=</span> <span class="n">cpn_logp_jitted</span><span class="p">,</span>
+                                <span class="n">logp_grad</span> <span class="o">=</span> <span class="n">cpn_logp_grad_jitted</span><span class="p">,</span>
+                                <span class="n">logp_nojit</span> <span class="o">=</span> <span class="n">cpn_logp</span><span class="p">)</span>
+</pre></div>
+<p>Finally, let's define a function that constructs our <code>PyMC</code> model for us. Note how we use our <em>likelihood ops</em>, the <code>lan_logp_op()</code> and the <code>cpn_logp_op()</code> respectively to define two <code>pm.Potential()</code> functions. You can learn more about <code>pm.Potential()</code> in the <a href="https://www.pymc.io/projects/docs/en/stable/api/generated/pymc.Potential.html">docs</a>, and more connected to <em>blackbox likelihoods</em>, in <a href="https://www.pymc.io/projects/examples/en/latest/case_studies/blackbox_external_likelihood_numpy.html">this helpful basic tutorial</a>.</p>
+<div class="hll"><pre><span></span><span class="k">def</span> <span class="nf">construct_pymc_model</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Construct our PyMC model given a dataset.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Data preprocessing:</span>
+    <span class="c1"># We expect three columns [rt, choice, condition(go or nogo)]</span>
+    <span class="c1"># We split the data according to whether the choice is go or nogo</span>
+    <span class="n">data_nogo</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">choice</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:][</span><span class="s1">&#39;is_go_trial&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">data_go</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">choice</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">ddm</span><span class="p">:</span>
+        <span class="c1"># Define simple Uniform priors</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+
+        <span class="n">pm</span><span class="o">.</span><span class="n">Potential</span><span class="p">(</span><span class="s2">&quot;choice_rt&quot;</span><span class="p">,</span> <span class="n">lan_logp_op</span><span class="p">(</span><span class="n">data_go</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
+        <span class="n">pm</span><span class="o">.</span><span class="n">Potential</span><span class="p">(</span><span class="s2">&quot;choice_only&quot;</span><span class="p">,</span> <span class="n">cpn_logp_op</span><span class="p">(</span><span class="n">data_nogo</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">ddm</span>
+</pre></div>
+<h3 id="inference-example-a-class-anchor-id-inference-example/a">Inference example <a class="anchor" id="inference_example"></a></h3><p>We are nearing the end of this blog-post (promised). All that remains is to simply <em>try it out</em>. 
+At this point we can simulate some synthetic <a href="https://www.nature.com/articles/nature12486">Neuroracer</a> experiment data, fire up our newly designed PyMC model and run our MCMC sampler for parameter inference.</p>
+<p>We pick a set of parameters, and following our modeling assumptions, we apply <span> $v_{NoGo} = (-1)*v_{Go}$ </span> for the trials we assign to the NoGo condition.</p>
+<div class="hll"><pre><span></span><span class="c1"># Let&#39;s make some data </span>
+<span class="kn">from</span> <span class="nn">ssms.basic_simulators</span> <span class="kn">import</span> <span class="n">simulator</span>
+<span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+              <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span>
+              <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+              <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">}</span>
+
+<span class="n">parameters_go</span> <span class="o">=</span> <span class="p">[</span><span class="n">parameters</span><span class="p">[</span><span class="n">key_</span><span class="p">]</span> <span class="k">for</span> <span class="n">key_</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+<span class="n">parameters_nogo</span> <span class="o">=</span> <span class="p">[</span><span class="n">parameters</span><span class="p">[</span><span class="n">key_</span><span class="p">]</span> <span class="k">if</span> <span class="n">key_</span> <span class="o">!=</span> <span class="s1">&#39;v&#39;</span> <span class="k">else</span> <span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">parameters</span><span class="p">[</span><span class="n">key_</span><span class="p">])</span> <span class="k">for</span> <span class="n">key_</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+
+<span class="c1"># Run simulations for each condition (go, nogo)</span>
+<span class="n">sim_go</span> <span class="o">=</span> <span class="n">simulator</span><span class="p">(</span><span class="n">theta</span> <span class="o">=</span> <span class="n">parameters_go</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="s1">&#39;ddm&#39;</span><span class="p">,</span> <span class="n">n_samples</span> <span class="o">=</span> <span class="mi">500</span><span class="p">)</span> 
+<span class="n">sim_nogo</span> <span class="o">=</span> <span class="n">simulator</span><span class="p">(</span><span class="n">theta</span> <span class="o">=</span> <span class="n">parameters_nogo</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="s1">&#39;ddm&#39;</span><span class="p">,</span> <span class="n">n_samples</span> <span class="o">=</span> <span class="mi">500</span><span class="p">)</span>
+
+<span class="c1"># Process data and add a column that signifies whether the trial,</span>
+<span class="c1"># belongs to a go (1) or nogo (-1) condition</span>
+<span class="n">data_go_condition</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">sim_go</span><span class="p">[</span><span class="s1">&#39;rts&#39;</span><span class="p">],</span> <span class="n">sim_go</span><span class="p">[</span><span class="s1">&#39;choices&#39;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">500</span><span class="p">,</span> <span class="mi">1</span><span class="p">))])</span>
+<span class="n">data_nogo_condition</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">sim_nogo</span><span class="p">[</span><span class="s1">&#39;rts&#39;</span><span class="p">],</span> <span class="n">sim_nogo</span><span class="p">[</span><span class="s1">&#39;choices&#39;</span><span class="p">],</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">500</span><span class="p">,</span> <span class="mi">1</span><span class="p">))])</span>
+
+<span class="c1"># Stack the two datasets and turn into DataFrame</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">data_go_condition</span><span class="p">,</span> <span class="n">data_nogo_condition</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">data_pd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;rt&#39;</span><span class="p">,</span> <span class="s1">&#39;choice&#39;</span><span class="p">,</span> <span class="s1">&#39;is_go_trial&#39;</span><span class="p">])</span>
+</pre></div>
+<p>Our dataset at hand, we can now intiate the PyMC model.</p>
+<div class="hll"><pre><span></span><span class="n">ddm_blog</span> <span class="o">=</span> <span class="n">construct_pymc_model</span><span class="p">(</span><span class="n">data_pd</span><span class="p">)</span>
+</pre></div>
+<p>Let's visualize the model structure.</p>
+<div class="hll"><pre><span></span><span class="n">pm</span><span class="o">.</span><span class="n">model_to_graphviz</span><span class="p">(</span><span class="n">ddm_blog</span><span class="p">)</span>
+</pre></div>
+<p><img src="pymc_lans_blog_post_potential_69_0.svg" alt="svg"></p>
+<p>The graphical model nicely illustrates how we handle the Go choices and NoGo choice via separate likelihod objects, while our basic parameters feed into both of these.</p>
+<p>Note that we don't fit the $z$ parameter here, which is to avoid known issues with parameter identifiability in case it was included.</p>
+<p>We are now ready to sample...</p>
+<div class="hll"><pre><span></span><span class="kn">from</span> <span class="nn">pymc.sampling</span> <span class="kn">import</span> <span class="n">jax</span> <span class="k">as</span> <span class="n">pmj</span>
+
+<span class="c1"># Just to keep the blog-post pretty automatically</span>
+<span class="kn">import</span> <span class="nn">warnings</span> 
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">ddm_blog</span><span class="p">:</span>
+    <span class="n">ddm_blog_traces_numpyro</span> <span class="o">=</span> <span class="n">pmj</span><span class="o">.</span><span class="n">sample_numpyro_nuts</span><span class="p">(</span>
+            <span class="n">chains</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">draws</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">chain_method</span><span class="o">=</span><span class="s2">&quot;vectorized&quot;</span>
+            <span class="p">)</span>
+</pre></div>
+<pre><code>Compiling...
+Compilation time =  0:00:08.502226
+Sampling...
+
+
+sample: 100%|██████████| 2500/2500 [00:17&lt;00:00, 140.40it/s]
+
+
+Sampling time =  0:01:03.744460
+Transforming variables...
+Transformation time =  0:00:01.292058
+</code></pre>
+<p>As a last step we can check our posterior distributions. Did all of this actually work out?</p>
+<p><strong>NOTE:</strong></p>
+<p>The posterior mass here may be somewhat off the mark when comparing to the ground truth parameters. While this hints at a calibration issue, it was conscious approach to trade-off on precision to avoid potentially very long runtimes for this tutorial. We can in general improve the performance of our neural network by training on much more synthetic data (which in real applications is advisable). This would however make running this notebook very cumbersome, which we in turn encourage you to try!</p>
+<div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">arviz</span> <span class="k">as</span> <span class="nn">az</span>
+<span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span><span class="p">(</span><span class="n">ddm_blog_traces_numpyro</span><span class="p">,</span>
+                  <span class="n">kind</span> <span class="o">=</span> <span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+                  <span class="o">**</span><span class="p">{</span><span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> 
+                     <span class="s1">&#39;histtype&#39;</span><span class="p">:</span> <span class="s1">&#39;step&#39;</span><span class="p">},</span>
+                  <span class="n">ref_val</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;ref_val&#39;</span><span class="p">:</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;v&#39;</span><span class="p">]}],</span>
+                             <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;ref_val&#39;</span><span class="p">:</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]}],</span>
+                             <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;ref_val&#39;</span><span class="p">:</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]}]</span>
+                            <span class="p">},</span>
+                  <span class="n">ref_val_color</span> <span class="o">=</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+</pre></div>
+<pre><code>array([&lt;Axes: title={'center': 'v'}&gt;, &lt;Axes: title={'center': 'a'}&gt;,
+       &lt;Axes: title={'center': 't'}&gt;], dtype=object)
+</code></pre>
+<p><img src="pymc_lans_blog_post_potential_73_1.png" alt="png"></p>
+<p>A somewhat long but hopefully rewarding tutorial is hereby finished. We hope you see some potential in this approach. Many <em>extensions</em> are possible, from the <em>choice of neural network architectures</em> to the <em>structure of the <a href="https://www.pymc.io/welcome.html">PyMC</a> model</em> a plethora of options arise. As a lowest bar, we hope that this may serve you as another take on a tutorial concerning custom distributions in <a href="https://www.pymc.io/welcome.html">PyMC</a>.</p>
+<p>For related tutorials check out:</p>
+<ol>
+<li><p><a href="https://www.pymc.io/projects/examples/en/latest/case_studies/blackbox_external_likelihood_numpy.html">Building blackbox likelihood functions</a></p>
+</li>
+<li><p><a href="https://www.pymc.io/projects/examples/en/latest/howto/custom_distribution.html">Working with custom distributions</a></p>
+</li>
+<li><p><a href="https://www.pymc.io/projects/examples/en/latest/case_studies/wrapping_jax_function.html">Wrapping jax functions into PyTensor Ops</a></p>
+</li>
+<li><p><a href="https://www.pymc-labs.io/blog-posts/jax-functions-in-pymc-3-quick-examples/">ODEs, Bayesian Neural Nets with Flax and PyMC</a></p>
+</li>
+</ol>
+
+	<!--THIS IS THE FOOTER OF THE BLOGPSOT-->
+	<hr> 
+		<!--div class="container"-->
+			<h2 class="font-roboto">Work with PyMC Labs</h2>
+			<p>If you are interested in seeing what we at PyMC Labs can do for you, then please email <a href="mailto:info@pymc-labs.io">info@pymc-labs.io</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity.
+
+We also run <a href="https://www.pymc-labs.io/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics.
+			</p>
+		<!--/div-->
+    
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+
+        </div>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+            integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+            crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+            <div class="container">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-twitter"
+                                    aria-hidden="true"></i>
+                                Twitter</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-github"
+                                    aria-hidden="true"></i>
+                                GitHub</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-linkedin"
+                                    aria-hidden="true"></i>
+                                LinkedIn</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-youtube"
+                                    aria-hidden="true"></i>
+                                YouTube</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-meetup"
+                                    aria-hidden="true"></i>
+                                Meetup</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                    aria-hidden="true"></i>
+                                Newsletter</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+    </body>
+
+</html>

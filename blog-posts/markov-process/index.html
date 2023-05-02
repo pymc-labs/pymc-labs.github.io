@@ -1,0 +1,2950 @@
+<!doctype html><html lang="en">
+
+    <head>
+        
+
+        <style media="screen">
+            body {
+                padding-top: 70px;
+                padding-bottom: 70px;
+            }
+
+        </style>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+            <link rel="stylesheet" href="../../static/css/style.css?h=70597643">
+
+        <link rel="stylesheet" href="../../static/custom_styles.css?h=e75d7755">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+
+        <!-- Extra meta tags: social site cards, browser icons... -->
+        <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+        <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+        <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+        <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+        <title>Estimating a Candidate&#39;s Popularity over Time with Gaussian Processes - PyMC Labs</title>
+        <meta name="twitter:card" content="summary">
+        <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/markov-process/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Estimating a Candidate&#39;s Popularity over Time with Gaussian Processes - PyMC Labs" />
+        <meta property="og:description" content="Estimate French presidents&#39; popularity across time with a Markov model" />
+        <meta property="og:image" content="https://pymc-labs.github.io/blog-posts/markov-process/cover.png" />
+
+        <!-- Highlight.js for syntax highlighting -->
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+        <!-- <script>hljs.highlightAll();</script> -->
+
+        <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+        <!-- We use this to do syntax highlighting -->
+        <link rel="stylesheet" href="../../static/pygments.css">
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+        </script>
+        
+<script src="../../static/scripts/toggle_code.js?h=3a00c72f" defer></script>
+
+    </head>
+
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <div class="container">
+                <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+                <a class="navbar-brand" href="/"><img class="navbar-logo"
+                        src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                    aria-hidden="true"></i>
+                                What we do</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                    aria-hidden="true"></i>
+                                Products</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                    aria-hidden="true"></i>
+                                Team</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                    aria-hidden="true"></i>
+                                Clients</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                    aria-hidden="true"></i>
+                                Workshops</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                    aria-hidden="true"></i>
+                                Blog</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container">
+            
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+        <h2 class="font-roboto">Estimating a Candidate&#39;s Popularity over Time with Gaussian Processes</h2>
+        
+        <p class="mb-2 text-muted">Estimate French presidents&#39; popularity across time with a Markov model</p>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-6 author_name">
+                <small class="text-muted">AUTHORED BY</small>
+                <p class="font-bold">
+                    
+
+
+
+    
+
+
+
+    
+        Alexandre Andorra and Rémi Louf
+    
+
+
+
+                </p>
+            </div>
+            <div class="col-md-6 author_date">
+                <!-- <p>2021-05-26</p> -->
+                
+<small class="text-muted">DATE</small>
+<p class="font-lighter">2021-05-26</p>
+
+<!--<div class="cover-blogposts"><img src="../../static/images/blog_post/cover.jpg?h=653e9b57"></div>-->
+
+            </div>
+        
+	    <div class="blog-cover-container">
+	   	 <img class="cover-blogposts" src="cover.png">
+	    
+	    </div>
+        
+	</div>
+        <hr> <p>A few months ago,
+<a href="https://alexandorra.github.io/pollsposition_blog/popularity/macron/gaussian%20processes/polls/2021/01/18/gp-popularity.html">I experimented with a Gaussian Process</a>
+to estimate the popularity of French presidents across time.
+The experiment was really positive,
+and helped me get familiar with the beauty of GPs.
+This time, I teamed up with <a href="https://twitter.com/remilouf">Rémi Louf</a>
+on a <a href="https://en.wikipedia.org/wiki/Markov_chain">Markov Chain</a> model
+to estimate the same process -- what is the true latent popularity,
+given that we only observe through the noisy data that are polls?</p>
+<p>This was supposed to be a trial run before working on an electoral model
+for the coming regional elections in France --
+it's always easier to start with 2 dimensions than 6, right?
+But the model turned out to be so good at smoothing
+and predicting popularity data that we thought it'd be a shame not to share it.
+And voilà!</p>
+<h2 id="show-me-the-data">Show me the data!</h2><p>The data are the same as in <a href="https://alexandorra.github.io/pollsposition_blog/popularity/macron/gaussian%20processes/polls/2021/01/18/gp-popularity.html">my GP post</a>,
+so we're not going to spend a lot of time explaining them.
+It's basically all the popularity opinion polls
+of French presidents since the term limits switched to 5 years (in 2002).</p>
+<p>Let's import those data, as well as the (fabulous) packages we'll need:</p>
+<div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">datetime</span>
+
+<span class="kn">import</span> <span class="nn">arviz</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pymc3</span> <span class="k">as</span> <span class="nn">pm</span>
+<span class="kn">import</span> <span class="nn">theano.tensor</span> <span class="k">as</span> <span class="nn">aet</span>
+<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">expit</span> <span class="k">as</span> <span class="n">logistic</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+    <span class="s2">&quot;https://raw.githubusercontent.com/AlexAndorra/pollsposition_models/master/data/raw_popularity_presidents.csv&quot;</span><span class="p">,</span>
+    <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">parse_dates</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+<p>The number of polls is homogeneous among months, except in the summer because, well, France:</p>
+<div class="hll"><pre><span></span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+</pre></div>
+<pre><code>1     100
+2      96
+3     100
+4      89
+5      91
+6      95
+7      68
+8      71
+9      94
+10     99
+11     98
+12     82
+Name: month, dtype: int64
+</code></pre>
+<p>Let us look at simple stats on the pollsters:</p>
+<div class="hll"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">sondage</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="n">margins</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Face to face</th>
+      <th>Internet</th>
+      <th>Phone</th>
+      <th>Phone&internet</th>
+      <th>All</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>BVA</td>
+      <td>0</td>
+      <td>101</td>
+      <td>89</td>
+      <td>0</td>
+      <td>190</td>
+    </tr>
+    <tr>
+      <td>Elabe</td>
+      <td>0</td>
+      <td>52</td>
+      <td>0</td>
+      <td>0</td>
+      <td>52</td>
+    </tr>
+    <tr>
+      <td>Harris</td>
+      <td>0</td>
+      <td>33</td>
+      <td>0</td>
+      <td>0</td>
+      <td>33</td>
+    </tr>
+    <tr>
+      <td>Ifop</td>
+      <td>0</td>
+      <td>29</td>
+      <td>181</td>
+      <td>38</td>
+      <td>248</td>
+    </tr>
+    <tr>
+      <td>Ipsos</td>
+      <td>0</td>
+      <td>40</td>
+      <td>177</td>
+      <td>0</td>
+      <td>217</td>
+    </tr>
+    <tr>
+      <td>Kantar</td>
+      <td>208</td>
+      <td>4</td>
+      <td>0</td>
+      <td>0</td>
+      <td>212</td>
+    </tr>
+    <tr>
+      <td>Odoxa</td>
+      <td>0</td>
+      <td>67</td>
+      <td>0</td>
+      <td>0</td>
+      <td>67</td>
+    </tr>
+    <tr>
+      <td>OpinionWay</td>
+      <td>0</td>
+      <td>12</td>
+      <td>0</td>
+      <td>0</td>
+      <td>12</td>
+    </tr>
+    <tr>
+      <td>Viavoice</td>
+      <td>0</td>
+      <td>20</td>
+      <td>0</td>
+      <td>0</td>
+      <td>20</td>
+    </tr>
+    <tr>
+      <td>YouGov</td>
+      <td>0</td>
+      <td>32</td>
+      <td>0</td>
+      <td>0</td>
+      <td>32</td>
+    </tr>
+    <tr>
+      <td>All</td>
+      <td>208</td>
+      <td>390</td>
+      <td>447</td>
+      <td>38</td>
+      <td>1083</td>
+    </tr>
+  </tbody>
+</table><p>Interesting: most pollsters only use one method -- internet.
+Only BVA, Ifop, Ipsos (and Kantar very recently) use different methods.
+So, if we naively estimate the biases of pollsters and methods individually,
+we'll get high correlations in our posterior estimates --
+the parameter for <code>face to face</code>
+will basically be the one for <code>Kantar</code>, and vice versa.
+So we will need to model the pairs <code>(pollster, method)</code>
+rather than pollsters and methods individually.</p>
+<p>Now, let's just plot the raw data and see what they look like:</p>
+<div class="hll"><pre><span></span><span class="n">approval_rates</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;p_approve&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="n">disapproval_rates</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;p_disapprove&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="n">doesnotrespond</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">approval_rates</span> <span class="o">-</span> <span class="n">disapproval_rates</span>
+<span class="n">newterm_dates</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;president&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()[</span><span class="s2">&quot;index&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="n">dates</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">rate</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+    <span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
+    <span class="p">[</span><span class="n">approval_rates</span><span class="p">,</span> <span class="n">doesnotrespond</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">&quot;Approve&quot;</span><span class="p">,</span> <span class="s2">&quot;No answer&quot;</span><span class="p">],</span>
+<span class="p">):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">rate</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">date</span> <span class="ow">in</span> <span class="n">newterm_dates</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+</pre></div>
+<p><img src="output_11_0.png" alt="png"></p>
+<p>We notice two things when looking at these plots:</p>
+<ol>
+<li>Approval rates systematically decrease as the goes on.</li>
+<li>While that's true, some events seem to push the approval rate back up,
+even though temporarily.
+This happened in every term, actually.
+Can that variance really be explained solely with a random walk?</li>
+<li>Non-response rate is higher during Macron's term.</li>
+</ol>
+<h2 id="monthly-standard-deviation">Monthly standard deviation</h2><p>Something that often proves challenging with count data
+is that they are often more dispersed
+than traditional models expect them to be.
+Let's check this now,
+by computing the monthly standard deviation of the approval rates
+(we weigh each poll equally,
+even though we probably should weigh them
+according to their respective sample size):</p>
+<div class="hll"><pre><span></span><span class="n">rolling_std</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">])</span>
+    <span class="o">.</span><span class="n">std</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">reset_index</span><span class="p">()[[</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">,</span> <span class="s2">&quot;p_approve&quot;</span><span class="p">]]</span>
+<span class="p">)</span>
+<span class="n">rolling_std</span>
+</pre></div>
+<div class="dfdiv">
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>year</th>
+      <th>month</th>
+      <th>p_approve</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2002</td>
+      <td>5</td>
+      <td>0.017078</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2002</td>
+      <td>6</td>
+      <td>0.030000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2002</td>
+      <td>7</td>
+      <td>0.005774</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2002</td>
+      <td>8</td>
+      <td>0.045826</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2002</td>
+      <td>9</td>
+      <td>0.025166</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>223</th>
+      <td>2020</td>
+      <td>12</td>
+      <td>0.064627</td>
+    </tr>
+    <tr>
+      <th>224</th>
+      <td>2021</td>
+      <td>1</td>
+      <td>0.042661</td>
+    </tr>
+    <tr>
+      <th>225</th>
+      <td>2021</td>
+      <td>2</td>
+      <td>0.041748</td>
+    </tr>
+    <tr>
+      <th>226</th>
+      <td>2021</td>
+      <td>3</td>
+      <td>0.042980</td>
+    </tr>
+    <tr>
+      <th>227</th>
+      <td>2021</td>
+      <td>4</td>
+      <td>0.020000</td>
+    </tr>
+  </tbody>
+</table>
+<p>228 rows × 3 columns</p>
+</div><div class="hll"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span>
+        <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">m</span><span class="si">}</span><span class="s2">-01&quot;</span> <span class="k">for</span> <span class="n">y</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rolling_std</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">rolling_std</span><span class="o">.</span><span class="n">month</span><span class="p">)]</span>
+    <span class="p">),</span>
+    <span class="n">rolling_std</span><span class="o">.</span><span class="n">p_approve</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+    <span class="s2">&quot;o&quot;</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Monthly standard deviation in polls&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">date</span> <span class="ow">in</span> <span class="n">newterm_dates</span><span class="p">:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+</pre></div>
+<p><img src="output_15_0.png" alt="png"></p>
+<p>There is a very high variance for Chirac's second term,
+and for the beggining of Macron's term.
+For Chirac's term, it seems like the difference stems from the polling method:
+face-to-face approval rates seem to be much lower,
+as you can see in the figure below.
+For Macron, this high variance is quite hard to explain.
+In any case, we'll probably have to take this overdispersion
+(as it's called in statistical linguo) of the data in our models...</p>
+<div class="hll"><pre><span></span><span class="n">face</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;method&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;face to face&quot;</span><span class="p">]</span>
+<span class="n">dates_face</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">index</span>
+
+<span class="n">other</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;method&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;face to face&quot;</span><span class="p">]</span>
+<span class="n">dates_other</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">index</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dates_face</span><span class="p">,</span> <span class="n">face</span><span class="p">[</span><span class="s2">&quot;p_approve&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;face to face&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dates_other</span><span class="p">,</span> <span class="n">other</span><span class="p">[</span><span class="s2">&quot;p_approve&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;other&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Does approve&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Raw approval polls&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">date</span> <span class="ow">in</span> <span class="n">newterm_dates</span><span class="p">:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+</pre></div>
+<p><img src="output_17_0.png" alt="png"></p>
+<h2 id="a-raw-analysis-of-bias">A raw analysis of bias</h2><p>As each pollster uses different methods
+to establish and question their samples each month,
+we don't expect their results to be identical --
+<em>that</em> would be troubling.
+Instead we expect each pollster and each polling method to be
+at a different place on the spectrum: some report popularity rates
+in line with the market average, some are below average, some are above.</p>
+<p>The model will be able to estimate this bias on the fly
+and more seriously (if we tell it to),
+but let's take a look at a crude estimation ourselves, to get a first idea.
+Note that we're talking about <em>statistical</em> bias here, not <em>political</em> bias:
+it's very probable that reaching out to people
+only by internet or phone
+can have a <a href="https://en.wikipedia.org/wiki/Selection_bias">selection effect</a> on your sample,
+without it being politically motivated --
+statistics are just hard and stubborn you know 🤷‍♂️</p>
+<p>To investigate bias,
+we now compute the monthly mean of the $p_{approve}$ values
+and check how each individual poll strayed from this mean:</p>
+<div class="hll"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">])[</span><span class="s2">&quot;p_approve&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(),</span>
+        <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">],</span>
+        <span class="n">suffixes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;_mean&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="s2">&quot;field_date&quot;</span><span class="p">})</span>
+<span class="p">)</span>
+<span class="n">data</span><span class="p">[</span><span class="s2">&quot;diff_approval&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;p_approve&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;p_approve_mean&quot;</span><span class="p">]</span>
+<span class="n">data</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+<div class="dfdiv">
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>field_date</th>
+      <th>president</th>
+      <th>sondage</th>
+      <th>samplesize</th>
+      <th>method</th>
+      <th>p_approve</th>
+      <th>p_disapprove</th>
+      <th>year</th>
+      <th>month</th>
+      <th>p_approve_mean</th>
+      <th>diff_approval</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2002-05-15</td>
+      <td>chirac2</td>
+      <td>Ifop</td>
+      <td>924</td>
+      <td>phone</td>
+      <td>0.51</td>
+      <td>0.44</td>
+      <td>2002</td>
+      <td>5</td>
+      <td>0.50</td>
+      <td>0.01</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2002-05-20</td>
+      <td>chirac2</td>
+      <td>Kantar</td>
+      <td>972</td>
+      <td>face to face</td>
+      <td>0.50</td>
+      <td>0.48</td>
+      <td>2002</td>
+      <td>5</td>
+      <td>0.50</td>
+      <td>-0.00</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2002-05-23</td>
+      <td>chirac2</td>
+      <td>BVA</td>
+      <td>1054</td>
+      <td>phone</td>
+      <td>0.52</td>
+      <td>0.37</td>
+      <td>2002</td>
+      <td>5</td>
+      <td>0.50</td>
+      <td>0.02</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2002-05-26</td>
+      <td>chirac2</td>
+      <td>Ipsos</td>
+      <td>907</td>
+      <td>phone</td>
+      <td>0.48</td>
+      <td>0.48</td>
+      <td>2002</td>
+      <td>5</td>
+      <td>0.50</td>
+      <td>-0.02</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2002-06-16</td>
+      <td>chirac2</td>
+      <td>Ifop</td>
+      <td>974</td>
+      <td>phone</td>
+      <td>0.49</td>
+      <td>0.43</td>
+      <td>2002</td>
+      <td>6</td>
+      <td>0.50</td>
+      <td>-0.02</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>1078</th>
+      <td>2021-03-29</td>
+      <td>macron</td>
+      <td>Kantar</td>
+      <td>1000</td>
+      <td>internet</td>
+      <td>0.36</td>
+      <td>0.58</td>
+      <td>2021</td>
+      <td>3</td>
+      <td>0.38</td>
+      <td>-0.02</td>
+    </tr>
+    <tr>
+      <th>1079</th>
+      <td>2021-03-30</td>
+      <td>macron</td>
+      <td>YouGov</td>
+      <td>1068</td>
+      <td>internet</td>
+      <td>0.30</td>
+      <td>0.61</td>
+      <td>2021</td>
+      <td>3</td>
+      <td>0.38</td>
+      <td>-0.08</td>
+    </tr>
+    <tr>
+      <th>1080</th>
+      <td>2021-04-07</td>
+      <td>macron</td>
+      <td>Elabe</td>
+      <td>1003</td>
+      <td>internet</td>
+      <td>0.33</td>
+      <td>0.63</td>
+      <td>2021</td>
+      <td>4</td>
+      <td>0.35</td>
+      <td>-0.02</td>
+    </tr>
+    <tr>
+      <th>1081</th>
+      <td>2021-04-10</td>
+      <td>macron</td>
+      <td>Ipsos</td>
+      <td>1002</td>
+      <td>internet</td>
+      <td>0.37</td>
+      <td>0.58</td>
+      <td>2021</td>
+      <td>4</td>
+      <td>0.35</td>
+      <td>0.02</td>
+    </tr>
+    <tr>
+      <th>1082</th>
+      <td>2021-04-26</td>
+      <td>macron</td>
+      <td>Kantar</td>
+      <td>1000</td>
+      <td>internet</td>
+      <td>0.35</td>
+      <td>0.58</td>
+      <td>2021</td>
+      <td>4</td>
+      <td>0.35</td>
+      <td>0.00</td>
+    </tr>
+  </tbody>
+</table>
+<p>1083 rows × 11 columns</p>
+</div><p>Then, we can aggregate these offsets by pollster and look at their distributions:</p>
+<div class="hll"><pre><span></span><span class="n">POLLSTER_VALS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">pollster</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;sondage&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">pollster</span><span class="p">][</span><span class="s2">&quot;diff_approval&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="k">for</span> <span class="n">pollster</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">POLLSTERS</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="n">colors</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;axes.prop_cycle&quot;</span><span class="p">]()</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">nrows</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">pollster</span><span class="p">,</span> <span class="n">vals</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">POLLSTER_VALS</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">colors</span><span class="p">)[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">pollster</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$p_</span><span class="si">{approve}</span><span class="s2"> - \bar</span><span class="si">{p}</span><span class="s2">_</span><span class="si">{approve}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">25</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_21_0.png" alt="png"></p>
+<p>A positive (resp. negative) bias means
+the pollster tends to report higher (resp. lower) popularity rates
+than the average pollster.
+We'll see what the model has to say about this,
+but our prior is that, for instance,
+YouGov and Kantar tend to be below average,
+while Harris and BVA tend to be higher.</p>
+<p>And now for the bias per method:</p>
+<div class="hll"><pre><span></span><span class="n">METHOD_VALS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">method</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;method&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">method</span><span class="p">][</span><span class="s2">&quot;diff_approval&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;method&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+<span class="p">}</span>
+
+<span class="n">colors</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;axes.prop_cycle&quot;</span><span class="p">]()</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">method</span><span class="p">,</span> <span class="n">vals</span> <span class="ow">in</span> <span class="n">METHOD_VALS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">colors</span><span class="p">)[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$p_+ - \bar</span><span class="si">{p}</span><span class="s2">_{+}$&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</pre></div>
+<p><img src="output_23_0.png" alt="png"></p>
+<p>Face-to-face polls seem to give systematically below-average approval rates,
+while telephone polls seem to give slightly higher-than-average results.</p>
+<p>Again, keep in mind that there is
+substantial correlation between pollsters and method,
+so take this with a grain of salt --
+that's why it's useful to add that to the model actually:
+it will be able to decipher these correlations,
+integrate them into the full data generating process,
+and report finer estimates of each bias.</p>
+<p>Speaking of models, do you know what time it is? It's model time, of course!!</p>
+<h2 id="specifying-the-model">Specifying the model</h2><p>We'll build several versions of our model, refining it incrementally.
+But the basic structure will remain the same.
+Let's build an abstract version that will help you understand the code.</p>
+<p>Each poll $i$ at month $m$ from the beginning of a president’s term finds that
+$y_i$ individuals have a positive opinion of the president’s action over
+$n_i$ respondents. We model this as:</p>
+<p><span>
+$$y_{i,m} \sim Binomial(p_{i,m}, n_{i,m})$$
+</span></p>
+<p>We loosely call <span>$p_{i,m}$</span>
+the <em>popularity</em> of the president in poll $i$,
+$m$ months into his presidency.</p>
+<p>Why specify the month when the time information is already contained in the
+succession of polls? Because French people tend to be less and less satisfied
+with their president as their term moves,
+regardless of their action -- you'll see...</p>
+<p>We model <span>$p_{i,m}$</span> with a random walk logistic regression:</p>
+<p><span>
+$$p_{i,m} = logistic(\mu_m + \alpha_k + \zeta_j)$$
+</span></p>
+<p>$\mu_m$ is the latent support for the president at month $m$
+and it's the main quantity we would like to model.
+$\alpha_k$ is the bias of the pollster,
+while $\zeta_j$ is the inherent bias of the polling
+method. The biases are assumed to be completely unpooled at first,
+i.e we model one bias for each pollster and method:
+<span>
+$$\alpha_k \sim Normal(0, \sigma_k)\qquad \forall \, pollster \, k$$
+</span></p>
+<p>and</p>
+<p><span>
+$$\zeta_j \sim Normal(0, \sigma_j)\qquad \forall \, method \, j$$
+</span></p>
+<p>We treat the time variation of $\mu$ with a correlated random walk:</p>
+<p><span>
+$$\mu_m | \mu_{m-1} \sim Normal(\mu_{m-1}, \sigma_m)$$
+</span></p>
+<p>Again, note that $\mu$ is latent: we never get to observe it in the world.</p>
+<p>For the sake of simplicity, we choose not to account at first for a natural
+decline in popularity $\delta$, the unmeployment at month $m$, or
+random events that can happen during the term.</p>
+<h3 id="mark-what">Mark What?</h3><p>Thus defined, our model is a <em>Markov Model</em>.
+This is a big and scary word to describe what is actually a simple concept
+(tip: this is a common technique
+to make us statisticians look cool and knowledgeable):
+a model where a "hidden" state jumps from one time step to another
+and where the observations are a function of this hidden state.
+Hidden states have no memory,
+in the sense that their value at any time step
+only depends on the value of the state at the previous time step.
+That's what <em>Markovian</em> means.</p>
+<p>Here, the hidden state is the latent popularity $\mu_m$
+and we combine it with the effects
+<span>$\alpha_k$</span> and <span>$\zeta_j$</span>
+to compute the value of the observed states, the polling results $y_{i,m}$.
+The value of the latent popularity at month $m$
+only depends on its value at $m-1$,
+and the jumps between months are normally distributed.</p>
+<p>To define our model,
+we'll use <a href="https://docs.pymc.io/pymc-examples/examples/pymc3_howto/data_container.html">PyMC's named coordinates feature</a>.
+That way, we'll be able to write down our model using the names of variables instead of their shape dimensions.
+To do that, we need to define a bunch of variables:</p>
+<div class="hll"><pre><span></span><span class="n">pollster_by_method_id</span><span class="p">,</span> <span class="n">pollster_by_methods</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span>
+    <span class="p">[</span><span class="s2">&quot;sondage&quot;</span><span class="p">,</span> <span class="s2">&quot;method&quot;</span><span class="p">]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">factorize</span><span class="p">(</span><span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">month_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">Categorical</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">president</span> <span class="o">==</span> <span class="n">president</span><span class="p">]</span><span class="o">.</span><span class="n">field_date</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">to_period</span><span class="p">(</span><span class="s2">&quot;M&quot;</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">codes</span>
+        <span class="k">for</span> <span class="n">president</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">president</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">months</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">month_id</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">data</span><span class="p">[</span><span class="s2">&quot;month_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">month_id</span>
+
+<span class="n">COORDS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;pollster_by_method&quot;</span><span class="p">:</span> <span class="n">pollster_by_methods</span><span class="p">,</span>
+    <span class="s2">&quot;month&quot;</span><span class="p">:</span> <span class="n">months</span><span class="p">,</span>
+    <span class="c1"># each observation is uniquely identified by (pollster, field_date):</span>
+    <span class="s2">&quot;observation&quot;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s2">&quot;sondage&quot;</span><span class="p">,</span> <span class="s2">&quot;field_date&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+<h3 id="fixed-sigma-for-the-random-walk">Fixed <code>sigma</code> for the random walk</h3><p>Our first model is as simple as possible:
+just a random walk on the monthly latent popularity
+and a term for the bias of each <code>(pollster, method)</code> pair,
+which is called the "house effect" in the political science litterature.
+Also, we'll use a more descriptive name for $\mu$ --
+<code>month_effect</code> sounds good, because, well, that's basically what it is.
+We'll arbitrarily fix the innovation of the random walk (<code>sigma</code>) to 1
+and see how it fares.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">COORDS</span><span class="p">)</span> <span class="k">as</span> <span class="n">pooled_popularity_simple</span><span class="p">:</span>
+
+    <span class="n">house_effect</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;house_effect&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;pollster_by_method&quot;</span><span class="p">)</span>
+    <span class="n">month_effect</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">GaussianRandomWalk</span><span class="p">(</span><span class="s2">&quot;month_effect&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;month&quot;</span><span class="p">)</span>
+
+    <span class="n">popularity</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">invlogit</span><span class="p">(</span>
+        <span class="n">month_effect</span><span class="p">[</span><span class="n">month_id</span><span class="p">]</span> <span class="o">+</span> <span class="n">house_effect</span><span class="p">[</span><span class="n">pollster_by_method_id</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">N_approve</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Binomial</span><span class="p">(</span>
+        <span class="s2">&quot;N_approve&quot;</span><span class="p">,</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">popularity</span><span class="p">,</span>
+        <span class="n">n</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;samplesize&quot;</span><span class="p">],</span>
+        <span class="n">observed</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;num_approve&quot;</span><span class="p">],</span>
+        <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;observation&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">idata</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">return_inferencedata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+<pre><code>Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [month_effect, house_effect]
+</code></pre>
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [8000/8000 00:23<00:00 Sampling 4 chains, 0 divergences]
+</div><details><pre><code>
+    Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 42 seconds.
+
+
+    0, dim: observation, 1083 =? 1083
+
+
+    The acceptance probability does not match the target. It is 0.3442984443078715, but should be close to 0.8. Try to increase the number of tuning steps.
+    The rhat statistic is larger than 1.05 for some parameters. This indicates slight problems during sampling.
+    The estimated number of effective samples is smaller than 200 for some parameters.
+</code></pre></details><p>We plot the posterior distribution of the pollster and method biases:</p>
+<div class="hll"><pre><span></span><span class="n">arviz</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">idata</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_33_0.png" alt="png"></p>
+<p>Because of the logistic link function,
+these coefficients can be tricky to interpret.
+When the bias is positive,
+this means that we need to add to the latent popularity to get the observation,
+which means that the (pollster, method) pair
+tends to be biased towards giving higher popularity scores.</p>
+<p>This model clearly has issues:
+the trace plot is really ugly
+and the R-hat statistic is larger than 1.2 for some parameters,
+which indicates problems during sampling.
+This is not surprising: this model is <em>really</em> simple.
+The important thing here is to diagnose the depth of the pathologies,
+and see how that points us to improvements.</p>
+<p>Let's look at the summary table:</p>
+<div class="hll"><pre><span></span><span class="n">arviz</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">idata</span><span class="p">,</span> <span class="n">round_to</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+<div class="dfdiv">
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>house_effect[0]</th>
+      <td>-0.10</td>
+      <td>0.04</td>
+      <td>-0.19</td>
+      <td>-0.03</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>23.23</td>
+      <td>59.59</td>
+      <td>1.15</td>
+    </tr>
+    <tr>
+      <th>house_effect[1]</th>
+      <td>0.38</td>
+      <td>0.04</td>
+      <td>0.30</td>
+      <td>0.45</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>22.39</td>
+      <td>62.47</td>
+      <td>1.15</td>
+    </tr>
+    <tr>
+      <th>house_effect[2]</th>
+      <td>-0.15</td>
+      <td>0.04</td>
+      <td>-0.23</td>
+      <td>-0.08</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>22.52</td>
+      <td>64.04</td>
+      <td>1.15</td>
+    </tr>
+    <tr>
+      <th>house_effect[3]</th>
+      <td>0.34</td>
+      <td>0.04</td>
+      <td>0.26</td>
+      <td>0.42</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>23.70</td>
+      <td>63.04</td>
+      <td>1.14</td>
+    </tr>
+    <tr>
+      <th>house_effect[4]</th>
+      <td>0.05</td>
+      <td>0.04</td>
+      <td>-0.03</td>
+      <td>0.13</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>24.94</td>
+      <td>65.23</td>
+      <td>1.14</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>month_effect[55]</th>
+      <td>-0.93</td>
+      <td>0.04</td>
+      <td>-1.02</td>
+      <td>-0.85</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>30.41</td>
+      <td>93.90</td>
+      <td>1.11</td>
+    </tr>
+    <tr>
+      <th>month_effect[56]</th>
+      <td>-0.96</td>
+      <td>0.04</td>
+      <td>-1.04</td>
+      <td>-0.87</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>26.41</td>
+      <td>85.65</td>
+      <td>1.12</td>
+    </tr>
+    <tr>
+      <th>month_effect[57]</th>
+      <td>-0.94</td>
+      <td>0.04</td>
+      <td>-1.02</td>
+      <td>-0.85</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>25.97</td>
+      <td>81.38</td>
+      <td>1.12</td>
+    </tr>
+    <tr>
+      <th>month_effect[58]</th>
+      <td>-0.78</td>
+      <td>0.04</td>
+      <td>-0.86</td>
+      <td>-0.70</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>25.49</td>
+      <td>90.16</td>
+      <td>1.13</td>
+    </tr>
+    <tr>
+      <th>month_effect[59]</th>
+      <td>-0.75</td>
+      <td>0.04</td>
+      <td>-0.83</td>
+      <td>-0.66</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>25.33</td>
+      <td>86.35</td>
+      <td>1.13</td>
+    </tr>
+  </tbody>
+</table>
+<p>75 rows × 9 columns</p>
+</div><p>Wow, that's bad!
+Do you see these much-too-high R_hat
+and much-too-low effective sample sizes (<code>ess_bulk</code> and <code>ess_tail</code>)?</p>
+<p>Let's not spend too much time on this model,
+but before we move on,
+it's useful to see how bad our posterior predictions for <code>mu</code>,
+the estimated monthly latent popularity, look.
+Since the model is completely pooled,
+we only have 60 values, which correspond to a full term (i.e 5 years):</p>
+<div class="hll"><pre><span></span><span class="k">def</span> <span class="nf">plot_latent_mu</span><span class="p">(</span><span class="n">inference_data</span><span class="p">,</span> <span class="n">overlay_observed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot latent posterior popularity&quot;&quot;&quot;</span>
+    <span class="n">post_pop</span> <span class="o">=</span> <span class="n">logistic</span><span class="p">(</span>
+        <span class="n">inference_data</span><span class="o">.</span><span class="n">posterior</span><span class="p">[</span><span class="s2">&quot;month_effect&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">sample</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;chain&quot;</span><span class="p">,</span> <span class="s2">&quot;draw&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+    <span class="c1"># plot random posterior draws</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">inference_data</span><span class="o">.</span><span class="n">posterior</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">],</span>
+        <span class="n">post_pop</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span>
+            <span class="n">sample</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">post_pop</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;sample&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># plot posterior mean</span>
+    <span class="n">post_pop</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="s2">&quot;sample&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;predicted mean&quot;</span><span class="p">)</span>
+
+    <span class="c1"># plot monthly raw polls</span>
+    <span class="k">if</span> <span class="n">overlay_observed</span><span class="p">:</span>
+        <span class="n">obs_mean</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;president&quot;</span><span class="p">,</span> <span class="s2">&quot;month_id&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">last</span><span class="p">()[</span><span class="s2">&quot;p_approve_mean&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unstack</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">president</span> <span class="ow">in</span> <span class="n">obs_mean</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">obs_mean</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+                <span class="n">obs_mean</span><span class="p">[</span><span class="n">president</span><span class="p">],</span>
+                <span class="s2">&quot;o&quot;</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;obs. monthly </span><span class="si">{</span><span class="n">president</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Months into term&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Does approve&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+<div class="hll"><pre><span></span><span class="n">plot_latent_mu</span><span class="p">(</span><span class="n">idata</span><span class="p">)</span>
+</pre></div>
+<p><img src="output_38_0.png" alt="png"></p>
+<p>Not too good, is it?
+The black line is the mean posterior latent monthly popularity
+estimated by the model.
+Each grey line is a draw from the posterior latent popularity,
+and each point is the observed monthly mean popularity
+in polls for each president.</p>
+<p>No need to stare at this graph to notice that
+the model grossly underestimates the variance in the data.
+We also see that presidents differ quite a lot,
+although they have some common pattern
+(this is a clue for improving the model;
+can you guess how we could include that?).
+The good point though is that the model is
+highly influenced by the sample size:
+up until month 50, the posterior prediction stays close to
+wherever the most dots are clustered,
+because those values appear most frequently, so it's a safer bet.
+Between months 50 and 60, polls become more dispersed,
+so the model is doing a compromise,
+staying below the bulk of points but much higher than the lowest points.
+Here, what's troubling the model is that one of the presidents
+(François Hollande) was hugely unpopular
+at the end of his term compared to the others.</p>
+<p>An easy and obvious way to improve this model
+is to allow the random walk's innovation to vary more.
+Maybe our model is too constrained by the fixed innovation
+and can't accomodate the variation in the data?</p>
+<h3 id="infer-the-standard-deviation-of-the-random-walk">Infer the standard deviation of the random walk</h3><p>Instead of fixing the random walk's innovation,
+let's estimate it from the data.
+The code is very similar:</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">COORDS</span><span class="p">)</span> <span class="k">as</span> <span class="n">pooled_popularity</span><span class="p">:</span>
+
+    <span class="n">house_effect</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;house_effect&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;pollster_by_method&quot;</span><span class="p">)</span>
+    <span class="n">sigma_mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;sigma_mu&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">month_effect</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">GaussianRandomWalk</span><span class="p">(</span><span class="s2">&quot;month_effect&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma_mu</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;month&quot;</span><span class="p">)</span>
+
+    <span class="n">popularity</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">invlogit</span><span class="p">(</span>
+        <span class="n">month_effect</span><span class="p">[</span><span class="n">month_id</span><span class="p">]</span> <span class="o">+</span> <span class="n">house_effect</span><span class="p">[</span><span class="n">pollster_by_method_id</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">N_approve</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Binomial</span><span class="p">(</span>
+        <span class="s2">&quot;N_approve&quot;</span><span class="p">,</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">popularity</span><span class="p">,</span>
+        <span class="n">n</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;samplesize&quot;</span><span class="p">],</span>
+        <span class="n">observed</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;num_approve&quot;</span><span class="p">],</span>
+        <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;observation&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">idata</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">tune</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">draws</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">return_inferencedata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+<pre><code>Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [month_effect, sigma_mu, house_effect]
+</code></pre>
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [16000/16000 00:29<00:00 Sampling 4 chains, 0 divergences]
+</div><pre><code>Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 47 seconds.
+
+
+0, dim: observation, 1083 =? 1083
+
+
+The acceptance probability does not match the target. It is 0.9081390089258286, but should be close to 0.8. Try to increase the number of tuning steps.
+The estimated number of effective samples is smaller than 200 for some parameters.
+</code></pre>
+<p>Did this help convergence?</p>
+<div class="hll"><pre><span></span><span class="n">arviz</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">idata</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_42_0.png" alt="png"></p>
+<p>Aaaaah, my eyes, my eyes, please stop!</p>
+<p>These trace plots are still very ugly.
+What about the R-hats and effective sample sizes?</p>
+<div class="hll"><pre><span></span><span class="n">arviz</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">idata</span><span class="p">,</span> <span class="n">round_to</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+<div class="dfdiv">
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>house_effect[0]</th>
+      <td>-0.10</td>
+      <td>0.04</td>
+      <td>-0.17</td>
+      <td>-0.03</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>69.19</td>
+      <td>126.68</td>
+      <td>1.03</td>
+    </tr>
+    <tr>
+      <th>house_effect[1]</th>
+      <td>0.38</td>
+      <td>0.04</td>
+      <td>0.31</td>
+      <td>0.45</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>70.21</td>
+      <td>134.31</td>
+      <td>1.03</td>
+    </tr>
+    <tr>
+      <th>house_effect[2]</th>
+      <td>-0.15</td>
+      <td>0.04</td>
+      <td>-0.22</td>
+      <td>-0.07</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>71.80</td>
+      <td>132.09</td>
+      <td>1.03</td>
+    </tr>
+    <tr>
+      <th>house_effect[3]</th>
+      <td>0.34</td>
+      <td>0.04</td>
+      <td>0.27</td>
+      <td>0.41</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>74.23</td>
+      <td>150.45</td>
+      <td>1.03</td>
+    </tr>
+    <tr>
+      <th>house_effect[4]</th>
+      <td>0.05</td>
+      <td>0.04</td>
+      <td>-0.02</td>
+      <td>0.12</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>74.48</td>
+      <td>152.07</td>
+      <td>1.03</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>month_effect[56]</th>
+      <td>-0.96</td>
+      <td>0.04</td>
+      <td>-1.03</td>
+      <td>-0.88</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>85.24</td>
+      <td>198.54</td>
+      <td>1.03</td>
+    </tr>
+    <tr>
+      <th>month_effect[57]</th>
+      <td>-0.93</td>
+      <td>0.04</td>
+      <td>-1.01</td>
+      <td>-0.85</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>86.12</td>
+      <td>189.24</td>
+      <td>1.03</td>
+    </tr>
+    <tr>
+      <th>month_effect[58]</th>
+      <td>-0.79</td>
+      <td>0.04</td>
+      <td>-0.87</td>
+      <td>-0.71</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>85.96</td>
+      <td>177.54</td>
+      <td>1.03</td>
+    </tr>
+    <tr>
+      <th>month_effect[59]</th>
+      <td>-0.75</td>
+      <td>0.04</td>
+      <td>-0.83</td>
+      <td>-0.67</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>86.35</td>
+      <td>206.63</td>
+      <td>1.02</td>
+    </tr>
+    <tr>
+      <th>sigma_mu</th>
+      <td>0.10</td>
+      <td>0.01</td>
+      <td>0.08</td>
+      <td>0.12</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>4283.14</td>
+      <td>4889.75</td>
+      <td>1.00</td>
+    </tr>
+  </tbody>
+</table>
+<p>76 rows × 9 columns</p>
+</div><p>Still very, very bad...
+The only good news is that we seem to efficiently estimate <code>sigma_mu</code>,
+the innovation of the random walk --
+the R-hat is perfect and the ESS is high.</p>
+<p>Do the posterior predictions look better?</p>
+<div class="hll"><pre><span></span><span class="n">plot_latent_mu</span><span class="p">(</span><span class="n">idata</span><span class="p">)</span>
+</pre></div>
+<p><img src="output_46_0.png" alt="png"></p>
+<p>The posterior variance of the values of $\mu$
+still is grossly underestimated;
+between month 40 and 50 presidents
+have had popularity rates between 0.2 and 0.4,
+while here the popularity is estimated to be
+around 0.21 plus or minus 0.02 at best.
+We need to fhix this.</p>
+<h3 id="accounting-for-overdispersion-in-polls">Accounting for overdispersion in polls</h3><p>As we saw with the previous model,
+the variance of $\mu$'s posterior values is grossly underestimated.
+This comes from at least two things:</p>
+<ol>
+<li>Presidents have similarities,
+but also a lot of differences in how their popularity rates evolves with time.
+We should take that into account and estimate one trendline per president.
+We'll do that later.</li>
+<li>Even beyond president effects,
+it seems that there is much more variation in the data
+than a Binomial distribution can account for
+(as is often the case with count data).
+This is called overdispersion of data in statistical linguo,
+and is due to the fact that the Binomial's variance depends on its mean.
+A convenient way to get around this limitation
+is to use a Beta-Binomial likelihood,
+to add one degree of freedom and allow the variance
+to be estimated independently from the mean value.
+For more details about this distribution and its parametrization,
+see <a href="https://alexandorra.github.io/pollsposition_blog/popularity/macron/gaussian%20processes/polls/2021/01/18/gp-popularity.html#Build-me-a-model">this blog post</a>.
+In short, this allows each poll to have its own Binomial probability,
+which even makes sense scientifically:
+it's conceivable that each poll is different
+in several ways from the others (even when done by the same pollster),
+because there are measurement errors and other factors we did not include,
+even beyond pollsters' and method's biases.</li>
+</ol>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">COORDS</span><span class="p">)</span> <span class="k">as</span> <span class="n">pooled_popularity</span><span class="p">:</span>
+
+    <span class="n">house_effect</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;house_effect&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;pollster_by_method&quot;</span><span class="p">)</span>
+    <span class="n">sigma_mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;sigma_mu&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">month_effect</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">GaussianRandomWalk</span><span class="p">(</span><span class="s2">&quot;month_effect&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma_mu</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;month&quot;</span><span class="p">)</span>
+
+    <span class="n">popularity</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">invlogit</span><span class="p">(</span>
+        <span class="n">month_effect</span><span class="p">[</span><span class="n">month_id</span><span class="p">]</span> <span class="o">+</span> <span class="n">house_effect</span><span class="p">[</span><span class="n">pollster_by_method_id</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># overdispersion parameter</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Exponential</span><span class="p">(</span><span class="s2">&quot;theta_offset&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">10.0</span>
+
+    <span class="n">N_approve</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">BetaBinomial</span><span class="p">(</span>
+        <span class="s2">&quot;N_approve&quot;</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="n">popularity</span> <span class="o">*</span> <span class="n">theta</span><span class="p">,</span>
+        <span class="n">beta</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">popularity</span><span class="p">)</span> <span class="o">*</span> <span class="n">theta</span><span class="p">,</span>
+        <span class="n">n</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;samplesize&quot;</span><span class="p">],</span>
+        <span class="n">observed</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;num_approve&quot;</span><span class="p">],</span>
+        <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;observation&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">idata</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">tune</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">draws</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">return_inferencedata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+<pre><code>Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [theta_offset, month_effect, sigma_mu, house_effect]
+</code></pre>
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='16000' class='' max='16000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [16000/16000 00:38<00:00 Sampling 4 chains, 0 divergences]
+</div><pre><code>Sampling 4 chains for 2_000 tune and 2_000 draw iterations (8_000 + 8_000 draws total) took 56 seconds.
+
+
+0, dim: observation, 1083 =? 1083
+
+
+The number of effective samples is smaller than 10% for some parameters.
+</code></pre>
+<div class="hll"><pre><span></span><span class="n">arviz</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span><span class="n">idata</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_49_0.png" alt="png"></p>
+<div class="hll"><pre><span></span><span class="n">arviz</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">idata</span><span class="p">,</span> <span class="n">round_to</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+<div class="dfdiv">
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>house_effect[0]</th>
+      <td>-0.09</td>
+      <td>0.06</td>
+      <td>-0.20</td>
+      <td>0.01</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>970.36</td>
+      <td>2360.00</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>house_effect[1]</th>
+      <td>0.36</td>
+      <td>0.06</td>
+      <td>0.25</td>
+      <td>0.46</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>972.49</td>
+      <td>2209.77</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>house_effect[2]</th>
+      <td>-0.11</td>
+      <td>0.06</td>
+      <td>-0.23</td>
+      <td>0.02</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>1397.60</td>
+      <td>3077.42</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>house_effect[3]</th>
+      <td>0.30</td>
+      <td>0.07</td>
+      <td>0.16</td>
+      <td>0.44</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>1598.99</td>
+      <td>3445.40</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>house_effect[4]</th>
+      <td>0.06</td>
+      <td>0.07</td>
+      <td>-0.09</td>
+      <td>0.19</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>1997.57</td>
+      <td>4200.72</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>month_effect[57]</th>
+      <td>-0.90</td>
+      <td>0.08</td>
+      <td>-1.05</td>
+      <td>-0.75</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>1449.45</td>
+      <td>3172.23</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>month_effect[58]</th>
+      <td>-0.85</td>
+      <td>0.08</td>
+      <td>-1.00</td>
+      <td>-0.69</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>1594.73</td>
+      <td>3531.40</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>month_effect[59]</th>
+      <td>-0.83</td>
+      <td>0.09</td>
+      <td>-1.00</td>
+      <td>-0.65</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>2052.19</td>
+      <td>3857.49</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>sigma_mu</th>
+      <td>0.08</td>
+      <td>0.01</td>
+      <td>0.05</td>
+      <td>0.10</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>2309.07</td>
+      <td>3766.36</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>theta_offset</th>
+      <td>18.93</td>
+      <td>1.28</td>
+      <td>16.53</td>
+      <td>21.30</td>
+      <td>0.01</td>
+      <td>0.01</td>
+      <td>7712.70</td>
+      <td>5102.88</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+<p>77 rows × 9 columns</p>
+</div><p>All of this is looking much better: only one sampling warning,
+really good-looking trace plot and much higher effective sample sizes
+(although it's still a bit low for some parameters).</p>
+<p>What about the posterior predictions?</p>
+<div class="hll"><pre><span></span><span class="n">plot_latent_mu</span><span class="p">(</span><span class="n">idata</span><span class="p">)</span>
+</pre></div>
+<p><img src="output_52_0.png" alt="png"></p>
+<p>This is better! We can see why the model is more comfortable:
+the Beta-Binomial likelihood give it more flexibility,
+as exemplified in the more wiggly posterior predictions,
+which also increases the uncertainty of the predictions.</p>
+<p>Still, this is not very satisfactory.
+The main limit of this model is that
+it doesn't distinguish between presidents --
+it pools all of them --
+although they all have differences despite being similar in some ways.
+As a result, it is unlikely we would be able to do much better than this
+for the pooled model;
+maybe by having one dispersion term per term/month?</p>
+<p>I don't know about you, but each time I hear "similar but different",
+I immediately think of a hiearchical (i.e partially pooled) model (yeah, I'm weird sometimes).
+Well, that's exactly what we're going to investigate next!</p>
+<h2 id="respect-the-hierarchy">Respect the hierarchy</h2><p>The main change is that now our <code>month_effect</code>
+will become a <code>month_president_effect</code>,
+and we'll have a common monthly mean for all presidents
+(which will be our new <code>month_effect</code>).
+A nice feature is that <code>sigma_mu</code>
+can now be interpreted as the shrinkage parameter of the random walk:
+the closest to zero it will be inferred to be,
+the more similar the presidents
+will be considered in their monthly popularity evolution.
+That's why we'll rename this parameter <code>shrinkage_pop</code>.
+Finally, the house effects stay unpooled, as they were before.</p>
+<p>Let's code that up and sample!</p>
+<div class="hll"><pre><span></span><span class="n">president_id</span><span class="p">,</span> <span class="n">presidents</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;president&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">factorize</span><span class="p">(</span><span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">COORDS</span><span class="p">[</span><span class="s2">&quot;president&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">presidents</span>
+</pre></div>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">COORDS</span><span class="p">)</span> <span class="k">as</span> <span class="n">hierarchical_popularity</span><span class="p">:</span>
+
+    <span class="n">house_effect</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;house_effect&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;pollster_by_method&quot;</span><span class="p">)</span>
+    <span class="n">month_effect</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;month_effect&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">COORDS</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">shrinkage_pop</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;shrinkage_pop&quot;</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+    <span class="n">month_president_effect</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">GaussianRandomWalk</span><span class="p">(</span>
+        <span class="s2">&quot;month_president_effect&quot;</span><span class="p">,</span>
+        <span class="n">mu</span><span class="o">=</span><span class="n">month_effect</span><span class="p">,</span>
+        <span class="n">sigma</span><span class="o">=</span><span class="n">shrinkage_pop</span><span class="p">,</span>
+        <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;president&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">popularity</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">invlogit</span><span class="p">(</span>
+        <span class="n">month_president_effect</span><span class="p">[</span><span class="n">president_id</span><span class="p">,</span> <span class="n">month_id</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">house_effect</span><span class="p">[</span><span class="n">pollster_by_method_id</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">N_approve</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Binomial</span><span class="p">(</span>
+        <span class="s2">&quot;N_approve&quot;</span><span class="p">,</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">popularity</span><span class="p">,</span>
+        <span class="n">n</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;samplesize&quot;</span><span class="p">],</span>
+        <span class="n">observed</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;num_approve&quot;</span><span class="p">],</span>
+        <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;observation&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">idata</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">return_inferencedata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+<pre><code>
+    Auto-assigning NUTS sampler...
+    Initializing NUTS using jitter+adapt_diag...
+    Multiprocess sampling (4 chains in 4 jobs)
+    NUTS: [month_president_effect, shrinkage_pop, month_effect, house_effect]
+</code></pre><div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='2293' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  28.66% [2293/8000 01:53<04:41 Sampling 4 chains, 0 divergences]
+</div><details><pre><code>
+-   ---------------------------------------------------------------------------
+
+    RemoteTraceback                           Traceback (most recent call last)
+
+    RemoteTraceback:
+    """
+    Traceback (most recent call last):
+      File "/Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/pymc3/parallel_sampling.py", line 137, in run
+        self._start_loop()
+      File "/Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/pymc3/parallel_sampling.py", line 191, in _start_loop
+        point, stats = self._compute_point()
+      File "/Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/pymc3/parallel_sampling.py", line 216, in _compute_point
+        point, stats = self._step_method.step(self._point)
+      File "/Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/pymc3/step_methods/arraystep.py", line 276, in step
+        apoint, stats = self.astep(array)
+      File "/Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/pymc3/step_methods/hmc/base_hmc.py", line 147, in astep
+        self.potential.raise_ok(self._logp_dlogp_func._ordering.vmap)
+      File "/Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/pymc3/step_methods/hmc/quadpotential.py", line 272, in raise_ok
+        raise ValueError("\n".join(errmsg))
+    ValueError: Mass matrix contains zeros on the diagonal.
+    The derivative of RV `month_president_effect`.ravel()[1] is zero.
+    The derivative of RV `month_president_effect`.ravel()[2] is zero.
+    The derivative of RV `month_president_effect`.ravel()[4] is zero.
+    The derivative of RV `month_president_effect`.ravel()[5] is zero.
+    The derivative of RV `month_president_effect`.ravel()[10] is zero.
+    The derivative of RV `month_president_effect`.ravel()[11] is zero.
+    The derivative of RV `month_president_effect`.ravel()[12] is zero.
+    The derivative of RV `month_president_effect`.ravel()[17] is zero.
+    The derivative of RV `month_president_effect`.ravel()[18] is zero.
+    The derivative of RV `month_president_effect`.ravel()[26] is zero.
+    The derivative of RV `month_president_effect`.ravel()[38] is zero.
+    The derivative of RV `month_president_effect`.ravel()[43] is zero.
+    The derivative of RV `month_president_effect`.ravel()[47] is zero.
+    The derivative of RV `month_president_effect`.ravel()[48] is zero.
+    The derivative of RV `month_president_effect`.ravel()[50] is zero.
+    The derivative of RV `month_president_effect`.ravel()[56] is zero.
+    The derivative of RV `month_president_effect`.ravel()[61] is zero.
+    The derivative of RV `month_president_effect`.ravel()[62] is zero.
+    The derivative of RV `month_president_effect`.ravel()[64] is zero.
+    The derivative of RV `month_president_effect`.ravel()[65] is zero.
+    The derivative of RV `month_president_effect`.ravel()[68] is zero.
+    The derivative of RV `month_president_effect`.ravel()[70] is zero.
+    The derivative of RV `month_president_effect`.ravel()[71] is zero.
+    The derivative of RV `month_president_effect`.ravel()[98] is zero.
+    The derivative of RV `month_president_effect`.ravel()[101] is zero.
+    The derivative of RV `month_president_effect`.ravel()[107] is zero.
+    The derivative of RV `month_president_effect`.ravel()[108] is zero.
+    The derivative of RV `month_president_effect`.ravel()[110] is zero.
+    The derivative of RV `month_president_effect`.ravel()[119] is zero.
+    The derivative of RV `month_president_effect`.ravel()[120] is zero.
+    The derivative of RV `month_president_effect`.ravel()[121] is zero.
+    The derivative of RV `month_president_effect`.ravel()[122] is zero.
+    The derivative of RV `month_president_effect`.ravel()[125] is zero.
+    The derivative of RV `month_president_effect`.ravel()[130] is zero.
+    The derivative of RV `month_president_effect`.ravel()[138] is zero.
+    The derivative of RV `month_president_effect`.ravel()[143] is zero.
+    The derivative of RV `month_president_effect`.ravel()[146] is zero.
+    The derivative of RV `month_president_effect`.ravel()[150] is zero.
+    The derivative of RV `month_president_effect`.ravel()[167] is zero.
+    The derivative of RV `month_president_effect`.ravel()[168] is zero.
+    The derivative of RV `month_president_effect`.ravel()[170] is zero.
+    The derivative of RV `month_president_effect`.ravel()[171] is zero.
+    The derivative of RV `month_president_effect`.ravel()[179] is zero.
+    The derivative of RV `month_president_effect`.ravel()[181] is zero.
+    The derivative of RV `month_president_effect`.ravel()[197] is zero.
+    The derivative of RV `month_president_effect`.ravel()[198] is zero.
+    The derivative of RV `month_president_effect`.ravel()[200] is zero.
+    The derivative of RV `month_president_effect`.ravel()[203] is zero.
+    The derivative of RV `month_president_effect`.ravel()[206] is zero.
+    The derivative of RV `month_president_effect`.ravel()[210] is zero.
+    The derivative of RV `month_president_effect`.ravel()[211] is zero.
+    The derivative of RV `month_president_effect`.ravel()[227] is zero.
+    The derivative of RV `month_president_effect`.ravel()[230] is zero.
+    The derivative of RV `month_president_effect`.ravel()[239] is zero.
+    The derivative of RV `month_effect`.ravel()[11] is zero.
+    The derivative of RV `month_effect`.ravel()[12] is zero.
+    The derivative of RV `month_effect`.ravel()[13] is zero.
+    The derivative of RV `month_effect`.ravel()[16] is zero.
+    The derivative of RV `month_effect`.ravel()[17] is zero.
+    The derivative of RV `month_effect`.ravel()[18] is zero.
+    The derivative of RV `month_effect`.ravel()[19] is zero.
+    The derivative of RV `month_effect`.ravel()[27] is zero.
+    The derivative of RV `month_effect`.ravel()[28] is zero.
+    The derivative of RV `month_effect`.ravel()[33] is zero.
+    The derivative of RV `month_effect`.ravel()[51] is zero.
+    The derivative of RV `month_effect`.ravel()[55] is zero.
+    The derivative of RV `month_effect`.ravel()[60] is zero.
+    """
+
+
+    The above exception was the direct cause of the following exception:
+
+
+    ValueError                                Traceback (most recent call last)
+
+    ValueError: Mass matrix contains zeros on the diagonal.
+    The derivative of RV `month_president_effect`.ravel()[1] is zero.
+    The derivative of RV `month_president_effect`.ravel()[2] is zero.
+    The derivative of RV `month_president_effect`.ravel()[4] is zero.
+    The derivative of RV `month_president_effect`.ravel()[5] is zero.
+    The derivative of RV `month_president_effect`.ravel()[10] is zero.
+    The derivative of RV `month_president_effect`.ravel()[11] is zero.
+    The derivative of RV `month_president_effect`.ravel()[12] is zero.
+    The derivative of RV `month_president_effect`.ravel()[17] is zero.
+    The derivative of RV `month_president_effect`.ravel()[18] is zero.
+    The derivative of RV `month_president_effect`.ravel()[26] is zero.
+    The derivative of RV `month_president_effect`.ravel()[38] is zero.
+    The derivative of RV `month_president_effect`.ravel()[43] is zero.
+    The derivative of RV `month_president_effect`.ravel()[47] is zero.
+    The derivative of RV `month_president_effect`.ravel()[48] is zero.
+    The derivative of RV `month_president_effect`.ravel()[50] is zero.
+    The derivative of RV `month_president_effect`.ravel()[56] is zero.
+    The derivative of RV `month_president_effect`.ravel()[61] is zero.
+    The derivative of RV `month_president_effect`.ravel()[62] is zero.
+    The derivative of RV `month_president_effect`.ravel()[64] is zero.
+    The derivative of RV `month_president_effect`.ravel()[65] is zero.
+    The derivative of RV `month_president_effect`.ravel()[68] is zero.
+    The derivative of RV `month_president_effect`.ravel()[70] is zero.
+    The derivative of RV `month_president_effect`.ravel()[71] is zero.
+    The derivative of RV `month_president_effect`.ravel()[98] is zero.
+    The derivative of RV `month_president_effect`.ravel()[101] is zero.
+    The derivative of RV `month_president_effect`.ravel()[107] is zero.
+    The derivative of RV `month_president_effect`.ravel()[108] is zero.
+    The derivative of RV `month_president_effect`.ravel()[110] is zero.
+    The derivative of RV `month_president_effect`.ravel()[119] is zero.
+    The derivative of RV `month_president_effect`.ravel()[120] is zero.
+    The derivative of RV `month_president_effect`.ravel()[121] is zero.
+    The derivative of RV `month_president_effect`.ravel()[122] is zero.
+    The derivative of RV `month_president_effect`.ravel()[125] is zero.
+    The derivative of RV `month_president_effect`.ravel()[130] is zero.
+    The derivative of RV `month_president_effect`.ravel()[138] is zero.
+    The derivative of RV `month_president_effect`.ravel()[143] is zero.
+    The derivative of RV `month_president_effect`.ravel()[146] is zero.
+    The derivative of RV `month_president_effect`.ravel()[150] is zero.
+    The derivative of RV `month_president_effect`.ravel()[167] is zero.
+    The derivative of RV `month_president_effect`.ravel()[168] is zero.
+    The derivative of RV `month_president_effect`.ravel()[170] is zero.
+    The derivative of RV `month_president_effect`.ravel()[171] is zero.
+    The derivative of RV `month_president_effect`.ravel()[179] is zero.
+    The derivative of RV `month_president_effect`.ravel()[181] is zero.
+    The derivative of RV `month_president_effect`.ravel()[197] is zero.
+    The derivative of RV `month_president_effect`.ravel()[198] is zero.
+    The derivative of RV `month_president_effect`.ravel()[200] is zero.
+    The derivative of RV `month_president_effect`.ravel()[203] is zero.
+    The derivative of RV `month_president_effect`.ravel()[206] is zero.
+    The derivative of RV `month_president_effect`.ravel()[210] is zero.
+    The derivative of RV `month_president_effect`.ravel()[211] is zero.
+    The derivative of RV `month_president_effect`.ravel()[227] is zero.
+    The derivative of RV `month_president_effect`.ravel()[230] is zero.
+    The derivative of RV `month_president_effect`.ravel()[239] is zero.
+    The derivative of RV `month_effect`.ravel()[11] is zero.
+    The derivative of RV `month_effect`.ravel()[12] is zero.
+    The derivative of RV `month_effect`.ravel()[13] is zero.
+    The derivative of RV `month_effect`.ravel()[16] is zero.
+    The derivative of RV `month_effect`.ravel()[17] is zero.
+    The derivative of RV `month_effect`.ravel()[18] is zero.
+    The derivative of RV `month_effect`.ravel()[19] is zero.
+    The derivative of RV `month_effect`.ravel()[27] is zero.
+    The derivative of RV `month_effect`.ravel()[28] is zero.
+    The derivative of RV `month_effect`.ravel()[33] is zero.
+    The derivative of RV `month_effect`.ravel()[51] is zero.
+    The derivative of RV `month_effect`.ravel()[55] is zero.
+    The derivative of RV `month_effect`.ravel()[60] is zero.
+
+
+    The above exception was the direct cause of the following exception:
+
+
+    RuntimeError                              Traceback (most recent call last)
+
+    <ipython-input-31-4872755fffcc> in <module>
+         24     )
+         25
+    ---> 26     idata = pm.sample(return_inferencedata=True)
+
+
+    ~/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/pymc3/sampling.py in sample(draws, step, init, n_init, start, trace, chain_idx, chains, cores, tune, progressbar, model, random_seed, discard_tuned_samples, compute_convergence_checks, callback, jitter_max_retries, return_inferencedata, idata_kwargs, mp_ctx, pickle_backend, **kwargs)
+        557         _print_step_hierarchy(step)
+        558         try:
+    --> 559             trace = _mp_sample(**sample_args, **parallel_args)
+        560         except pickle.PickleError:
+        561             _log.warning("Could not pickle model, sampling singlethreaded.")
+
+
+    ~/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/pymc3/sampling.py in _mp_sample(draws, tune, step, chains, cores, chain, random_seed, start, progressbar, trace, model, callback, discard_tuned_samples, mp_ctx, pickle_backend, **kwargs)
+       1475         try:
+       1476             with sampler:
+    -> 1477                 for draw in sampler:
+       1478                     trace = traces[draw.chain - chain]
+       1479                     if trace.supports_sampler_stats and draw.stats is not None:
+
+
+    ~/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/pymc3/parallel_sampling.py in __iter__(self)
+        477
+        478         while self._active:
+    --> 479             draw = ProcessAdapter.recv_draw(self._active)
+        480             proc, is_last, draw, tuning, stats, warns = draw
+        481             self._total_draws += 1
+
+
+    ~/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/pymc3/parallel_sampling.py in recv_draw(processes, timeout)
+        357             else:
+        358                 error = RuntimeError("Chain %s failed." % proc.chain)
+    --> 359             raise error from old_error
+        360         elif msg[0] == "writing_done":
+        361             proc._readable = True
+
+
+    RuntimeError: Chain 0 failed.
+
+</code></pre></details><p>Uh-oh, our model doesn't sample...
+Apparently we've got zero derivates for some variables, whatever that means!
+Usually, this is due to missing values somewhere
+(which leads to -infinity log-probabilities),
+or just to some misspecification in the model
+(yep, life is complicated, we've got to accept it).
+A first step then is to check the model's
+test point and see whether we've got any <span>$-\inf$</span> in there:</p>
+<pre><code>
+hierarchical_popularity.check_test_point()
+</code></pre><pre><code>
+    house_effect                 14.67
+    month_effect                 59.67
+    shrinkage_pop_log__          -0.77
+    month_president_effect     9895.94
+    N_approve                -83867.83
+    Name: Log-probability of test_point, dtype: float64
+</code></pre><p>Nope, everything looks good.
+So, the the problem doesn't come from missing values in the data
+but certainly from the model specification itself.
+We've checked, and there is no typo in the code above.
+A safe bet here is that the current parametrization
+(very poorly called "centered" parametrization)
+is somehow presenting the MCMC sampler with a vexing geometry.
+A common trick is to switch to a "non-centered parametrization",
+where <code>month_effect</code> and <code>shrinkage_pop</code>
+are estimated independently from <code>month_president_effect</code>,
+as you'll see in the code below.</p>
+<p>This trick is a bit weird if that's the first time you're encountering it,
+so you can take a look at <a href="https://twiecki.io/blog/2017/02/08/bayesian-hierchical-non-centered/">this blog post</a>
+for further explanation.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">COORDS</span><span class="p">)</span> <span class="k">as</span> <span class="n">hierarchical_popularity</span><span class="p">:</span>
+
+    <span class="n">house_effect</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;house_effect&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;pollster_by_method&quot;</span><span class="p">)</span>
+
+    <span class="n">month_effect</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;month_effect&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;month&quot;</span><span class="p">)</span>
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;shrinkage_pop&quot;</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+    <span class="n">raw_rw</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">GaussianRandomWalk</span><span class="p">(</span><span class="s2">&quot;raw_rw&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;president&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">))</span>
+    <span class="n">month_president_effect</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span>
+        <span class="s2">&quot;month_president_effect&quot;</span><span class="p">,</span>
+        <span class="n">month_effect</span> <span class="o">+</span> <span class="n">raw_rw</span> <span class="o">*</span> <span class="n">sd</span><span class="p">,</span>
+        <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;president&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">popularity</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">invlogit</span><span class="p">(</span>
+        <span class="n">month_president_effect</span><span class="p">[</span><span class="n">president_id</span><span class="p">,</span> <span class="n">month_id</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">house_effect</span><span class="p">[</span><span class="n">pollster_by_method_id</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">N_approve</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Binomial</span><span class="p">(</span>
+        <span class="s2">&quot;N_approve&quot;</span><span class="p">,</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">popularity</span><span class="p">,</span>
+        <span class="n">n</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;samplesize&quot;</span><span class="p">],</span>
+        <span class="n">observed</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;num_approve&quot;</span><span class="p">],</span>
+        <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;observation&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">idata</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">return_inferencedata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+<pre><code>Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [raw_rw, shrinkage_pop, month_effect, house_effect]
+</code></pre>
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [8000/8000 01:58<00:00 Sampling 4 chains, 0 divergences]
+</div><pre><code>Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 136 seconds.
+
+
+0, dim: observation, 1083 =? 1083
+
+
+The number of effective samples is smaller than 25% for some parameters.
+</code></pre>
+<p>Yep, that was it! Feels like magic, doesn't it?
+Each time I just switch from a centered
+to a non-centered parametrization and it just starts sampling,
+I am amazed!</p>
+<p>We only got a small warning about effective sample size,
+so we expect the trace plot to look good.
+But do our estimates make sense?</p>
+<div class="hll"><pre><span></span><span class="n">arviz</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span>
+    <span class="n">idata</span><span class="p">,</span>
+<span class="p">);</span>
+</pre></div>
+<p><img src="output_61_0.png" alt="png"></p>
+<p>That looks a bit weird right? <code>shrinkage_pop</code>,
+the random walk's standard deviation, seems really high!
+That's basically telling us that the president's popularity
+can change a lot from one month to another,
+which we now from domain knowledge is not true.
+The <code>month_effect</code> are all similar and centered on 0,
+which means all months are very similar --
+there can't really be a bad month or a good month.</p>
+<p>This is worrying for at least two reasons:
+1) we <em>know</em> from prior knowledge that
+there <em>are</em> good and bad months for presidents;
+2) this extreme similarity in <code>month_effect</code>
+directly contradicts the high <code>shrinkage_pop</code>:
+how can the standard deviation be so high if months are all the same?</p>
+<p>So something is missing here.
+Actually, we should really have an intercept,
+which represents the baseline presidential approval,
+no matter the month and president.
+The tricky thing here is that <code>pm.GaussianRandomWalk</code>
+uses <a href="https://docs.pymc.io/api/distributions/timeseries.html#pymc3.distributions.timeseries.GaussianRandomWalk">a distribution to initiate the random walk</a>.
+So, if we don't constrain it to zero,
+we will get an additive non-identifiability --
+for each president and month, we'll have two intercepts,
+<code>baseline</code> and the initial value of the random walk.
+<code>pm.GaussianRandomWalk</code> only accepts distribution objects
+for the <code>init</code> kwarg though,
+so we have to implement the random walk by hand, i.e:</p>
+<p><span>
+$$\mu_n = \mu_{n - 1} + Z_n, \, with \, Z_n \sim Normal(0, 1) \, and \, \mu_0 = 0$$
+</span></p>
+<p>In other words, a Gaussian random walk is just a cumulative sum,
+where we add a sample from a standard Normal at each step
+($Z_n$ here, which is called the innovation of the random walk).</p>
+<p>Finally, it's probably useful to add a <code>president_effect</code>:
+it's very probable that some presidents are just more popular than others,
+even when taking into account the cyclical temporal variations.</p>
+<div class="hll"><pre><span></span><span class="n">COORDS</span><span class="p">[</span><span class="s2">&quot;month_minus_origin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">COORDS</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span>
+</pre></div>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">COORDS</span><span class="p">)</span> <span class="k">as</span> <span class="n">hierarchical_popularity</span><span class="p">:</span>
+
+    <span class="n">baseline</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;baseline&quot;</span><span class="p">)</span>
+    <span class="n">president_effect</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;president_effect&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;president&quot;</span><span class="p">)</span>
+    <span class="n">house_effect</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;house_effect&quot;</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;pollster_by_method&quot;</span><span class="p">)</span>
+
+    <span class="n">month_effect</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;month_effect&quot;</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;month&quot;</span><span class="p">)</span>
+    <span class="c1"># need the cumsum parametrization to properly control the init of the GRW</span>
+    <span class="n">rw_init</span> <span class="o">=</span> <span class="n">aet</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">COORDS</span><span class="p">[</span><span class="s2">&quot;president&quot;</span><span class="p">]),</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">rw_innovations</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span>
+        <span class="s2">&quot;rw_innovations&quot;</span><span class="p">,</span>
+        <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;president&quot;</span><span class="p">,</span> <span class="s2">&quot;month_minus_origin&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">raw_rw</span> <span class="o">=</span> <span class="n">aet</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">aet</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">rw_init</span><span class="p">,</span> <span class="n">rw_innovations</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;shrinkage_pop&quot;</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+    <span class="n">month_president_effect</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span>
+        <span class="s2">&quot;month_president_effect&quot;</span><span class="p">,</span> <span class="n">raw_rw</span> <span class="o">*</span> <span class="n">sd</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;president&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">popularity</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">invlogit</span><span class="p">(</span>
+        <span class="n">baseline</span>
+        <span class="o">+</span> <span class="n">president_effect</span><span class="p">[</span><span class="n">president_id</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">month_effect</span><span class="p">[</span><span class="n">month_id</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">month_president_effect</span><span class="p">[</span><span class="n">president_id</span><span class="p">,</span> <span class="n">month_id</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">house_effect</span><span class="p">[</span><span class="n">pollster_by_method_id</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">N_approve</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Binomial</span><span class="p">(</span>
+        <span class="s2">&quot;N_approve&quot;</span><span class="p">,</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">popularity</span><span class="p">,</span>
+        <span class="n">n</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;samplesize&quot;</span><span class="p">],</span>
+        <span class="n">observed</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;num_approve&quot;</span><span class="p">],</span>
+        <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;observation&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">idata</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">return_inferencedata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+<pre><code>Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [shrinkage_pop, rw_innovations, month_effect, house_effect, president_effect, baseline]
+</code></pre>
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [8000/8000 11:50<00:00 Sampling 4 chains, 0 divergences]
+</div><pre><code>Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 733 seconds.
+
+
+0, dim: observation, 1083 =? 1083
+</code></pre>
+<p>No warnings whatsoever!
+Who would have thought that adding a simple intercept would help that much!
+Let's look at our expectedly beautiful trace plot 🤩</p>
+<p>Note that sampling time went up though -- interesting 🤔</p>
+<div class="hll"><pre><span></span><span class="n">arviz</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span>
+    <span class="n">idata</span><span class="p">,</span>
+    <span class="n">var_names</span><span class="o">=</span><span class="s2">&quot;~rw&quot;</span><span class="p">,</span>
+    <span class="n">filter_vars</span><span class="o">=</span><span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+<span class="p">);</span>
+</pre></div>
+<details>
+<pre><code>
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+</code></pre>
+</details><p><img src="output_66_1.png" alt="png"></p>
+<p>That looks much better, doesn't it?
+Now we do see a difference in the different months,
+and the shrinkage standard deviation looks much more reasonable too,
+meaning that once we've accounted for the variation in popularity
+associated with the other effects,
+the different presidents' popularity isn't that different on a monthly basis --
+i.e there <em>are</em> cycles in popularity, no matter who the president is.</p>
+<h2 id="modelers-just-wanna-have-fuuuun">Modelers just wanna have fuuuun!</h2><p>We could stop there, but, for fun, let's improve this model even further by:</p>
+<p>(1) Using a Beta-Binomial likelihood.</p>
+<p>We already saw in the completely pooled model that
+it improves fit and convergence a lot.
+Plus, it makes scientific sense: for a lot of reasons,
+each poll probably has a different true Binomial probability
+than all the other ones -- even when it comes from the same pollster;
+just think about measurement errors
+or the way the sample is different each time.
+Here, we parametrize the Beta-Binomial by its mean and precision,
+instead of the classical $\alpha$ and $\beta$ parameters.
+For more details about this distribution and parametrization,
+see <a href="https://alexandorra.github.io/pollsposition_blog/popularity/macron/gaussian%20processes/polls/2021/01/18/gp-popularity.html#Build-me-a-model">this blog post</a>.</p>
+<p>(2) Making sure that our different effects sum to zero.</p>
+<p>Think about the month effect.
+It only makes sense in a relative sense:
+some months are better than average, some others are worse,
+but you can't have <em>only</em> good months --
+they'd be good compared to what?
+So we want to make sure that the average month effect is 0,
+while allowing each month to be better or worse than average if needed.
+And the reasoning is the same for house effects for instance --
+can you see why?
+To implement that, we use a Normal distribution
+whose last axis is constrained to sum to zero.
+In PyMC, we can use the <code>ZeroSumNormal</code> distribution,
+that <a href="https://github.com/aseyboldt">Adrian Seyboldt</a>
+contributed and kindly shared with us.</p>
+<p>Ok, enough talking, let's code!</p>
+<div class="hll"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="k">def</span> <span class="nf">ZeroSumNormal</span><span class="p">(</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">dims</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Multivariate normal, such that sum(x, axis=-1) = 0.</span>
+
+<span class="sd">    Parameters</span>
+
+<span class="sd">    name: str</span>
+<span class="sd">        String name representation of the PyMC variable.</span>
+<span class="sd">    sigma: float, defaults to 1</span>
+<span class="sd">        Scale for the Normal distribution. If none is provided, a standard Normal is used.</span>
+<span class="sd">    dims: Union[str, Tuple[str]]</span>
+<span class="sd">        Dimension names for the shape of the distribution.</span>
+<span class="sd">        See https://docs.pymc.io/pymc-examples/examples/pymc3_howto/data_container.html for an example.</span>
+<span class="sd">    model: Optional[pm.Model], defaults to None</span>
+<span class="sd">        PyMC model instance. If ``None``, a model instance is created.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">-   ----------</span>
+<span class="sd">    Contributed by Adrian Seyboldt (@aseyboldt).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dims</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="p">(</span><span class="n">dims</span><span class="p">,)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">modelcontext</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="o">*</span><span class="n">dims_pre</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="n">dims</span>
+    <span class="n">dim_trunc</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s2">_truncated_&quot;</span>
+    <span class="p">(</span><span class="n">shape</span><span class="p">,)</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">shape_from_dims</span><span class="p">((</span><span class="n">dim</span><span class="p">,))</span>
+    <span class="k">assert</span> <span class="n">shape</span> <span class="o">&gt;=</span> <span class="mi">1</span>
+
+    <span class="n">model</span><span class="o">.</span><span class="n">add_coords</span><span class="p">({</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s2">_truncated_&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">RangeIndex</span><span class="p">(</span><span class="n">shape</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)})</span>
+    <span class="n">raw</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_truncated_&quot;</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">dims_pre</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">dim_trunc</span><span class="p">,),</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span>
+    <span class="p">)</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="n">make_sum_zero_hh</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">draws</span> <span class="o">=</span> <span class="n">aet</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">Q</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">draws</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">make_sum_zero_hh</span><span class="p">(</span><span class="n">N</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Build a householder transformation matrix that maps e_1 to a vector of all 1s.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">e_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="n">e_1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span> <span class="o">@</span> <span class="n">a</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">e_1</span>
+    <span class="n">v</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">v</span> <span class="o">@</span> <span class="n">v</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+</pre></div>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">COORDS</span><span class="p">)</span> <span class="k">as</span> <span class="n">hierarchical_popularity</span><span class="p">:</span>
+
+    <span class="n">baseline</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;baseline&quot;</span><span class="p">)</span>
+    <span class="n">president_effect</span> <span class="o">=</span> <span class="n">ZeroSumNormal</span><span class="p">(</span><span class="s2">&quot;president_effect&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;president&quot;</span><span class="p">)</span>
+    <span class="n">house_effect</span> <span class="o">=</span> <span class="n">ZeroSumNormal</span><span class="p">(</span><span class="s2">&quot;house_effect&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;pollster_by_method&quot;</span><span class="p">)</span>
+    <span class="n">month_effect</span> <span class="o">=</span> <span class="n">ZeroSumNormal</span><span class="p">(</span><span class="s2">&quot;month_effect&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;month&quot;</span><span class="p">)</span>
+
+    <span class="c1"># need the cumsum parametrization to properly control the init of the GRW</span>
+    <span class="n">rw_init</span> <span class="o">=</span> <span class="n">aet</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">COORDS</span><span class="p">[</span><span class="s2">&quot;president&quot;</span><span class="p">]),</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">rw_innovations</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span>
+        <span class="s2">&quot;rw_innovations&quot;</span><span class="p">,</span>
+        <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;president&quot;</span><span class="p">,</span> <span class="s2">&quot;month_minus_origin&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">raw_rw</span> <span class="o">=</span> <span class="n">aet</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">aet</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">rw_init</span><span class="p">,</span> <span class="n">rw_innovations</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;shrinkage_pop&quot;</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+    <span class="n">month_president_effect</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span>
+        <span class="s2">&quot;month_president_effect&quot;</span><span class="p">,</span> <span class="n">raw_rw</span> <span class="o">*</span> <span class="n">sd</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;president&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">popularity</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">invlogit</span><span class="p">(</span>
+        <span class="n">baseline</span>
+        <span class="o">+</span> <span class="n">president_effect</span><span class="p">[</span><span class="n">president_id</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">month_effect</span><span class="p">[</span><span class="n">month_id</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">month_president_effect</span><span class="p">[</span><span class="n">president_id</span><span class="p">,</span> <span class="n">month_id</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">house_effect</span><span class="p">[</span><span class="n">pollster_by_method_id</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># overdispersion parameter</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Exponential</span><span class="p">(</span><span class="s2">&quot;theta_offset&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">10.0</span>
+
+    <span class="n">N_approve</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">BetaBinomial</span><span class="p">(</span>
+        <span class="s2">&quot;N_approve&quot;</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="n">popularity</span> <span class="o">*</span> <span class="n">theta</span><span class="p">,</span>
+        <span class="n">beta</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">popularity</span><span class="p">)</span> <span class="o">*</span> <span class="n">theta</span><span class="p">,</span>
+        <span class="n">n</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;samplesize&quot;</span><span class="p">],</span>
+        <span class="n">observed</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;num_approve&quot;</span><span class="p">],</span>
+        <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;observation&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="n">pm</span><span class="o">.</span><span class="n">model_to_graphviz</span><span class="p">(</span><span class="n">hierarchical_popularity</span><span class="p">)</span>
+</pre></div>
+<p><img src="output_69_0.svg" alt="svg"></p>
+<p>Pssst, wanna see something funny?
+Let's plot the graphical representation
+of the very first model we tried in this study,
+to realize how far we've gotten since then:</p>
+<div class="hll"><pre><span></span><span class="n">pm</span><span class="o">.</span><span class="n">model_to_graphviz</span><span class="p">(</span><span class="n">pooled_popularity_simple</span><span class="p">)</span>
+</pre></div>
+<p><img src="output_71_0.svg" alt="svg"></p>
+<p>Well we don't know about you, but we find that funny 😂 !
+And it's a great example of how statistical modeling happens in real life:
+small, incremental, error-filled steps,
+instead of big, giant, perfect steps -- so, in a nutshell,
+a delightfully miserable endeavor!</p>
+<p>Now, let's sample from this last model!</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">hierarchical_popularity</span><span class="p">:</span>
+    <span class="n">idata</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">return_inferencedata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+<pre><code>Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [theta_offset, shrinkage_pop, rw_innovations, month_effect_truncated_, house_effect_truncated_, president_effect_truncated_, baseline]
+</code></pre>
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [8000/8000 02:57<00:00 Sampling 4 chains, 0 divergences]
+</div><pre><code>Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 196 seconds.
+
+
+0, dim: observation, 1083 =? 1083
+</code></pre>
+<p>Sampling was lightning fast, with a 4x improvement over our previous model!
+And we don't have any warnings, aka the best of both worlds.</p>
+<div class="hll"><pre><span></span><span class="n">arviz</span><span class="o">.</span><span class="n">plot_trace</span><span class="p">(</span>
+    <span class="n">idata</span><span class="p">,</span>
+    <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;~truncated&quot;</span><span class="p">,</span> <span class="s2">&quot;~rw_innovations&quot;</span><span class="p">],</span>
+    <span class="n">filter_vars</span><span class="o">=</span><span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+    <span class="n">compact</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">);</span>
+</pre></div>
+<details><pre><code>
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: divide by zero encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/density_utils.py:783: RuntimeWarning: invalid value encountered in true_divide
+      pdf /= bw * (2 * np.pi) ** 0.5
+</code></pre></details><p><img src="output_75_1.png" alt="png"></p>
+<div class="hll"><pre><span></span><span class="n">arviz</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span>
+    <span class="n">idata</span><span class="p">,</span>
+    <span class="n">round_to</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;~truncated&quot;</span><span class="p">,</span> <span class="s2">&quot;~rw_innovations&quot;</span><span class="p">],</span>
+    <span class="n">filter_vars</span><span class="o">=</span><span class="s2">&quot;regex&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+<details><pre><code>
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/diagnostics.py:561: RuntimeWarning: invalid value encountered in double_scalars
+      (between_chain_variance / within_chain_variance + num_samples - 1) / (num_samples)
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/diagnostics.py:561: RuntimeWarning: invalid value encountered in double_scalars
+      (between_chain_variance / within_chain_variance + num_samples - 1) / (num_samples)
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/diagnostics.py:561: RuntimeWarning: invalid value encountered in double_scalars
+      (between_chain_variance / within_chain_variance + num_samples - 1) / (num_samples)
+    /Users/alex_andorra/opt/anaconda3/envs/elections-models/lib/python3.9/site-packages/arviz/stats/diagnostics.py:561: RuntimeWarning: invalid value encountered in double_scalars
+      (between_chain_variance / within_chain_variance + num_samples - 1) / (num_samples)
+</code></pre></details><div class="dfdiv">
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>baseline</th>
+      <td>0.16</td>
+      <td>0.08</td>
+      <td>-0.00</td>
+      <td>0.31</td>
+      <td>0.0</td>
+      <td>0.00</td>
+      <td>1875.39</td>
+      <td>2361.99</td>
+      <td>1.01</td>
+    </tr>
+    <tr>
+      <th>president_effect[0]</th>
+      <td>-0.22</td>
+      <td>0.06</td>
+      <td>-0.32</td>
+      <td>-0.11</td>
+      <td>0.0</td>
+      <td>0.00</td>
+      <td>5477.76</td>
+      <td>2964.37</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>president_effect[1]</th>
+      <td>0.24</td>
+      <td>0.06</td>
+      <td>0.13</td>
+      <td>0.35</td>
+      <td>0.0</td>
+      <td>0.00</td>
+      <td>5901.82</td>
+      <td>3281.21</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>president_effect[2]</th>
+      <td>-0.02</td>
+      <td>0.06</td>
+      <td>-0.13</td>
+      <td>0.08</td>
+      <td>0.0</td>
+      <td>0.00</td>
+      <td>6010.84</td>
+      <td>3175.73</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>president_effect[3]</th>
+      <td>-0.01</td>
+      <td>0.05</td>
+      <td>-0.10</td>
+      <td>0.08</td>
+      <td>0.0</td>
+      <td>0.00</td>
+      <td>4991.87</td>
+      <td>3454.38</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>month_president_effect[3,56]</th>
+      <td>-0.59</td>
+      <td>0.39</td>
+      <td>-1.27</td>
+      <td>0.18</td>
+      <td>0.0</td>
+      <td>0.00</td>
+      <td>6903.42</td>
+      <td>2799.11</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>month_president_effect[3,57]</th>
+      <td>-0.60</td>
+      <td>0.40</td>
+      <td>-1.36</td>
+      <td>0.16</td>
+      <td>0.0</td>
+      <td>0.00</td>
+      <td>7176.01</td>
+      <td>2852.99</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>month_president_effect[3,58]</th>
+      <td>-0.60</td>
+      <td>0.42</td>
+      <td>-1.40</td>
+      <td>0.21</td>
+      <td>0.0</td>
+      <td>0.00</td>
+      <td>7949.23</td>
+      <td>2993.55</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>month_president_effect[3,59]</th>
+      <td>-0.60</td>
+      <td>0.44</td>
+      <td>-1.41</td>
+      <td>0.22</td>
+      <td>0.0</td>
+      <td>0.00</td>
+      <td>8050.80</td>
+      <td>3096.09</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>theta_offset</th>
+      <td>143.78</td>
+      <td>7.89</td>
+      <td>128.92</td>
+      <td>158.73</td>
+      <td>0.1</td>
+      <td>0.07</td>
+      <td>5746.64</td>
+      <td>2687.64</td>
+      <td>1.00</td>
+    </tr>
+  </tbody>
+</table>
+<p>322 rows × 9 columns</p>
+</div><h2 id="posterior-predictions">Posterior predictions</h2><p>And now let's do something new!
+Let's visualize the posterior estimates of the house effects.
+We'll plot the mean value for each <code>(pollster, method)</code> pair.
+Remember, a <em>positive</em> house effect
+means the given pair tend to <em>overestimate</em> the latent popularity:</p>
+<div class="hll"><pre><span></span><span class="n">mean_house_effect</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">idata</span><span class="o">.</span><span class="n">posterior</span><span class="p">[</span><span class="s2">&quot;house_effect&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="s2">&quot;chain&quot;</span><span class="p">,</span> <span class="s2">&quot;draw&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">mean_house_effect</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">rot</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;(pollster, method)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;house effect&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;$&gt;0$ bias means (pollster, method) overestimates the latent popularity&quot;</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_78_0.png" alt="png"></p>
+<p>All this is inline with what I usually observe
+when I collect the polls each month
+(yes, by hand, thanks for asking, that's so cute!):</p>
+<ul>
+<li>BVA tends to be a bit higher than average, no matter the method.
+Harris tends to be higher too, while Viavoice, Elabe and, especially,
+YouGov tend to be report much lower results than the average pollster.</li>
+<li>As suspected, Kantar is lower than average when using face-to-face,
+but is now within the average since it shifted to internet in January 2021.
+Interestingly, it goes the other way around for Ipsos:
+internet has a slightly negative bias for them,
+while phone has a slightly positive one.</li>
+</ul>
+<p>Now let's look at our posterior predictions.
+This time, we can distinguish each president,
+which probably helped the model tremendously:</p>
+<div class="hll"><pre><span></span><span class="n">obs_mean</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;president&quot;</span><span class="p">,</span> <span class="s2">&quot;month_id&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">last</span><span class="p">()[</span><span class="s2">&quot;p_approve_mean&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unstack</span><span class="p">()</span><span class="o">.</span><span class="n">T</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">idata</span><span class="o">.</span><span class="n">posterior</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;president&quot;</span><span class="p">]):</span>
+    <span class="n">post</span> <span class="o">=</span> <span class="n">idata</span><span class="o">.</span><span class="n">posterior</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">president</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+    <span class="n">post_pop</span> <span class="o">=</span> <span class="n">logistic</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="n">post</span><span class="p">[</span><span class="s2">&quot;baseline&quot;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">post</span><span class="p">[</span><span class="s2">&quot;president_effect&quot;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">post</span><span class="p">[</span><span class="s2">&quot;month_effect&quot;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">post</span><span class="p">[</span><span class="s2">&quot;month_president_effect&quot;</span><span class="p">]</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">sample</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;chain&quot;</span><span class="p">,</span> <span class="s2">&quot;draw&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="c1"># plot random posterior draws</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">post</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;month&quot;</span><span class="p">],</span>
+        <span class="n">post_pop</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span>
+            <span class="n">sample</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">post_pop</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s2">&quot;sample&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># plot posterior mean</span>
+    <span class="n">post_pop</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="s2">&quot;sample&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;predicted mean&quot;</span><span class="p">)</span>
+    <span class="c1"># plot monthly raw polls</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">obs_mean</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+        <span class="n">obs_mean</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">data</span><span class="p">],</span>
+        <span class="s2">&quot;o&quot;</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;observed monthly&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Months into term&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Latent popularity&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+<p><img src="output_80_0.png" alt="png"></p>
+<p>Quite the improvement uh?
+The model is much, much better at tracking each president's popoularity now --
+this extension to a hierarchical structure proved very necessary!</p>
+<p>Another way to check our model's performance
+is to generate plausible polls from it,
+and compare them to the <em>actual</em> polls.
+This is a genuine posterior retrodictive check:
+we generate data from our model and check how plausible they are,
+compared to the observed data and our domain knowledge.
+Contrary to our previous plot,
+this kind of checks integrate
+all the model uncertainty down to the likelihood,
+so it's directly comparable to the observed data.</p>
+<p>In particular,
+we can see in the plot above that the model still has one weakness:
+it has troubles when the popularity rate
+varies widely from one month to the next.
+These wild bumps happen for various reasons,
+usually in answer to big political events.
+Although they vary in magnitude,
+we do see a few of them in each mandate,
+and each time the model wasn't aggressive enough
+in keeping in line with them.
+That could be trouble for out-of-sample predictions
+and could be improved in a subsequent version of the model.</p>
+<p>Compution posterior predictive samples is just one line of code in PyMC3.
+We'll also extend our current <code>InferenceData</code> object
+with these posterior predictive samples,
+to be able to use all the xarray goodies in our plot
+(for a quick start on ArviZ's <code>InferenceData</code>'s awesomness for multidimensional data,
+<a href="https://arviz-devs.github.io/arviz/getting_started/XarrayforArviZ.html">click here</a>).</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">hierarchical_popularity</span><span class="p">:</span>
+    <span class="n">idata</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">arviz</span><span class="o">.</span><span class="n">from_pymc3</span><span class="p">(</span>
+            <span class="n">posterior_predictive</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span><span class="n">idata</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</pre></div>
+<div>
+    <style>
+        /* Turns off some styling */
+        progress {
+            /* gets rid of default border in Firefox and Opera. */
+            border: none;
+            /* Needs to be in here for Safari polyfill so background images work as expected. */
+            background-size: auto;
+        }
+        .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+            background: #F44336;
+        }
+    </style>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 00:06<00:00]
+</div><div class="hll"><pre><span></span><span class="n">predicted_approval_rates</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">idata</span><span class="o">.</span><span class="n">posterior_predictive</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="s2">&quot;chain&quot;</span><span class="p">,</span> <span class="s2">&quot;draw&quot;</span><span class="p">))[</span><span class="s2">&quot;N_approve&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;samplesize&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">dates</span> <span class="o">=</span> <span class="n">predicted_approval_rates</span><span class="o">.</span><span class="n">field_date</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">dates</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;p_approve&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;observed polls&quot;</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">predicted_approval_rates</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;predicted polls&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Posterior Predictive Approval Rate&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">date</span> <span class="ow">in</span> <span class="n">newterm_dates</span><span class="p">:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+</pre></div>
+<p><img src="output_83_0.png" alt="png"></p>
+<p>These are really good predictions 😲 !
+The model has very little trouble tracking
+the evolution and variation of each president's popularity,
+so we can be happy with ourselves. Interestingly though,
+we still see this tendency of the model
+to slightly underestimate the variation in raw polls,
+especially when big, sudden shifts in opinion happen,
+as we already mentioned.
+Although we don't want to <em>exactly</em> replicate the observed data
+(some polls really are outliers
+and that's good that the model doesn't overfit),
+it would be interesting to see if the model
+can be further improved in this respect.</p>
+<p>And that, ladies and gentlemen,
+was our workflow for modeling the evolution of 🇫🇷 presidents' popularity
+as a Markov chain!
+We hope you enjoyed it,
+and feel free to comment below or <a href="https://twitter.com/alex_andorra">reach out</a>
+for any comments or suggestions.
+By the way, what do you think of this model?
+Are you surprised that French people tend to dislike their presidents?</p>
+<p><img src="https://media.giphy.com/media/3o7qDEq2bMbcbPRQ2c/giphy.gif" alt="MicDropUrl"></p>
+<pre><code>Last updated: Sun May 16 2021
+
+Python implementation: CPython
+Python version       : 3.9.2
+IPython version      : 7.22.0
+
+pandas    : 1.2.4
+theano    : 1.1.2
+numpy     : 1.20.2
+matplotlib: 3.4.1
+pymc3     : 3.11.2
+arviz     : 0.11.2
+</code></pre>
+
+	<!--THIS IS THE FOOTER OF THE BLOGPSOT-->
+	<hr> 
+		<!--div class="container"-->
+			<h2 class="font-roboto">Work with PyMC Labs</h2>
+			<p>If you are interested in seeing what we at PyMC Labs can do for you, then please email <a href="mailto:info@pymc-labs.io">info@pymc-labs.io</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity.
+
+We also run <a href="https://www.pymc-labs.io/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics.
+			</p>
+		<!--/div-->
+    
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+
+        </div>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+            integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+            crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+            <div class="container">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-twitter"
+                                    aria-hidden="true"></i>
+                                Twitter</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-github"
+                                    aria-hidden="true"></i>
+                                GitHub</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-linkedin"
+                                    aria-hidden="true"></i>
+                                LinkedIn</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-youtube"
+                                    aria-hidden="true"></i>
+                                YouTube</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-meetup"
+                                    aria-hidden="true"></i>
+                                Meetup</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                    aria-hidden="true"></i>
+                                Newsletter</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+    </body>
+
+</html>
