@@ -1,0 +1,1118 @@
+<!doctype html><html lang="en">
+
+    <head>
+        
+        <style media="screen">
+            body {
+                padding-top: 70px;
+                padding-bottom: 70px;
+            }
+
+        </style>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+        <link rel="stylesheet" href="../static/css/custom_style.css?h=16f93eb7">
+        <link rel="stylesheet" href="../static/css/table_style.css?h=c677f945">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+
+        <!-- Extra meta tags: social site cards, browser icons... -->
+        <meta name="theme-color" content="#ffffff">
+        <link rel="shortcut icon" href="../static/favicon.ico?h=d935d59e">
+        <link rel="apple-touch-icon" sizes="180x180" href="../static/apple-touch-icon.png?h=2bad941d">
+        <link rel="icon" type="image/png" sizes="32x32" href="../static/favicon-32x32.png?h=1673bb68">
+        <link rel="icon" type="image/png" sizes="16x16" href="../static/favicon-16x16.png?h=089e66cb">
+
+        <title>Blog Posts - PyMC Labs</title>
+        <meta name="twitter:card" content="summary">
+        <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/" />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href="">
+        <meta property="og:title" content="Blog Posts - PyMC Labs" />
+        <meta property="og:description" content="Read about our success stories." />
+        <meta property="og:image" content="../static/images/pymc-labs-icon.png?h=77fcc5df" />
+        <meta name="description" content="We are a Bayesian consulting firm specializing in data analysis and predictive modeling. Contact us today to learn how we can help your business.">
+        <meta name="keywords" content="Bayesian consulting, data analysis, predictive modeling">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+        <!-- <script>hljs.highlightAll();</script> -->
+
+        <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+        <!-- We use this to do syntax highlighting -->
+        <link rel="stylesheet" href="../static/pygments.css">
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+        </script>
+        
+    </head>
+
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <div class="container">
+                <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+                <a class="navbar-brand" href="/"><img alt="logo" loading="eager" width="88" height="70" title="logo" class="navbar-logo"
+                        src="../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop"
+                    aria-controls="navbarTop" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarTop">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                    aria-hidden="true"></i>
+                                What we do</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                    aria-hidden="true"></i>
+                                Products</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                    aria-hidden="true"></i>
+                                Team</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                    aria-hidden="true"></i>
+                                Clients</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                    aria-hidden="true"></i>
+                                Workshops</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                    aria-hidden="true"></i>
+                                Blog</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container">
+            
+
+<div class="row">
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="2023-19-11-marketing-effectiveness/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="2023-19-11-marketing-effectiveness/cover.png" alt="">
+
+
+                </a>
+                <a href="2023-19-11-marketing-effectiveness/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Mastering Marketing Effectiveness: A Comprehensive Guide for Digital Marketers</h4>
+                </a>
+                <small>2023-11-19</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="2023-10-27-Latent-calendar-Will/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="2023-10-27-Latent-calendar-Will/cover.png" alt="">
+
+
+                </a>
+                <a href="2023-10-27-Latent-calendar-Will/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Latent Calendar: Modeling Weekly Behavior with Latent Components</h4>
+                </a>
+                <small>2023-10-27</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="2023-09-15-Hierarchical-models-Chris-Fonnesbeck/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="2023-09-15-Hierarchical-models-Chris-Fonnesbeck/cover.png" alt="">
+
+
+                </a>
+                <a href="2023-09-15-Hierarchical-models-Chris-Fonnesbeck/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Developing Hierarchical Models for Sports Analytics</h4>
+                </a>
+                <small>2023-09-26</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="from-uncertainty-to-insight-how-bayesian-data-science-can-transform-your-business/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="from-uncertainty-to-insight-how-bayesian-data-science-can-transform-your-business/cover.png" alt="">
+
+
+                </a>
+                <a href="from-uncertainty-to-insight-how-bayesian-data-science-can-transform-your-business/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">From Uncertainty to Insight: How Bayesian Data Science Can Transform Your Business</h4>
+                </a>
+                <small>2023-09-25</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="causal-analysis-with-pymc-answering-what-if-with-the-new-do-operator/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="causal-analysis-with-pymc-answering-what-if-with-the-new-do-operator/cover.png" alt="">
+
+
+                </a>
+                <a href="causal-analysis-with-pymc-answering-what-if-with-the-new-do-operator/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Causal analysis with PyMC: Answering &#34;What If?&#34; with the new do operator</h4>
+                </a>
+                <small>2023-08-01</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="2023-07-18-niall-In-house-marketing/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="2023-07-18-niall-In-house-marketing/cover.png" alt="">
+
+
+                </a>
+                <a href="2023-07-18-niall-In-house-marketing/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Building an in-house marketing analytics solution</h4>
+                </a>
+                <small>2023-07-31</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="2023-06-20-juan-marketing-analytics/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="2023-06-20-juan-marketing-analytics/cover.png" alt="">
+
+
+                </a>
+                <a href="2023-06-20-juan-marketing-analytics/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Bayesian Methods in Modern Marketing Analytics</h4>
+                </a>
+                <small>2023-06-20</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="out-of-model-predictions-with-pymc/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="out-of-model-predictions-with-pymc/cover.png" alt="">
+
+
+                </a>
+                <a href="out-of-model-predictions-with-pymc/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Out of model predictions with PyMC</h4>
+                </a>
+                <small>2023-06-12</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="simulating-data-with-pymc/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="simulating-data-with-pymc/cover.png" alt="">
+
+
+                </a>
+                <a href="simulating-data-with-pymc/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Simulating data with PyMC</h4>
+                </a>
+                <small>2023-04-20</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="pymc-marketing-a-bayesian-approach-to-marketing-data-science/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="pymc-marketing-a-bayesian-approach-to-marketing-data-science/cover.png" alt="">
+
+
+                </a>
+                <a href="pymc-marketing-a-bayesian-approach-to-marketing-data-science/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">PyMC-Marketing: A Bayesian Approach to Marketing Data Science</h4>
+                </a>
+                <small>2023-04-06</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="likelihood-approximations-through-neural-networks/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="likelihood-approximations-through-neural-networks/cover.png" alt="">
+
+
+                </a>
+                <a href="likelihood-approximations-through-neural-networks/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Likelihood Approximations with Neural Networks in PyMC</h4>
+                </a>
+                <small>2023-03-31</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="2023-01-12-Akili/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="2023-01-12-Akili/cover.png" alt="">
+
+
+                </a>
+                <a href="2023-01-12-Akili/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Likelihood Approximations for Cognitive Modeling with PyMC</h4>
+                </a>
+                <small>2023-01-12</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="jax-functions-in-pymc-3-quick-examples/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="jax-functions-in-pymc-3-quick-examples/cover.png" alt="">
+
+
+                </a>
+                <a href="jax-functions-in-pymc-3-quick-examples/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">How to use JAX ODEs and Neural Networks in PyMC</h4>
+                </a>
+                <small>2023-01-03</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="2022-12-08-Salk/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="2022-12-08-Salk/cover.png" alt="">
+
+
+                </a>
+                <a href="2022-12-08-Salk/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Hierarchical Bayesian Modeling of Survey Data with Post-stratification</h4>
+                </a>
+                <small>2022-12-08</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="causalpy-a-new-package-for-bayesian-causal-inference-for-quasi-experiments/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="causalpy-a-new-package-for-bayesian-causal-inference-for-quasi-experiments/cover.png" alt="">
+
+
+                </a>
+                <a href="causalpy-a-new-package-for-bayesian-causal-inference-for-quasi-experiments/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">CausalPy - causal inference for quasi-experiments</h4>
+                </a>
+                <small>2022-11-17</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="2022-11-11-HelloFresh/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="2022-11-11-HelloFresh/cover.png" alt="">
+
+
+                </a>
+                <a href="2022-11-11-HelloFresh/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Bayesian Marketing Mix Models: State of the Art and their Future</h4>
+                </a>
+                <small>2022-11-11</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="Thomas_PyData_London/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="Thomas_PyData_London/cover.png" alt="">
+
+
+                </a>
+                <a href="Thomas_PyData_London/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Solving Real-World Business Problems with Bayesian Modeling</h4>
+                </a>
+                <small>2022-10-31</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="2022-10-26-AlvaLabs/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="2022-10-26-AlvaLabs/cover.png" alt="">
+
+
+                </a>
+                <a href="2022-10-26-AlvaLabs/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Bayesian Item Response Modeling in PyMC</h4>
+                </a>
+                <small>2022-10-26</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="spatial-gaussian-process-01/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="spatial-gaussian-process-01/cover.png" alt="">
+
+
+                </a>
+                <a href="spatial-gaussian-process-01/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Modeling spatial data with Gaussian processes in PyMC</h4>
+                </a>
+                <small>2022-08-17</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="bayesian-inference-at-scale-running-ab-tests-with-millions-of-observations/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="bayesian-inference-at-scale-running-ab-tests-with-millions-of-observations/cover.png" alt="">
+
+
+                </a>
+                <a href="bayesian-inference-at-scale-running-ab-tests-with-millions-of-observations/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Bayesian inference at scale: Running A/B tests with millions of observations</h4>
+                </a>
+                <small>2022-08-12</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="2022-08-11-indigo/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="2022-08-11-indigo/cover.png" alt="">
+
+
+                </a>
+                <a href="2022-08-11-indigo/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Bayesian Modeling in Biotech: Using PyMC to Analyze Agricultural Data</h4>
+                </a>
+                <small>2022-08-11</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="modelling-changes-marketing-effectiveness-over-time/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="modelling-changes-marketing-effectiveness-over-time/cover.png" alt="">
+
+
+                </a>
+                <a href="modelling-changes-marketing-effectiveness-over-time/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Bayesian Media Mix Models: Modelling changes in marketing effectiveness over time</h4>
+                </a>
+                <small>2022-07-19</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="03-xpost-ar-nba-irt/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="03-xpost-ar-nba-irt/cover.png" alt="">
+
+
+                </a>
+                <a href="03-xpost-ar-nba-irt/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">NBA Foul Analysis with Item Response Theory using PyMC</h4>
+                </a>
+                <small>2022-07-15</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="causal-inference-in-pymc/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="causal-inference-in-pymc/cover.png" alt="">
+
+
+                </a>
+                <a href="causal-inference-in-pymc/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">What if? Causal inference through counterfactual reasoning in PyMC</h4>
+                </a>
+                <small>2022-07-13</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="2022-07-10-ricardo-video/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="2022-07-10-ricardo-video/cover.png" alt="">
+
+
+                </a>
+                <a href="2022-07-10-ricardo-video/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">PyMC, Aesara and AePPL: The New Kids on The Block</h4>
+                </a>
+                <small>2022-07-10</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="bayesian-vector-autoregression/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="bayesian-vector-autoregression/cover.png" alt="">
+
+
+                </a>
+                <a href="bayesian-vector-autoregression/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Bayesian Vector Autoregression in PyMC</h4>
+                </a>
+                <small>2022-06-24</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="02-xpost-tw-MCMC-sampling/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="02-xpost-tw-MCMC-sampling/cover.png" alt="">
+
+
+                </a>
+                <a href="02-xpost-tw-MCMC-sampling/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">MCMC sampling for dummies</h4>
+                </a>
+                <small>2022-06-15</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="pymc-in-browser/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="pymc-in-browser/cover.png" alt="">
+
+
+                </a>
+                <a href="pymc-in-browser/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Running PyMC in the Browser with PyScript</h4>
+                </a>
+                <small>2022-05-16</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="04-xpost-be-time-series-volcano/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="04-xpost-be-time-series-volcano/cover.png" alt="">
+
+
+                </a>
+                <a href="04-xpost-be-time-series-volcano/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Building Time-Series Models With Known Data Structure</h4>
+                </a>
+                <small>2022-05-15</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="01-xpost-tw-stochastic-volatility/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="01-xpost-tw-stochastic-volatility/cover.png" alt="">
+
+
+                </a>
+                <a href="01-xpost-tw-stochastic-volatility/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Stochastic Volatility Model with PyMC</h4>
+                </a>
+                <small>2022-01-15</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="labs-principles/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="labs-principles/cover.png" alt="">
+
+
+                </a>
+                <a href="labs-principles/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">My Journey Building PyMC Labs: Five Principles from Open Source that Boost Innovation at any Company</h4>
+                </a>
+                <small>2022-01-10</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="the-quickest-migration-guide-ever-from-pymc3-to-pymc-v40/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="the-quickest-migration-guide-ever-from-pymc3-to-pymc-v40/cover.png" alt="">
+
+
+                </a>
+                <a href="the-quickest-migration-guide-ever-from-pymc3-to-pymc-v40/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">The Quickest Migration Guide Ever from PyMC3 to PyMC v4.0</h4>
+                </a>
+                <small>2022-01-03</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="pymc-stan-benchmark/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="pymc-stan-benchmark/cover.png" alt="">
+
+
+                </a>
+                <a href="pymc-stan-benchmark/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">MCMC for big datasets: faster sampling with JAX and the GPU</h4>
+                </a>
+                <small>2021-12-22</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="bayes-is-slow-speeding-up-hellofreshs-bayesian-ab-tests-by-60x/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="bayes-is-slow-speeding-up-hellofreshs-bayesian-ab-tests-by-60x/cover.png" alt="">
+
+
+                </a>
+                <a href="bayes-is-slow-speeding-up-hellofreshs-bayesian-ab-tests-by-60x/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Bayes is slow? Speeding up HelloFresh&#39;s Bayesian AB tests by 60x</h4>
+                </a>
+                <small>2021-10-22</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="reducing-customer-acquisition-costs-how-we-helped-optimizing-hellofreshs-marketing-budget/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="reducing-customer-acquisition-costs-how-we-helped-optimizing-hellofreshs-marketing-budget/cover.png" alt="">
+
+
+                </a>
+                <a href="reducing-customer-acquisition-costs-how-we-helped-optimizing-hellofreshs-marketing-budget/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Improving the Speed and Accuracy of Bayesian Media Mix Models</h4>
+                </a>
+                <small>2021-09-21</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="bayesian-media-mix-modeling-for-marketing-optimization/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="bayesian-media-mix-modeling-for-marketing-optimization/cover.png" alt="">
+
+
+                </a>
+                <a href="bayesian-media-mix-modeling-for-marketing-optimization/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Bayesian Media Mix Modeling for Marketing Optimization</h4>
+                </a>
+                <small>2021-09-17</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="markov-process/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="markov-process/cover.png" alt="">
+
+
+                </a>
+                <a href="markov-process/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Estimating a Candidate&#39;s Popularity over Time with Markov Processes</h4>
+                </a>
+                <small>2021-05-26</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="everysk/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="everysk/cover.png" alt="">
+
+
+                </a>
+                <a href="everysk/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Bayesian model to infer private equity returns from capital in and outflows</h4>
+                </a>
+                <small>2021-02-25</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+    
+    
+<div class="col-md-6 mb-5">
+        <div class="card h-100 card-hover transition">
+            <div class="card-body">
+                <a href="saving-the-world/">
+                    
+
+    <img width="500" height="300" loading="lazy" title="cover image" class="rounded card-img-top blog-cover-image  mb-5" src="saving-the-world/cover.gif" alt="">
+
+
+                </a>
+                <a href="saving-the-world/" style="text-decoration: none;" >
+                    <h4 class="mb-2 font-roboto no-decoration">Introducing PyMC Labs</h4>
+                </a>
+                <small>2021-02-18</small>
+
+            </div>
+        </div>
+</div>
+
+    
+    
+</div>
+
+        </div>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+            integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+            crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+            <div class="container">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBottom"
+                    aria-controls="navbarBottom" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarBottom">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-twitter"
+                                    aria-hidden="true"></i>
+                                Twitter</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-github"
+                                    aria-hidden="true"></i>
+                                GitHub</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-linkedin"
+                                    aria-hidden="true"></i>
+                                LinkedIn</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-youtube"
+                                    aria-hidden="true"></i>
+                                YouTube</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-meetup"
+                                    aria-hidden="true"></i>
+                                Meetup</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                    aria-hidden="true"></i>
+                                Newsletter</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/privacy-policy"><i class="fa fa-solid fa-lock"
+                                    aria-hidden="true"></i>
+                                Privacy Policy</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/impressum"><i class="fa fa-solid fa-info-circle"
+                                    aria-hidden="true"></i>
+                                Impressum</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/contact"><i class="fa fa-solid fa-file-signature"
+                                    aria-hidden="true"></i>
+                                Contact</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+    </body>
+
+</html>

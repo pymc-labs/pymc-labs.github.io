@@ -1,0 +1,2043 @@
+<!doctype html><html lang="en">
+
+    <head>
+        
+
+        <style media="screen">
+            body {
+                padding-top: 70px;
+                padding-bottom: 70px;
+            }
+
+        </style>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+        <link rel="stylesheet" href="../../static/css/custom_style.css?h=16f93eb7">
+        <link rel="stylesheet" href="../../static/css/table_style.css?h=c677f945">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+
+        <!-- Extra meta tags: social site cards, browser icons... -->
+        <meta name="theme-color" content="#ffffff">
+        <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+        <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+        <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+        <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+
+        <title>Out of model predictions with PyMC - PyMC Labs</title>
+        <meta name="twitter:card" content="summary">
+        <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/out-of-model-predictions-with-pymc/" />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href="">
+        <meta property="og:title" content="Out of model predictions with PyMC - PyMC Labs" />
+        <meta property="og:description" content="" />
+        <meta property="og:image" content="https://pymc-labs.github.io/blog-posts/out-of-model-predictions-with-pymc/cover.png" />
+        <meta name="description" content="We are a Bayesian consulting firm specializing in data analysis and predictive modeling. Contact us today to learn how we can help your business.">
+        <meta name="keywords" content="Bayesian consulting, data analysis, predictive modeling">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+        <!-- <script>hljs.highlightAll();</script> -->
+
+        <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+        <!-- We use this to do syntax highlighting -->
+        <link rel="stylesheet" href="../../static/pygments.css">
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+        </script>
+        
+<script src="../../static/scripts/toggle_code.js?h=3a00c72f" defer></script>
+
+    </head>
+
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <div class="container">
+                <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+                <a class="navbar-brand" href="/"><img alt="logo" loading="eager" width="88" height="70" title="logo" class="navbar-logo"
+                        src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop"
+                    aria-controls="navbarTop" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarTop">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                    aria-hidden="true"></i>
+                                What we do</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                    aria-hidden="true"></i>
+                                Products</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                    aria-hidden="true"></i>
+                                Team</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                    aria-hidden="true"></i>
+                                Clients</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                    aria-hidden="true"></i>
+                                Workshops</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                    aria-hidden="true"></i>
+                                Blog</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container">
+            
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 blogpost">
+        <h2 class="font-roboto">Out of model predictions with PyMC</h2>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-6 author_name">
+                <small class="text-muted">AUTHORED BY</small>
+                <p class="font-bold">
+                    
+
+
+
+    
+
+
+
+    
+        
+            Ricardo Vieira
+        
+    
+        
+            and Tomás Capretto
+        
+    
+
+
+
+                </p>
+            </div>
+            <div class="col-md-6 author_date">
+                <!-- <p>2023-06-12</p> -->
+                
+<small class="text-muted">DATE</small>
+<p class="font-lighter">2023-06-12</p>
+
+<!--<div class="cover-blogposts"><img src="../../static/images/blog_post/cover.jpg?h=653e9b57"></div>-->
+
+            </div>
+        
+            
+                <div class="blog-cover-container">
+                    <img loading="lazy" title="cover image" alt="" class="cover-blogposts" src="cover.png">
+                </div>
+            
+	    </div>
+        <hr> <p>PyMC has three core functions that map to the traditional Bayesian workflow:</p>
+<ul>
+<li><code>sample_prior_predictive</code> (<a href="https://www.pymc.io/projects/docs/en/stable/api/generated/pymc.sample_prior_predictive.html">docs</a>)</li>
+<li><code>sample</code> (<a href="https://www.pymc.io/projects/docs/en/stable/api/generated/pymc.sample.html">docs</a>)</li>
+<li><code>sample_posterior_predictive</code> (<a href="https://www.pymc.io/projects/docs/en/stable/api/generated/pymc.sample_posterior_predictive.html">docs</a>)</li>
+</ul>
+<p><strong>Prior predictive sampling</strong> helps understanding the relationship between the parameter priors and the outcome variable, before any data is observed.</p>
+<p><strong>Sampling</strong> is used to infer the posterior distribution of parameters in a model, conditioned on observed data.</p>
+<p>Finally, <strong>posterior predictive sampling</strong> can be used to predict new outcomes, conditioned on the posterior parameters.</p>
+<p>What may not be immediately obvious is that predictions need not be done on the same model where parameters were inferred.</p>
+<p>For example, if you learn (make inferences) about the volatility of a process in one context (or model), and you expect it to be similar in another, you can use what you learned to make better predictions in that second context (or predictive model). As we will see, the posterior predictive sampling function is more than happy to support this type of knowledge transfer.</p>
+<p>In this blog post, we will walk through five different applications of the <code>sample_posterior_predictive</code> function:</p>
+<ol>
+<li>Making predictions on the same model</li>
+<li>Making predictions on different models</li>
+<li>Simulating new groups in hierarchical models</li>
+<li>Forecasting time series</li>
+<li>Sampling latent variables</li>
+</ol>
+<h2 id="a-simple-use-of-posterior-predictive-sampling">A simple use of posterior predictive sampling</h2>
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode10" aria-expanded="false" aria-controls="collapseibleCode10">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode10" class="collapse">
+                <div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">arviz</span> <span class="k">as</span> <span class="nn">az</span>
+<span class="kn">import</span> <span class="nn">pymc</span> <span class="k">as</span> <span class="nn">pm</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<span class="n">seed</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">ord</span><span class="p">,</span> <span class="s2">&quot;Posterior Predictive&quot;</span><span class="p">))</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s2">&quot;darkgrid&quot;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">font_scale</span><span class="o">=</span><span class="mf">1.3</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using arviz version: </span><span class="si">{</span><span class="n">az</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using pymc version: </span><span class="si">{</span><span class="n">pm</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+
+            </div>
+            <pre><code>Using arviz version: 0.13.0
+Using pymc version: 5.3.1
+</code></pre>
+<p>There are two common uses of posterior predictive sampling, which we illustrate here:</p>
+<ol>
+<li>Performing posterior predictive checks</li>
+<li>Obtaining out-of-sample predictions</li>
+</ol>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">m</span><span class="p">:</span>
+    <span class="c1"># y ~ 2 * x</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">MutableData</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="n">y_obs</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.8</span><span class="p">,</span> <span class="mf">4.1</span><span class="p">]</span>
+
+    <span class="n">beta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;beta&quot;</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">beta</span> <span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">y_obs</span><span class="p">)</span>
+
+    <span class="n">idata</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+</pre></div>
+<pre><code>Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [beta]
+</code></pre>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [8000/8000 00:01&lt;00:00 Sampling 4 chains, 0 divergences]
+</div><div class="hll"><pre><span></span><span class="k">with</span> <span class="n">m</span><span class="p">:</span>
+    <span class="n">pp</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span><span class="n">idata</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+</pre></div>
+<pre><code>Sampling: [y]
+</code></pre>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 00:00&lt;00:00]
+</div><div class="hll"><pre><span></span><span class="n">az</span><span class="o">.</span><span class="n">plot_ppc</span><span class="p">(</span><span class="n">pp</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_7_0.png" alt="png"></p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">m</span><span class="p">:</span>
+    <span class="c1"># Make predictions conditioned on new Xs</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">set_data</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">]})</span>
+    <span class="n">pp</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span><span class="n">idata</span><span class="p">,</span> <span class="n">predictions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+</pre></div>
+<pre><code>Sampling: [y]
+</code></pre>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 00:00&lt;00:00]
+</div><div class="hll"><pre><span></span><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span><span class="p">(</span><span class="n">pp</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;predictions&quot;</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_9_0.png" alt="png"></p>
+<p>In this blog post we are mostly interested in out-of-sample predictions, but we will see some cases of in-sample predictions as well.</p>
+<p>In (generalized) linear models like this one we can obtain out-of-sample predictions by conditioning on new predictor values. When we do this, we are implicitly assuming that the same statistical relationship between predictor and outcome still holds.</p>
+<p>There is nothing special about linear models, other than how easy it is to make predictions. In PyMC we don't even need to write a new model as we can simply swap the predictors with <code>set_data</code> (<a href="https://www.pymc.io/projects/docs/en/stable/api/generated/pymc.set_data.html">docs</a>).</p>
+<p>However, there are many cases where such a "trick" does not suffice. We may need to write separate models for parameter inference and predictions, respectively. You may actually have multiple models for different types of predictions. This blog post shows how this can be done easily in PyMC.</p>
+<p>Before we move on, let's see how we could have written a separate predictive model even for this simple linear model:</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">pred_m</span><span class="p">:</span>
+    <span class="c1"># Only x changes</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">beta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;beta&quot;</span><span class="p">)</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;y_pred&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">beta</span> <span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="n">pp</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span>
+        <span class="n">idata</span><span class="p">,</span> 
+        <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;y_pred&quot;</span><span class="p">],</span> 
+        <span class="n">predictions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+        <span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+<pre><code>Sampling: [y_pred]
+</code></pre>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 00:00&lt;00:00]
+</div><div class="hll"><pre><span></span><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span><span class="p">(</span><span class="n">pp</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;predictions&quot;</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_12_0.png" alt="png"></p>
+<p><strong>Notice that we reused the <code>idata</code> object we got from sampling the first model</strong>. The posterior samples for the <code>beta</code> variable contained there were used when making predictions in this new model. We will explain in a moment how this works under the hood, but the important point is that <code>sample_posterior_predictive</code> does not care whether the current model is the one that generated the posterior draws we fed into it.</p>
+<p>You may also have noticed that we had to pass <code>var_names=["y_pred"]</code>. 
+By default, <code>sample_posterior_predictive</code> only samples observed variables, but in our predictive model we didn't have observations (otherwise they wouldn't be predictions). We defined <code>y_pred</code> as an unobserved random variable (the kwarg <code>observed</code> was not specified). To get posterior predictive samples from these variables, we just need to include them in <code>var_names</code>.</p>
+<p>Now let's see how we can apply this strategy in more complex cases.</p>
+<h2 id="making-predictions-on-different-models">Making predictions on different models</h2><p>If we believe that our inferred variables are still valid in a new context, we can use posterior predictive sampling to make predictions conditioned on those variables.</p>
+<p>In this example we imagine we have a process where the latent mean is the same as in the linear model above, but the observational noise follows a Student's T-distribution instead of a normal.</p>
+<p>In our model, it means we assume <code>mu = beta * x</code> still holds. All the knowledge we have about <code>beta</code> is conveniently stored as posterior draws in our <code>InferenceData</code>, which we will reuse in the new model.</p>
+<div class="hll"><pre><span></span><span class="n">idata</span><span class="o">.</span><span class="n">posterior</span><span class="o">.</span><span class="n">beta</span>
+</pre></div>
+<div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg>
+<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
+ *
+ */
+
+:root {
+  --xr-font-color0: var(--jp-content-font-color0, rgba(0, 0, 0, 1));
+  --xr-font-color2: var(--jp-content-font-color2, rgba(0, 0, 0, 0.54));
+  --xr-font-color3: var(--jp-content-font-color3, rgba(0, 0, 0, 0.38));
+  --xr-border-color: var(--jp-border-color2, #e0e0e0);
+  --xr-disabled-color: var(--jp-layout-color3, #bdbdbd);
+  --xr-background-color: var(--jp-layout-color0, white);
+  --xr-background-color-row-even: var(--jp-layout-color1, white);
+  --xr-background-color-row-odd: var(--jp-layout-color2, #eeeeee);
+}
+
+html[theme=dark],
+body[data-theme=dark],
+body.vscode-dark {
+  --xr-font-color0: rgba(255, 255, 255, 1);
+  --xr-font-color2: rgba(255, 255, 255, 0.54);
+  --xr-font-color3: rgba(255, 255, 255, 0.38);
+  --xr-border-color: #1F1F1F;
+  --xr-disabled-color: #515151;
+  --xr-background-color: #111111;
+  --xr-background-color-row-even: #111111;
+  --xr-background-color-row-odd: #313131;
+}
+
+.xr-wrap {
+  display: block !important;
+  min-width: 300px;
+  max-width: 700px;
+}
+
+.xr-text-repr-fallback {
+  /* fallback to plain text repr when CSS is not injected (untrusted notebook) */
+  display: none;
+}
+
+.xr-header {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: solid 1px var(--xr-border-color);
+}
+
+.xr-header > div,
+.xr-header > ul {
+  display: inline;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.xr-obj-type,
+.xr-array-name {
+  margin-left: 2px;
+  margin-right: 10px;
+}
+
+.xr-obj-type {
+  color: var(--xr-font-color2);
+}
+
+.xr-sections {
+  padding-left: 0 !important;
+  display: grid;
+  grid-template-columns: 150px auto auto 1fr 20px 20px;
+}
+
+.xr-section-item {
+  display: contents;
+}
+
+.xr-section-item input {
+  display: none;
+}
+
+.xr-section-item input + label {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-item input:enabled + label {
+  cursor: pointer;
+  color: var(--xr-font-color2);
+}
+
+.xr-section-item input:enabled + label:hover {
+  color: var(--xr-font-color0);
+}
+
+.xr-section-summary {
+  grid-column: 1;
+  color: var(--xr-font-color2);
+  font-weight: 500;
+}
+
+.xr-section-summary > span {
+  display: inline-block;
+  padding-left: 0.5em;
+}
+
+.xr-section-summary-in:disabled + label {
+  color: var(--xr-font-color2);
+}
+
+.xr-section-summary-in + label:before {
+  display: inline-block;
+  content: '►';
+  font-size: 11px;
+  width: 15px;
+  text-align: center;
+}
+
+.xr-section-summary-in:disabled + label:before {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-summary-in:checked + label:before {
+  content: '▼';
+}
+
+.xr-section-summary-in:checked + label > span {
+  display: none;
+}
+
+.xr-section-summary,
+.xr-section-inline-details {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.xr-section-inline-details {
+  grid-column: 2 / -1;
+}
+
+.xr-section-details {
+  display: none;
+  grid-column: 1 / -1;
+  margin-bottom: 5px;
+}
+
+.xr-section-summary-in:checked ~ .xr-section-details {
+  display: contents;
+}
+
+.xr-array-wrap {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 20px auto;
+}
+
+.xr-array-wrap > label {
+  grid-column: 1;
+  vertical-align: top;
+}
+
+.xr-preview {
+  color: var(--xr-font-color3);
+}
+
+.xr-array-preview,
+.xr-array-data {
+  padding: 0 5px !important;
+  grid-column: 2;
+}
+
+.xr-array-data,
+.xr-array-in:checked ~ .xr-array-preview {
+  display: none;
+}
+
+.xr-array-in:checked ~ .xr-array-data,
+.xr-array-preview {
+  display: inline-block;
+}
+
+.xr-dim-list {
+  display: inline-block !important;
+  list-style: none;
+  padding: 0 !important;
+  margin: 0;
+}
+
+.xr-dim-list li {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}
+
+.xr-dim-list:before {
+  content: '(';
+}
+
+.xr-dim-list:after {
+  content: ')';
+}
+
+.xr-dim-list li:not(:last-child):after {
+  content: ',';
+  padding-right: 5px;
+}
+
+.xr-has-index {
+  font-weight: bold;
+}
+
+.xr-var-list,
+.xr-var-item {
+  display: contents;
+}
+
+.xr-var-item > div,
+.xr-var-item label,
+.xr-var-item > .xr-var-name span {
+  background-color: var(--xr-background-color-row-even);
+  margin-bottom: 0;
+}
+
+.xr-var-item > .xr-var-name:hover span {
+  padding-right: 5px;
+}
+
+.xr-var-list > li:nth-child(odd) > div,
+.xr-var-list > li:nth-child(odd) > label,
+.xr-var-list > li:nth-child(odd) > .xr-var-name span {
+  background-color: var(--xr-background-color-row-odd);
+}
+
+.xr-var-name {
+  grid-column: 1;
+}
+
+.xr-var-dims {
+  grid-column: 2;
+}
+
+.xr-var-dtype {
+  grid-column: 3;
+  text-align: right;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-preview {
+  grid-column: 4;
+}
+
+.xr-var-name,
+.xr-var-dims,
+.xr-var-dtype,
+.xr-preview,
+.xr-attrs dt {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 10px;
+}
+
+.xr-var-name:hover,
+.xr-var-dims:hover,
+.xr-var-dtype:hover,
+.xr-attrs dt:hover {
+  overflow: visible;
+  width: auto;
+  z-index: 1;
+}
+
+.xr-var-attrs,
+.xr-var-data {
+  display: none;
+  background-color: var(--xr-background-color) !important;
+  padding-bottom: 5px !important;
+}
+
+.xr-var-attrs-in:checked ~ .xr-var-attrs,
+.xr-var-data-in:checked ~ .xr-var-data {
+  display: block;
+}
+
+.xr-var-data > table {
+  float: right;
+}
+
+.xr-var-name span,
+.xr-var-data,
+.xr-attrs {
+  padding-left: 25px !important;
+}
+
+.xr-attrs,
+.xr-var-attrs,
+.xr-var-data {
+  grid-column: 1 / -1;
+}
+
+dl.xr-attrs {
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 125px auto;
+}
+
+.xr-attrs dt,
+.xr-attrs dd {
+  padding: 0;
+  margin: 0;
+  float: left;
+  padding-right: 10px;
+  width: auto;
+}
+
+.xr-attrs dt {
+  font-weight: normal;
+  grid-column: 1;
+}
+
+.xr-attrs dt:hover span {
+  display: inline-block;
+  background: var(--xr-background-color);
+  padding-right: 10px;
+}
+
+.xr-attrs dd {
+  grid-column: 2;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.xr-icon-database,
+.xr-icon-file-text2 {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1em;
+  height: 1.5em !important;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
+</style><pre class='xr-text-repr-fallback'>&lt;xarray.DataArray &#x27;beta&#x27; (chain: 4, draw: 1000)&gt;
+array([[1.99738968, 1.99738968, 2.03544969, ..., 2.03003163, 1.91305585,
+        1.91551041],
+       [1.97578801, 1.99005488, 1.95586019, ..., 1.96489625, 1.96489625,
+        1.9623966 ],
+       [1.9866023 , 2.04438365, 1.90143213, ..., 2.0112917 , 2.01303214,
+        1.99563726],
+       [1.96956778, 1.96956778, 1.96431009, ..., 1.97842336, 1.96940486,
+        1.99869095]])
+Coordinates:
+  * chain    (chain) int64 0 1 2 3
+  * draw     (draw) int64 0 1 2 3 4 5 6 7 8 ... 992 993 994 995 996 997 998 999</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'beta'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>chain</span>: 4</li><li><span class='xr-has-index'>draw</span>: 1000</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-79abf634-d2ab-4f4b-9daa-7d4a7c5e0554' class='xr-array-in' type='checkbox' checked><label for='section-79abf634-d2ab-4f4b-9daa-7d4a7c5e0554' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>1.997 1.997 2.035 2.011 2.011 1.92 ... 1.979 1.959 1.978 1.969 1.999</span></div><div class='xr-array-data'><pre>array([[1.99738968, 1.99738968, 2.03544969, ..., 2.03003163, 1.91305585,
+        1.91551041],
+       [1.97578801, 1.99005488, 1.95586019, ..., 1.96489625, 1.96489625,
+        1.9623966 ],
+       [1.9866023 , 2.04438365, 1.90143213, ..., 2.0112917 , 2.01303214,
+        1.99563726],
+       [1.96956778, 1.96956778, 1.96431009, ..., 1.97842336, 1.96940486,
+        1.99869095]])</pre></div></div></li><li class='xr-section-item'><input id='section-64cb4c42-303b-432f-b95b-be62adf0f519' class='xr-section-summary-in' type='checkbox'  checked><label for='section-64cb4c42-303b-432f-b95b-be62adf0f519' class='xr-section-summary' >Coordinates: <span>(2)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>chain</span></div><div class='xr-var-dims'>(chain)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3</div><input id='attrs-4f202840-a769-4f63-9ab5-3e2fbb9c6a74' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-4f202840-a769-4f63-9ab5-3e2fbb9c6a74' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e18994f5-0579-4d19-a733-9ee022d37528' class='xr-var-data-in' type='checkbox'><label for='data-e18994f5-0579-4d19-a733-9ee022d37528' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([0, 1, 2, 3])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>draw</span></div><div class='xr-var-dims'>(draw)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0 1 2 3 4 5 ... 995 996 997 998 999</div><input id='attrs-b99672e4-1c13-47ad-851e-0fe8227e105c' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-b99672e4-1c13-47ad-851e-0fe8227e105c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ff2804bd-1fd1-4132-9a22-63de66a1e869' class='xr-var-data-in' type='checkbox'><label for='data-ff2804bd-1fd1-4132-9a22-63de66a1e869' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([  0,   1,   2, ..., 997, 998, 999])</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-be4914d3-abd5-4092-94f2-19e5fcf472ea' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-be4914d3-abd5-4092-94f2-19e5fcf472ea' class='xr-section-summary'  title='Expand/collapse section'>Attributes: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'></dl></div></li></ul></div></div><p><em>You may want to pause and <a href="https://python.arviz.org/en/stable/getting_started/XarrayforArviZ.html#xarray-for-arviz">read</a> about <code>InferenceData</code> before we go on.</em></p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">pred_t_m</span><span class="p">:</span>
+    <span class="c1"># Using the same x as in the last example</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">beta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;beta&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Only the likelihood distribution changes</span>
+    <span class="n">y_t</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">StudentT</span><span class="p">(</span><span class="s2">&quot;y_pred_t&quot;</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">beta</span> <span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+    <span class="n">pp_t</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span>
+        <span class="n">idata</span><span class="p">,</span> 
+        <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;y_pred_t&quot;</span><span class="p">],</span> 
+        <span class="n">predictions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+        <span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+<pre><code>Sampling: [y_pred_t]
+</code></pre>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 00:00&lt;00:00]
+</div><div class="hll"><pre><span></span><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span><span class="p">(</span><span class="n">pp</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;predictions&quot;</span><span class="p">);</span>
+<span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span><span class="p">(</span><span class="n">pp_t</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;predictions&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_19_0.png" alt="png"></p>
+<p><img src="output_19_1.png" alt="png"></p>
+<p>In fact it doesn't even matter that the "transferred variables" are given the same prior as in the original model. After all, the posterior distribution rarely follows the same form as the prior (there is even a funny name, <a href="https://en.wikipedia.org/wiki/Conjugate_prior">conjugate prior</a>, for the few cases where this happens).</p>
+<p>In our case, all the knowledge we have about the posterior distribution of the parameters is encoded in the form of samples in our <code>InferenceData</code> <code>posterior</code> group. <code>sample_posterior_predictive</code> simply checks if a model variable has the same name as one in that group. If it finds a match, it assumes those draws are valid for the variable in the current model.</p>
+<p>To illustrate this, we will give <code>beta</code> a <code>Flat</code> prior in our new predictive model. Note that one can't take random draws from this distribution in the first place:</p>
+<div class="hll"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">Flat</span><span class="o">.</span><span class="n">dist</span><span class="p">())</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">exc</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+<pre><code>NotImplementedError: Cannot sample from flat variable
+</code></pre>
+<p>If <code>sample_posterior_predictive</code> was trying to take random draws from this variable, we would see this error. But because we have a variable with the same name in the posterior group, the function will use those draws instead, assuming implicitly that they form a valid posterior.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">pred_bern_m</span><span class="p">:</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">25</span><span class="p">))</span>
+
+    <span class="n">beta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Flat</span><span class="p">(</span><span class="s2">&quot;beta&quot;</span><span class="p">)</span>
+
+    <span class="c1"># We again change the functional form of the model</span>
+    <span class="c1"># Instead of a linear Gaussian we Have a logistic Bernoulli model</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">beta</span> <span class="o">*</span> <span class="n">x</span><span class="p">))</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="n">pp</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span>
+        <span class="n">idata</span><span class="p">,</span> 
+        <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">],</span> 
+        <span class="n">predictions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+        <span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+<pre><code>Sampling: [y]
+</code></pre>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 00:00&lt;00:00]
+</div><p>In this example we forced our linear predictors through a sigmoid transformation, 
+in order to take Bernoulli draws.</p>
+<div class="hll"><pre><span></span><span class="k">def</span> <span class="nf">jitter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">predictions_constant_data</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">25</span><span class="p">):</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">predictions</span><span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">chain</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">draw</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">predictions</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">chain</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">draw</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">.1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">jitter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">rng</span><span class="p">),</span> <span class="n">jitter</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">rng</span><span class="p">),</span> <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">.1</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([],</span> <span class="p">[],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;p&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">([],</span> <span class="p">[],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;y + jitter&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="p">(</span><span class="mf">1.03</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">));</span>
+</pre></div>
+<p><img src="output_25_0.png" alt="png"></p>
+<p>We will briefly describe the internal mechanism used by <code>sample_posterior_predictive</code> to combine posterior draws into predictive samples at the end. For now let's just see it in action in some other places.</p>
+<h2 id="simulating-new-groups-in-hierarchical-models">Simulating new groups in hierarchical models</h2><p>Hierarchical models are a powerful class of Bayesian models that allow the back-and-forth flow of information across statistically related groups. One predictive question that arises naturally in such settings, is what to expect from yet unseen groups.</p>
+<p>Think about all the cases where this applies. You may want to predict the lifetime of the next acquired customer, or predict the sales of a new product that has not yet been launched. In both cases, we assume there is some similarity between old and new customers or products.</p>
+<p>We will grab the <a href="https://www.pymc.io/projects/docs/en/stable/learn/core_notebooks/model_comparison.html">eight schools</a> 
+model to show how posterior predictive sampling can be used to simulate new groups from a hierarchical model. We will investigate what a 9th and 10th school might look like.</p>
+<div class="hll"><pre><span></span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">28</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">12</span><span class="p">])</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">18</span><span class="p">])</span>
+<span class="n">J</span> <span class="o">=</span> <span class="mi">8</span>
+</pre></div>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">eight_schools</span><span class="p">:</span>
+    <span class="n">eta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;eta&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">J</span><span class="p">)</span>
+
+    <span class="c1"># Hierarchical mean and SD</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;mu&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">tau</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;tau&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="c1"># Non-centered parameterization of random effect</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span><span class="s2">&quot;theta&quot;</span><span class="p">,</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">tau</span> <span class="o">*</span> <span class="n">eta</span><span class="p">)</span>
+
+    <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="n">idata</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="n">target_accept</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+</pre></div>
+<pre><code>Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [eta, mu, tau]
+</code></pre>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='12000' class='' max='12000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [12000/12000 00:09&lt;00:00 Sampling 4 chains, 1 divergences]
+</div><p>After sampling (and recklessly ignoring divergences) we write a predictive model that can be used to predict the out-of-sample schools 9 and 10.</p>
+<p>While we don't have to, we will write the model in such a way that we can also get posterior predictive draws from the initial 8 schools. This will allow us to discuss some subtleties when defining predictive models.</p>
+<p>First, note we can't simply define an <code>eta</code> distribution with <code>shape=J+2</code>, because the posterior predictive sampling function would assume we have the whole posterior for this distribution and try to use the 8 values to take 10 draws (which would crash immediately).</p>
+<p>We actually don't know what the <code>eta</code> should be for the two unobserved schools, so we want to sample it from the prior. The solution is to create two vectors of variables separately, <code>eta</code> and <code>eta_new</code> and concatenate them. The <code>sample_posterior_predictive</code> function will reuse the <code>InferenceData</code> draws for <code>eta</code> and take new draws for <code>eta_new</code>.</p>
+<p>A predictive model can have unobserved variables that were not present in the original model. When we request samples for variables that depend on unobserved variables that can't be found in the <code>InferenceData</code>, we will get draws from their prior. This is how we will get <code>eta_new</code> draws needed to generate predictions for our variable of interest, <code>y</code>.</p>
+<p>Let's also assume we don't know exactly what the <code>sigma</code> is for the new schools, but that we can come up with a unique prior for each. We will add that as yet another unobserved variable to the predictive model. We will name it <code>sigma_new</code>.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">ten_schools</span><span class="p">:</span>
+    <span class="c1"># Priors for schools 9 and 10</span>
+    <span class="c1"># We assume that the mean of school 10 is expected to be one std above the mean</span>
+    <span class="c1"># and have a relatively low measurement error</span>
+    <span class="n">eta_new</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;eta_new&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">sigma_new</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">&quot;sigma_new&quot;</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">upper</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span>
+
+    <span class="c1"># These are unchanged</span>
+    <span class="n">eta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;eta&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">J</span><span class="p">)</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;mu&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">tau</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;tau&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="c1"># We concatenate the variables from the old and new groups</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span><span class="s2">&quot;theta&quot;</span><span class="p">,</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">tau</span> <span class="o">*</span> <span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">eta</span><span class="p">,</span> <span class="n">eta_new</span><span class="p">]))</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">sigma</span><span class="p">,</span> <span class="n">sigma_new</span><span class="p">]))</span>
+
+    <span class="n">pp</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span><span class="n">idata</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">],</span> <span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+</pre></div>
+<pre><code>Sampling: [eta_new, sigma_new, y]
+</code></pre>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [8000/8000 00:01&lt;00:00]
+</div><div class="hll"><pre><span></span><span class="n">az</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">pp</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;posterior_predictive&quot;</span><span class="p">)</span>
+</pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>y[0]</th>
+      <td>8.815</td>
+      <td>16.110</td>
+      <td>-20.375</td>
+      <td>40.508</td>
+      <td>0.178</td>
+      <td>0.130</td>
+      <td>8184.0</td>
+      <td>7836.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>y[1]</th>
+      <td>7.160</td>
+      <td>11.415</td>
+      <td>-14.631</td>
+      <td>28.470</td>
+      <td>0.126</td>
+      <td>0.091</td>
+      <td>8245.0</td>
+      <td>7910.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>y[2]</th>
+      <td>5.465</td>
+      <td>17.145</td>
+      <td>-27.803</td>
+      <td>36.261</td>
+      <td>0.189</td>
+      <td>0.137</td>
+      <td>8256.0</td>
+      <td>7846.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>y[3]</th>
+      <td>6.548</td>
+      <td>12.328</td>
+      <td>-15.879</td>
+      <td>30.123</td>
+      <td>0.146</td>
+      <td>0.103</td>
+      <td>7128.0</td>
+      <td>6930.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>y[4]</th>
+      <td>4.875</td>
+      <td>10.765</td>
+      <td>-15.694</td>
+      <td>24.765</td>
+      <td>0.124</td>
+      <td>0.088</td>
+      <td>7592.0</td>
+      <td>7693.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>y[5]</th>
+      <td>5.653</td>
+      <td>12.332</td>
+      <td>-17.918</td>
+      <td>28.482</td>
+      <td>0.135</td>
+      <td>0.101</td>
+      <td>8285.0</td>
+      <td>7559.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>y[6]</th>
+      <td>8.716</td>
+      <td>11.520</td>
+      <td>-13.165</td>
+      <td>30.285</td>
+      <td>0.127</td>
+      <td>0.091</td>
+      <td>8289.0</td>
+      <td>7738.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>y[7]</th>
+      <td>7.101</td>
+      <td>18.875</td>
+      <td>-28.648</td>
+      <td>42.553</td>
+      <td>0.217</td>
+      <td>0.153</td>
+      <td>7614.0</td>
+      <td>7686.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>y[8]</th>
+      <td>6.354</td>
+      <td>16.879</td>
+      <td>-25.829</td>
+      <td>38.007</td>
+      <td>0.192</td>
+      <td>0.136</td>
+      <td>7690.0</td>
+      <td>7457.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>y[9]</th>
+      <td>11.220</td>
+      <td>10.158</td>
+      <td>-6.581</td>
+      <td>31.223</td>
+      <td>0.115</td>
+      <td>0.083</td>
+      <td>7885.0</td>
+      <td>7480.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode11" aria-expanded="false" aria-controls="collapseibleCode11">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode11" class="collapse">
+                <div class="hll"><pre><span></span><span class="n">pps</span> <span class="o">=</span> <span class="n">az</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">pp</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;posterior_predictive&quot;</span><span class="p">)</span>
+
+<span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">14</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">axi</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">ravel</span><span class="p">()):</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">pps</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axi</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">8</span> <span class="k">else</span> <span class="s2">&quot;C1&quot;</span><span class="p">)</span>
+    <span class="n">axi</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+    <span class="n">axi</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;School[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+
+            </div>
+            <p><img src="output_34_0.png" alt="png"></p>
+<p>The predictions for new schools are informed by the group-level variables <code>mu</code> and <code>tau</code>, which were estimated via sampling of the original subset of 8 schools.</p>
+<p>As there is no further structure that distinguishes the new schools, the difference in predictions arises only from the <code>eta_new</code> and <code>sigma_new</code> priors we assigned to them.</p>
+<p>Other models could yield different predictions from independent variables, while keeping the priors equal. Other models yet may have no information that distinguishes new groups, in which case their posterior predictive draws would all be identical (up to random noise).</p>
+<p>Let's now look into the future...</p>
+<h2 id="forecasting-time-series">Forecasting time series</h2><p>If we have a time series model, it's relatively easy to perform a forecast by creating a predictive model with a new time series that starts where the observations "left off".</p>
+<p>For this example we will simulate draws from a Gaussian random walk (<a href="https://www.pymc.io/projects/docs/en/stable/api/distributions/generated/pymc.GaussianRandomWalk.html">docs</a>). If you are unfamiliar with the use of <code>dist</code> and <code>draw</code>, you may want to read our previous article on <a href="https://www.pymc-labs.com/blog-posts/simulating-data-with-pymc/">simulating data with PyMC</a>.</p>
+<div class="hll"><pre><span></span><span class="n">mu_true</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.05</span>
+<span class="n">sigma_true</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+<span class="n">y</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">GaussianRandomWalk</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span>
+    <span class="n">init_dist</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(),</span> 
+    <span class="n">mu</span><span class="o">=</span><span class="n">mu_true</span><span class="p">,</span> 
+    <span class="n">sigma</span><span class="o">=</span><span class="n">sigma_true</span><span class="p">,</span>
+    <span class="n">steps</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">y_obs</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+</pre></div>
+<div class="hll"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mu=</span><span class="si">{</span><span class="n">mu_true</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, sigma=</span><span class="si">{</span><span class="n">sigma_true</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y_obs</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_39_0.png" alt="png"></p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">m</span><span class="p">:</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;mu&quot;</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;sigma&quot;</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">GaussianRandomWalk</span><span class="p">(</span>
+        <span class="s2">&quot;y&quot;</span><span class="p">,</span> 
+        <span class="n">init_dist</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(),</span> 
+        <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> 
+        <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span>
+        <span class="n">observed</span><span class="o">=</span><span class="n">y_obs</span>
+    <span class="p">)</span>
+
+    <span class="n">idata</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+</pre></div>
+<pre><code>Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [mu, sigma]
+</code></pre>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [8000/8000 00:02&lt;00:00 Sampling 4 chains, 0 divergences]
+</div><p>To force a new time series to start where the observations "left off", we define <code>init_dist</code> as a <code>DiracDelta</code> on the last observed <code>y</code>. This will force every predictive series to start at that exact value.</p>
+<p>Note again that the prior distributions don't matter, only the variable names and shapes. We use <code>Flat</code> for <code>sigma</code> as in an earlier example. We use <code>Normal</code> for <code>mu</code> because (spoiler alert) we will actually sample from it in the next example.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">forecast_m</span><span class="p">:</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;mu&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Flat sigma for illustration purposes</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Flat</span><span class="p">(</span><span class="s2">&quot;sigma&quot;</span><span class="p">)</span>
+
+    <span class="c1"># init_dist now starts on last observed value of y</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">GaussianRandomWalk</span><span class="p">(</span>
+        <span class="s2">&quot;y_forecast&quot;</span><span class="p">,</span>
+        <span class="n">init_dist</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">DiracDelta</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">y_obs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+        <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span>
+        <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span>
+        <span class="n">steps</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">pp</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span>
+        <span class="n">idata</span><span class="p">,</span> 
+        <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;y_forecast&quot;</span><span class="p">],</span> 
+        <span class="n">predictions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+        <span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+<pre><code>Sampling: [y_forecast]
+</code></pre>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 00:00&lt;00:00]
+</div><div class="hll"><pre><span></span><span class="n">steps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">az</span><span class="o">.</span><span class="n">plot_hdi</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">steps</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">pp</span><span class="o">.</span><span class="n">predictions</span><span class="p">[</span><span class="s2">&quot;y_forecast&quot;</span><span class="p">])</span>
+<span class="c1"># Plot first five forecasts</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">predictions</span><span class="p">[</span><span class="s2">&quot;y_forecast&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">chain</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">draw</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">y_obs</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">50</span><span class="p">,</span> <span class="mi">150</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;observed&quot;</span><span class="p">,</span> <span class="s2">&quot;forecast&quot;</span><span class="p">]);</span>
+</pre></div>
+<p><img src="output_43_0.png" alt="png"></p>
+<p>We mentioned that the validity of posterior predictive samples hangs on the premise that what we learned about variables in one context transfers to novel ones. But reality is seldom so simple.</p>
+<p>For instance, we may believe some parameters generalize but not others. Or they may generalize but we are still unsure how much. When we create a predictive model we can easily codify this knowledge.</p>
+<p>We will repeat the forecast example but assume only the volatility (<code>sigma</code>),  but not the mean drift (<code>mu</code>) holds into the future. There are a few ways we can achieve this:</p>
+<ol>
+<li>Drop the <code>mu</code> draws from the posterior group. As we mentioned in the schools example, any unobserved variable that is required for generating draws from the predictive variables will be sampled from the prior if not present.</li>
+<li>Use a different name for the drift in the forecast time series. This is basically the same as option 1, since the new variable won't be present in the posterior group and will have to be resampled from the prior.</li>
+<li>Include <code>mu</code> in <code>var_names</code>. This will force <code>sample_posterior_predictive</code> to ignore the <code>mu</code> posterior draws and resample it from the prior. Any variables between <code>mu</code> and our variables of interest would also be resampled from the prior as the posterior draws are no longer relevant, since they depended directly on <code>mu</code>.</li>
+</ol>
+<p>Any option is equally valid. We will pick the last one as we can reuse the model we already defined.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">forecast_m</span><span class="p">:</span>
+    <span class="n">pp_resampling_mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span>
+        <span class="n">idata</span><span class="p">,</span> 
+        <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;mu&quot;</span><span class="p">,</span> <span class="s2">&quot;y_forecast&quot;</span><span class="p">],</span> 
+        <span class="n">predictions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+        <span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+<pre><code>Sampling: [mu, y_forecast]
+</code></pre>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 00:00&lt;00:00]
+</div>
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode12" aria-expanded="false" aria-controls="collapseibleCode12">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode12" class="collapse">
+                <div class="hll"><pre><span></span><span class="n">steps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">az</span><span class="o">.</span><span class="n">plot_hdi</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">steps</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">pp_resampling_mu</span><span class="o">.</span><span class="n">predictions</span><span class="p">[</span><span class="s2">&quot;y_forecast&quot;</span><span class="p">])</span>
+<span class="c1"># Plot first five forecasts</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">pp_resampling_mu</span><span class="o">.</span><span class="n">predictions</span><span class="p">[</span><span class="s2">&quot;y_forecast&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">chain</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">draw</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">y_obs</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">50</span><span class="p">,</span> <span class="mi">150</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;observed&quot;</span><span class="p">,</span> <span class="s2">&quot;forecast&quot;</span><span class="p">]);</span>
+</pre></div>
+
+            </div>
+            <p><img src="output_46_0.png" alt="png"></p>
+<p>Forecasting is now incredibly wide. We can achieve a middle ground, by reusing <code>mu</code> but adding new uncertainty downstream of it.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">forecast_noisy_m</span><span class="p">:</span>
+    <span class="c1"># Again using Flat priors. This has a nice debug value,</span>
+    <span class="c1"># because it confirms the values must come from the trace and not the prior</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Flat</span><span class="p">(</span><span class="s2">&quot;mu&quot;</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Flat</span><span class="p">(</span><span class="s2">&quot;sigma&quot;</span><span class="p">)</span>
+
+    <span class="c1"># We add a new normal noise term around the inferred mu</span>
+    <span class="n">mu_noisy</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;mu_noisy&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+    <span class="n">pm</span><span class="o">.</span><span class="n">GaussianRandomWalk</span><span class="p">(</span>
+        <span class="s2">&quot;y_forecast&quot;</span><span class="p">,</span>
+        <span class="n">init_dist</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">DiracDelta</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">y_obs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+        <span class="n">mu</span><span class="o">=</span><span class="n">mu_noisy</span><span class="p">,</span>
+        <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span>
+        <span class="n">steps</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">pp_noisy_mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span>
+        <span class="n">idata</span><span class="p">,</span> 
+        <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;y_forecast&quot;</span><span class="p">],</span> 
+        <span class="n">predictions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+        <span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+<pre><code>Sampling: [mu_noisy, y_forecast]
+</code></pre>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 00:00&lt;00:00]
+</div>
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode13" aria-expanded="false" aria-controls="collapseibleCode13">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode13" class="collapse">
+                <div class="hll"><pre><span></span><span class="n">steps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">az</span><span class="o">.</span><span class="n">plot_hdi</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">steps</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">pp_noisy_mu</span><span class="o">.</span><span class="n">predictions</span><span class="p">[</span><span class="s2">&quot;y_forecast&quot;</span><span class="p">])</span>
+<span class="c1"># Plot first five forecasts</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">pp_noisy_mu</span><span class="o">.</span><span class="n">predictions</span><span class="p">[</span><span class="s2">&quot;y_forecast&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">chain</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">draw</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">y_obs</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">50</span><span class="p">,</span> <span class="mi">150</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;observed&quot;</span><span class="p">,</span> <span class="s2">&quot;forecast&quot;</span><span class="p">]);</span>
+</pre></div>
+
+            </div>
+            <p><img src="output_49_0.png" alt="png"></p>
+<h2 id="sampling-latent-variables">Sampling latent variables</h2><p>The examples up to here focused on predicting model outcomes. In some cases we may be more interested in predicting latent variables.</p>
+<p>In the next two examples we show that <code>sample_posterior_predictive</code> can be easily used for this purpose as well.</p>
+<h3 id="predicting-uncensored-variables">Predicting uncensored variables</h3><p>We will start with a rather simple application. After doing inference on censored data we wonder what future observations may look like ignoring any <a href="https://en.wikipedia.org/wiki/Censoring_(statistics">censoring process</a> (<a href="https://www.pymc.io/projects/docs/en/stable/api/distributions/generated/pymc.Censored.html">docs</a>).</p>
+<p>This could be used to make predictions about the expected lifetime of a patient that was still alive when the latest data was collected, or even a completely new patient.</p>
+<div class="hll"><pre><span></span><span class="n">x_censored_obs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">4.3</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">]</span>
+
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">censored_m</span><span class="p">:</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;mu&quot;</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;sigma&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+    <span class="n">x_censored</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Censored</span><span class="p">(</span>
+        <span class="s2">&quot;x_censored&quot;</span><span class="p">,</span> 
+        <span class="n">dist</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> 
+        <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+        <span class="n">upper</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> 
+        <span class="n">observed</span><span class="o">=</span><span class="n">x_censored_obs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">idata</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+</pre></div>
+<pre><code>Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [mu, sigma]
+</code></pre>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [8000/8000 00:02&lt;00:00 Sampling 4 chains, 1 divergences]
+</div><p>All we have to do is to recreate the original model without censoring the variable of interest.</p>
+<p>Just for illustration purposes, we will actually make predictions from a still-censored and an uncensored process. This way we can compare the two side by side.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">uncensored_m</span><span class="p">:</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;mu&quot;</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;sigma&quot;</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+    <span class="n">x_censored</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Censored</span><span class="p">(</span><span class="s2">&quot;x_censored&quot;</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
+
+    <span class="c1"># This uncensored variable is new</span>
+    <span class="n">x_uncensored</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;x_uncensored&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+
+    <span class="n">pp</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span>
+        <span class="n">idata</span><span class="p">,</span>
+        <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x_censored&quot;</span><span class="p">,</span> <span class="s2">&quot;x_uncensored&quot;</span><span class="p">],</span>
+        <span class="n">predictions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+<pre><code>Sampling: [x_censored, x_uncensored]
+</code></pre>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 00:00&lt;00:00]
+</div><div class="hll"><pre><span></span><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span><span class="p">(</span><span class="n">pp</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;predictions&quot;</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_55_0.png" alt="png"></p>
+<p>Let's mix things up for our final example...</p>
+<h3 id="recovering-mixture-indexes">Recovering mixture indexes</h3><p>It's <a href="https://mc-stan.org/docs/2_20/stan-users-guide/rao-blackwell-section.html">common advice</a> to marginalize discrete parameters, so that inference can be done exclusively with gradient-based samplers like NUTS.</p>
+<p>However, we often do care about the latent discrete variables. For example we may be interested in classifying which discrete source generated an observed event.</p>
+<p>Once we have inferred the continuous parameters in our model, it's generally possible to recover marginalized variables by doing a bit of algebra. As you may have guessed, we will again rely on <code>sample_posterior_predictive</code>.</p>
+<p>We pick a Mixture model as an example. The handy <code>Mixture</code> (<a href="https://www.pymc.io/projects/docs/en/stable/api/distributions/generated/pymc.Mixture.html">docs</a>) distribution implicitly marginalizes over categorical index variables that identify the component that generates each observation.</p>
+<p>Here is how we can simulate some data from a Normal mixture:</p>
+<div class="hll"><pre><span></span><span class="c1"># ~30% of the draws come from component 0 and 70% from component 1</span>
+<span class="n">w_true</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">]</span>
+
+<span class="c1"># Components are Normals centered around -5 and 5, and with 2.5 std</span>
+<span class="n">mu_true</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">sigma_true</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
+
+<span class="n">N</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">idxs</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Categorical</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">w_true</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">N</span><span class="p">,))</span>
+<span class="n">components</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mu_true</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sigma_true</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mu_true</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">sigma_true</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+<span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">components</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="n">idxs</span><span class="p">]</span>
+<span class="n">idxs_true</span><span class="p">,</span> <span class="n">y_obs</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">draw</span><span class="p">([</span><span class="n">idxs</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span> <span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+</pre></div>
+<div class="hll"><pre><span></span><span class="n">idxs_true</span><span class="p">,</span> <span class="n">y_obs</span>
+</pre></div>
+<pre><code>(array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1]),
+ array([ 1.33624848,  0.57901453,  0.79282242,  0.93851528,  1.29247425,
+         0.73555422,  0.66878824,  0.89633854,  0.37092651,  0.07381751,
+         0.81795087, -1.5136106 , -0.56532478,  1.44692458,  0.85920656,
+        -0.02250421, -1.81445585,  1.48100228,  0.25457723,  1.31812146]))
+</code></pre>
+<div class="hll"><pre><span></span><span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="c1"># Let&#39;s plot the density</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10_000</span><span class="p">)</span>
+<span class="n">pdf</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">w_true</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">pm</span><span class="o">.</span><span class="n">logp</span><span class="p">(</span><span class="n">components</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span>
+    <span class="o">+</span> <span class="n">w_true</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">pm</span><span class="o">.</span><span class="n">logp</span><span class="p">(</span><span class="n">components</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span>
+<span class="p">)</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="o">/</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;bwr&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">y_obs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="n">c</span><span class="o">=</span><span class="n">idxs_true</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;bwr&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;y_obs&quot;</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_61_0.png" alt="png"></p>
+<p>The dots in the plot correspond to the simulated values, color-coded by their original mixture component. We also plot the density of the marginalized mixture above.</p>
+<p>In an applied setting, the true Mixture form is likely unknown and we would want to estimate it via sampling. To do this, we fit a model with wide component mean and noise priors, conditioned on our (simulated) observations. As mentioned, the <code>Mixture</code> distribution allows us to marginalize over the index categorical variables and perform sampling exclusively with NUTS.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">m</span><span class="p">:</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;mu&quot;</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;sigma&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,))</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Dirichlet</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">comp_dists</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mu</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mu</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">sigma</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="p">]</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">Mixture</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">comp_dists</span><span class="o">=</span><span class="n">comp_dists</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">y_obs</span><span class="p">)</span>
+
+    <span class="n">idata</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">target_accept</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+</pre></div>
+<pre><code>Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [mu, sigma, w]
+</code></pre>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='8000' class='' max='8000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [8000/8000 00:11&lt;00:00 Sampling 4 chains, 1 divergences]
+</div><div class="hll"><pre><span></span><span class="n">az</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">idata</span><span class="p">)</span>
+</pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>mu[0]</th>
+      <td>-1.656</td>
+      <td>1.152</td>
+      <td>-3.535</td>
+      <td>0.428</td>
+      <td>0.051</td>
+      <td>0.040</td>
+      <td>823.0</td>
+      <td>391.0</td>
+      <td>1.02</td>
+    </tr>
+    <tr>
+      <th>mu[1]</th>
+      <td>0.803</td>
+      <td>0.168</td>
+      <td>0.521</td>
+      <td>1.151</td>
+      <td>0.005</td>
+      <td>0.004</td>
+      <td>1085.0</td>
+      <td>899.0</td>
+      <td>1.01</td>
+    </tr>
+    <tr>
+      <th>sigma[0]</th>
+      <td>0.855</td>
+      <td>0.512</td>
+      <td>0.079</td>
+      <td>1.771</td>
+      <td>0.031</td>
+      <td>0.022</td>
+      <td>154.0</td>
+      <td>32.0</td>
+      <td>1.02</td>
+    </tr>
+    <tr>
+      <th>sigma[1]</th>
+      <td>0.562</td>
+      <td>0.164</td>
+      <td>0.294</td>
+      <td>0.890</td>
+      <td>0.006</td>
+      <td>0.005</td>
+      <td>924.0</td>
+      <td>613.0</td>
+      <td>1.02</td>
+    </tr>
+    <tr>
+      <th>w[0]</th>
+      <td>0.190</td>
+      <td>0.129</td>
+      <td>0.007</td>
+      <td>0.435</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>790.0</td>
+      <td>946.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>w[1]</th>
+      <td>0.810</td>
+      <td>0.129</td>
+      <td>0.565</td>
+      <td>0.993</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>790.0</td>
+      <td>946.0</td>
+      <td>1.00</td>
+    </tr>
+  </tbody>
+</table>
+</div><p>Equipped with some knowledge of conditional probability in mixture processes, and draws from the posterior parameters, we can now recover the indexes by sampling from a suitably parametrized Categorical distribution.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">recover_m</span><span class="p">:</span>
+    <span class="c1"># Remember: the prior form doesn&#39;t actually matter!</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;mu&quot;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,))</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;sigma&quot;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,))</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Dirichlet</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">comp_dists</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mu</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mu</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">sigma</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Compute the logp that each datapoint came from each component</span>
+    <span class="n">log_probs</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+        <span class="p">[</span><span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">pm</span><span class="o">.</span><span class="n">logp</span><span class="p">(</span><span class="n">comp_dists</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y_obs</span><span class="p">)],</span> 
+        <span class="p">[</span><span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="n">pm</span><span class="o">.</span><span class="n">logp</span><span class="p">(</span><span class="n">comp_dists</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">y_obs</span><span class="p">)],</span>
+    <span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># log_probs has shape (2, 20), we transpose it to (20, 2), so that the </span>
+    <span class="c1"># Categorical takes 20 batched draws from two possible values of [0, 1]</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Categorical</span><span class="p">(</span><span class="s2">&quot;idx&quot;</span><span class="p">,</span> <span class="n">logit_p</span><span class="o">=</span><span class="n">log_probs</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="n">pp</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span><span class="n">idata</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;idx&quot;</span><span class="p">],</span> <span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+</pre></div>
+<pre><code>Sampling: [idx]
+</code></pre>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='4000' class='' max='4000' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [4000/4000 00:01&lt;00:00]
+</div><div class="hll"><pre><span></span><span class="n">az</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">pp</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s2">&quot;posterior_predictive&quot;</span><span class="p">)</span>
+</pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>idx[0]</th>
+      <td>0.976</td>
+      <td>0.152</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>2262.0</td>
+      <td>4000.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>idx[1]</th>
+      <td>0.952</td>
+      <td>0.215</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.005</td>
+      <td>0.003</td>
+      <td>2121.0</td>
+      <td>4000.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>idx[2]</th>
+      <td>0.968</td>
+      <td>0.175</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>1883.0</td>
+      <td>4000.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>idx[3]</th>
+      <td>0.976</td>
+      <td>0.152</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>2237.0</td>
+      <td>4000.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>idx[4]</th>
+      <td>0.978</td>
+      <td>0.145</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>2333.0</td>
+      <td>4000.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>idx[5]</th>
+      <td>0.968</td>
+      <td>0.176</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>2157.0</td>
+      <td>4000.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>idx[6]</th>
+      <td>0.967</td>
+      <td>0.179</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.005</td>
+      <td>0.003</td>
+      <td>1554.0</td>
+      <td>4000.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>idx[7]</th>
+      <td>0.974</td>
+      <td>0.161</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>2011.0</td>
+      <td>4000.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>idx[8]</th>
+      <td>0.919</td>
+      <td>0.273</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.006</td>
+      <td>0.004</td>
+      <td>1863.0</td>
+      <td>1863.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>idx[9]</th>
+      <td>0.849</td>
+      <td>0.358</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.009</td>
+      <td>0.006</td>
+      <td>1612.0</td>
+      <td>1612.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>idx[10]</th>
+      <td>0.970</td>
+      <td>0.169</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>2099.0</td>
+      <td>4000.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>idx[11]</th>
+      <td>0.080</td>
+      <td>0.271</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.013</td>
+      <td>0.009</td>
+      <td>430.0</td>
+      <td>430.0</td>
+      <td>1.01</td>
+    </tr>
+    <tr>
+      <th>idx[12]</th>
+      <td>0.527</td>
+      <td>0.499</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.018</td>
+      <td>0.012</td>
+      <td>812.0</td>
+      <td>812.0</td>
+      <td>1.01</td>
+    </tr>
+    <tr>
+      <th>idx[13]</th>
+      <td>0.973</td>
+      <td>0.163</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>2263.0</td>
+      <td>4000.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>idx[14]</th>
+      <td>0.976</td>
+      <td>0.155</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>2024.0</td>
+      <td>4000.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>idx[15]</th>
+      <td>0.823</td>
+      <td>0.382</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.010</td>
+      <td>0.007</td>
+      <td>1382.0</td>
+      <td>1382.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>idx[16]</th>
+      <td>0.062</td>
+      <td>0.240</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.012</td>
+      <td>0.009</td>
+      <td>383.0</td>
+      <td>383.0</td>
+      <td>1.01</td>
+    </tr>
+    <tr>
+      <th>idx[17]</th>
+      <td>0.970</td>
+      <td>0.172</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>1985.0</td>
+      <td>4000.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>idx[18]</th>
+      <td>0.904</td>
+      <td>0.294</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.007</td>
+      <td>0.005</td>
+      <td>1740.0</td>
+      <td>1740.0</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>idx[19]</th>
+      <td>0.974</td>
+      <td>0.158</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>2341.0</td>
+      <td>4000.0</td>
+      <td>1.00</td>
+    </tr>
+  </tbody>
+</table>
+</div><div class="hll"><pre><span></span><span class="n">idx</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">posterior_predictive</span><span class="p">[</span><span class="s2">&quot;idx&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="s2">&quot;chain&quot;</span><span class="p">,</span> <span class="s2">&quot;draw&quot;</span><span class="p">))</span>
+
+<span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">y_obs</span><span class="p">,</span> <span class="mi">1</span><span class="o">-</span><span class="n">idx</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;idx==0&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">y_obs</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mi">1</span><span class="o">-</span><span class="n">idx</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;idx==1&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">y_obs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">idxs_true</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;bwr&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="p">(</span><span class="mf">1.03</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">));</span>
+</pre></div>
+<p><img src="output_68_0.png" alt="png"></p>
+<p>In the plot above we show the proportion of categorical draws for each observation, as the height of stacked bars.</p>
+<p>We can see that inference about the latent indexes is reasonable for most observations. Uncertainty increases as the values get closer to the center, and can even flip when an observation is more probable under the opposite mixture component.</p>
+<p>If we were interested in predicting the original component for new datapoints, we could just pass them instead of <code>y_obs</code> in the recovery model.</p>
+<h2 id="concluding-remarks">Concluding remarks</h2><p>This blog post illustrated how PyMC's <code>sample_posterior_predictive</code> function can make use of learned parameters to predict variables in novel contexts. This is valid as long as the used parameters are expected to generalize.</p>
+<p>The actual mechanism used by <code>sample_posterior_predictive</code> is pretty simple. We start with the generative process encoded by the PyMC model. Sampling directly from it would give us prior predictive draws (this is exactly what <code>sample_prior_predictive</code> does). But, for <code>sample_posterior_predictive</code> there is one extra step.</p>
+<p>Any variables that are found in the posterior group of the <code>InferenceData</code> (via name matching), and not requested to be resampled in the <code>var_names</code> argument, are replaced by the posterior draws. Any of the requested variables in <code>var_names</code> that happen to be downstream of these, will now be "conditioned" on the posterior draws and not the priors. There are some other subtleties that you can read about in <a href="https://github.com/pymc-devs/pymc/blob/067d89bf8046a32038df4b4a73c81e81d4cb50b6/pymc/sampling/forward.py#L105-L181">forward.py</a>, but this is more or less the gist of it.</p>
+<p>Generating predictions like this is seemingly trivial but very powerful. As always, we invite you to try PyMC and see if it fits your needs!</p>
+
+	<!--THIS IS THE FOOTER OF THE BLOGPSOT-->
+	<hr> 
+		<!--div class="container"-->
+			<h2 class="font-roboto">Work with PyMC Labs</h2>
+			<p>If you are interested in seeing what we at PyMC Labs can do for you, then please email <a href="mailto:info@pymc-labs.com">info@pymc-labs.com</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity.
+
+We also run <a href="https://www.pymc-labs.com/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics.
+			</p>
+		<!--/div-->
+    
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+
+        </div>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+            integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+            crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+            <div class="container">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBottom"
+                    aria-controls="navbarBottom" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarBottom">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-twitter"
+                                    aria-hidden="true"></i>
+                                Twitter</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-github"
+                                    aria-hidden="true"></i>
+                                GitHub</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-linkedin"
+                                    aria-hidden="true"></i>
+                                LinkedIn</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-youtube"
+                                    aria-hidden="true"></i>
+                                YouTube</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-meetup"
+                                    aria-hidden="true"></i>
+                                Meetup</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                    aria-hidden="true"></i>
+                                Newsletter</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/privacy-policy"><i class="fa fa-solid fa-lock"
+                                    aria-hidden="true"></i>
+                                Privacy Policy</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/impressum"><i class="fa fa-solid fa-info-circle"
+                                    aria-hidden="true"></i>
+                                Impressum</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/contact"><i class="fa fa-solid fa-file-signature"
+                                    aria-hidden="true"></i>
+                                Contact</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+    </body>
+
+</html>

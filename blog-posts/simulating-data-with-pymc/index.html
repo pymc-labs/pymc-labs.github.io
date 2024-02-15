@@ -1,0 +1,613 @@
+<!doctype html><html lang="en">
+
+    <head>
+        
+
+        <style media="screen">
+            body {
+                padding-top: 70px;
+                padding-bottom: 70px;
+            }
+
+        </style>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+        <link rel="stylesheet" href="../../static/css/custom_style.css?h=16f93eb7">
+        <link rel="stylesheet" href="../../static/css/table_style.css?h=c677f945">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+
+        <!-- Extra meta tags: social site cards, browser icons... -->
+        <meta name="theme-color" content="#ffffff">
+        <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+        <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+        <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+        <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+
+        <title>Simulating data with PyMC - PyMC Labs</title>
+        <meta name="twitter:card" content="summary">
+        <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/simulating-data-with-pymc/" />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href="">
+        <meta property="og:title" content="Simulating data with PyMC - PyMC Labs" />
+        <meta property="og:description" content="" />
+        <meta property="og:image" content="https://pymc-labs.github.io/blog-posts/simulating-data-with-pymc/cover.png" />
+        <meta name="description" content="We are a Bayesian consulting firm specializing in data analysis and predictive modeling. Contact us today to learn how we can help your business.">
+        <meta name="keywords" content="Bayesian consulting, data analysis, predictive modeling">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+        <!-- <script>hljs.highlightAll();</script> -->
+
+        <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+        <!-- We use this to do syntax highlighting -->
+        <link rel="stylesheet" href="../../static/pygments.css">
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+        </script>
+        
+<script src="../../static/scripts/toggle_code.js?h=3a00c72f" defer></script>
+
+    </head>
+
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <div class="container">
+                <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+                <a class="navbar-brand" href="/"><img alt="logo" loading="eager" width="88" height="70" title="logo" class="navbar-logo"
+                        src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop"
+                    aria-controls="navbarTop" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarTop">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                    aria-hidden="true"></i>
+                                What we do</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                    aria-hidden="true"></i>
+                                Products</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                    aria-hidden="true"></i>
+                                Team</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                    aria-hidden="true"></i>
+                                Clients</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                    aria-hidden="true"></i>
+                                Workshops</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                    aria-hidden="true"></i>
+                                Blog</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container">
+            
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 blogpost">
+        <h2 class="font-roboto">Simulating data with PyMC</h2>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-6 author_name">
+                <small class="text-muted">AUTHORED BY</small>
+                <p class="font-bold">
+                    
+
+
+
+    
+
+
+
+    
+        
+            Ricardo Vieira
+        
+    
+        
+            and Tomás Capretto
+        
+    
+
+
+
+                </p>
+            </div>
+            <div class="col-md-6 author_date">
+                <!-- <p>2023-04-20</p> -->
+                
+<small class="text-muted">DATE</small>
+<p class="font-lighter">2023-04-20</p>
+
+<!--<div class="cover-blogposts"><img src="../../static/images/blog_post/cover.jpg?h=653e9b57"></div>-->
+
+            </div>
+        
+            
+                <div class="blog-cover-container">
+                    <img loading="lazy" title="cover image" alt="" class="cover-blogposts" src="cover.png">
+                </div>
+            
+	    </div>
+        <hr> <p style="text-align: right; color: gray;font-size: small;"><em>Image from <a href="https://en.wikipedia.org/wiki/Buffon%27s_needle_problem">Wikipedia</a></em></p><p><a href="https://www.pymc.io/welcome.html">PyMC</a> provids a great API for defining statistical models. 
+When paired with its sampling algorithms, it becomes the ideal tool for conducting reliable and robust Bayesian inference.</p>
+<p>Still, Bayesian inference is far from its only use case. 
+PyMC models specify a highly structured data-generating process that can be very useful on its own. 
+Applications include simulation for optimization routines, risk analysis, and research design, among many others.</p>
+<p>PyMC comes with many user-friendly builtin distributions and meta-distributions 
+which are cumbersome to write from scratch with NumPy or SciPy routines.
+These include Mixtures, Timeseries, Multivariate parametrizations, Censored and Truncated distributions, 
+and pretty much anything you would would ever need when doing data simulation.</p>
+<p>In this blog post we will give you a flavor for some of these, and show how we use them as part of a data modelling workflow!</p>
+<h2 id="taking-draws-from-simple-distributions">Taking draws from simple distributions</h2><div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">pymc</span> <span class="k">as</span> <span class="nn">pm</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+</pre></div>
+<p>SciPy has a lot of distributions, but they are often difficult to work with, due to their focus on loc-scale parametrizations.</p>
+<p>PyMC tends to pick more intuitive parametrizations (and often offers multiple options).</p>
+<p>For instance, in PyMC you can define a <a href="https://www.pymc.io/projects/docs/en/stable/api/distributions/generated/pymc.Gamma.html">Gamma</a> distribution using 
+the shape/rate parametrization (which we call alpha and beta), and then take draws with the <a href="https://www.pymc.io/projects/docs/en/stable/api/generated/pymc.draw.html">draw</a> function.</p>
+<div class="hll"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Gamma</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">x_draws</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">draws</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">x_draws</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_5_0.png" alt="Gamma distribution histogram"></p>
+<p>Or, perhaps more intuitively, using the mean/standard deviation parametrization (called mu and sigma).</p>
+<div class="hll"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Gamma</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">x_draws</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">draws</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">x_draws</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_7_0.png" alt="Alternative parametrization Gamma distribution histogram"></p>
+<p>PyMC takes care of converting between equivalent parametrizations for the user.</p>
+<h2 id="all-pymc-distributions-are-vectorized">All PyMC distributions are vectorized</h2><p>Not all SciPy distributions allow NumPy-like broadcasting for their parameters.
+PyMC distributions always do!</p>
+<div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">st</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">st</span><span class="o">.</span><span class="n">dirichlet</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span><span class="o">.</span><span class="n">rvs</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+</pre></div>
+<pre><code>Parameter vector 'a' must be one dimensional, but a.shape = (2, 3).
+</code></pre>
+<p>Ah well...</p>
+<div class="hll"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Dirichlet</span><span class="o">.</span><span class="n">dist</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="n">pm</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+<pre><code>array([[0.00173804, 0.0396383 , 0.95862366],
+       [0.94999365, 0.04176138, 0.00824496]])
+</code></pre>
+<h2 id="meta-distributions">Meta-Distributions</h2><p>Neither NumPy nor SciPy offer a pre-built truncated LogNormal distribution (last time I checked). 
+They do offer a Truncated Normal, and you could exponentiate those to obtain Truncated LogNormal draws. 
+But what if you wanted to sample some other truncated distribution?</p>
+<p>PyMC can truncate any (pure univariate) distribution you throw at it, via the 
+<a href="https://www.pymc.io/projects/docs/en/stable/api/distributions/generated/pymc.Truncated.html#pymc.Truncated">Truncated</a> class.</p>
+<div class="hll"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Truncated</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">Lognormal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">upper</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">x_draws</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">draws</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">x_draws</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_14_0.png" alt="Truncated LogNormal histogram"></p>
+<p>Or you can sample from Mixtures, using <a href="https://www.pymc.io/projects/docs/en/stable/api/distributions/mixture.html">Mixture</a>.</p>
+<p>Here we sample from a Mixture of two Normals, with weights <code>[0.3, 0.7]</code>, 
+meaning that 30% of the draws will come from the first component and 70% from the second (on average).</p>
+<div class="hll"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Mixture</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span>
+    <span class="n">w</span><span class="o">=</span><span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">],</span> 
+    <span class="n">comp_dists</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> 
+        <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+<span class="n">x_draws</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">draws</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">x_draws</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_17_0.png" alt="Mixture histogram"></p>
+<p>Or Random walks... with mixture initial distributions? Sure.</p>
+<div class="hll"><pre><span></span><span class="n">init_dist</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Mixture</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span>
+    <span class="n">w</span><span class="o">=</span><span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">],</span> 
+    <span class="n">comp_dists</span><span class="o">=</span><span class="p">[</span>
+        <span class="c1"># Why? Because we can!</span>
+        <span class="n">pm</span><span class="o">.</span><span class="n">Beta</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> 
+        <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">RandomWalk</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span>
+    <span class="n">init_dist</span><span class="o">=</span><span class="n">init_dist</span><span class="p">,</span>
+    <span class="n">innovation_dist</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">StudentT</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">nu</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+    <span class="n">steps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">x_draws</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">draws</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">x_draw</span> <span class="ow">in</span> <span class="n">x_draws</span><span class="p">:</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_draw</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_20_0.png" alt="RandomWalk series with Mixture initial starting point"></p>
+<h2 id="multiple-variables">Multiple variables</h2><p>You can also draw multiple non-independent variables easily.</p>
+<p>In this example we first sample a categorical index variable, 
+which is then used to select an entry from a vector of 3 Normals with means [-100, 0, 100], respectively.</p>
+<p>We can retrieve both the index and selected Normal draws via <code>draw</code>.</p>
+<div class="hll"><pre><span></span><span class="n">idx</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Categorical</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mf">.1</span><span class="p">,</span> <span class="mf">.3</span><span class="p">,</span> <span class="mf">.6</span><span class="p">])</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="n">idx</span><span class="p">]</span>
+<span class="n">idx_draws</span><span class="p">,</span> <span class="n">x_draws</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">draw</span><span class="p">([</span><span class="n">idx</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="n">draws</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">idx_draws</span><span class="p">,</span> <span class="n">x_draws</span>
+</pre></div>
+<pre><code>(array([2, 0, 1, 1, 0]),
+ array([  99.56070737,  -97.86364272,   -1.91664666,   -0.51318227,
+        -101.0769092 ]))
+</code></pre>
+<p>Here we first sample a Poisson variable. 
+This value then determines how many draws to take from a Gamma variable that is finally summed.</p>
+<div class="hll"><pre><span></span><span class="n">n_events</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Poisson</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">emissions</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Gamma</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">n_events</span><span class="p">)</span>
+<span class="n">pm</span><span class="o">.</span><span class="n">draw</span><span class="p">([</span><span class="n">n_events</span><span class="p">,</span> <span class="n">emissions</span><span class="o">.</span><span class="n">sum</span><span class="p">()],</span> <span class="n">draws</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+</pre></div>
+<pre><code>[array([ 4, 10,  5]), array([36.44587888, 99.99521681, 57.83917302])]
+</code></pre>
+<h2 id="what-if-i-don-t-know-what-i-want-to-sample">What if I don't know what I want to sample?</h2><p>Sometimes you have a rough idea of what the data looks like, but you don't know how to specify it.</p>
+<p>This could happen in a parameter recovery study, where you want to simulate covariates that are somewhat "realistic". 
+Maybe their marginals match an observed dataset or they show some level of covariance. 
+But you may not know exactly what parameters to use.</p>
+<p>The good news is that PyMC can also do inference (that's its main goal after all)!</p>
+<p>Let's say we have the following marginal data, 
+and we want to simulate something that behaves roughly like it.</p>
+<div class="hll"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;diamonds&quot;</span><span class="p">)</span>
+
+<span class="n">fg</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">displot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;price&quot;</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="s2">&quot;cut&quot;</span><span class="p">,</span> <span class="n">facet_kws</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">sharey</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">height</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mf">0.85</span><span class="p">);</span>
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">fg</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">():</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+</pre></div>
+<p><img src="output_27_0.png" alt="Histogram of diamon prices per cut category"></p>
+<p>Looks like a positive distribution, maybe multimodal. 
+Perhaps a LogNormal mixture?</p>
+<p>What about the parameters for the components, what should be the mixture weigths? 
+Let's make PyMC infer them!</p>
+<div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">cut_idxs</span><span class="p">,</span> <span class="n">cut_labels</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">factorize</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;cut&quot;</span><span class="p">])</span>
+<span class="n">cut_idxs</span><span class="p">,</span> <span class="n">cut_labels</span>
+</pre></div>
+<pre><code>(array([0, 1, 2, ..., 3, 1, 0]),
+ CategoricalIndex(['Ideal', 'Premium', 'Good', 'Very Good', 'Fair'], categories=['Ideal', 'Premium', 'Very Good', 'Good', 'Fair'], ordered=False, dtype='category'))
+</code></pre>
+<p>Let's assume the price for each of the 5 cuts can be modeled by a mixture of 3 LogNormal distributions. 
+That will be 5 * 3 = 15 means and 15 standard deviations. 
+We will also need 15 mixture weights. 
+Sounds like many parameters, but we have much more data.</p>
+<div class="hll"><pre><span></span><span class="sa">f</span><span class="s2">&quot;rows=</span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+</pre></div>
+<pre><code>'rows=53940'
+</code></pre>
+<p>Let's create a PyMC model, 
+with vague priors and fit the most likely parameter combination that could have generated the data.</p>
+<div class="hll"><pre><span></span><span class="n">coords</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;cut&quot;</span><span class="p">:</span> <span class="n">cut_labels</span><span class="o">.</span><span class="n">codes</span><span class="p">,</span>
+    <span class="s2">&quot;components&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="s2">&quot;obs&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)),</span>
+<span class="p">}</span>
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">)</span> <span class="k">as</span> <span class="n">m</span><span class="p">:</span>
+    <span class="c1"># Priors for the weights, means and standard deviations</span>
+    <span class="n">mix_weights</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Dirichlet</span><span class="p">(</span><span class="s2">&quot;mix_weights&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span> <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;cut&quot;</span><span class="p">,</span> <span class="s2">&quot;components&quot;</span><span class="p">))</span>
+    <span class="n">mix_means</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;mix_means&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;cut&quot;</span><span class="p">,</span> <span class="s2">&quot;components&quot;</span><span class="p">))</span>
+    <span class="n">mix_stds</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;mix_stds&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;cut&quot;</span><span class="p">,</span> <span class="s2">&quot;components&quot;</span><span class="p">))</span>
+
+    <span class="c1"># Distribution of the data</span>
+    <span class="c1"># We use numpy advanced indexing to broadcast the 5 mixtures parameters </span>
+    <span class="c1"># and weights into the long form shape of the data</span>
+    <span class="n">price</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Mixture</span><span class="p">(</span>
+        <span class="s2">&quot;price&quot;</span><span class="p">,</span>
+        <span class="n">w</span><span class="o">=</span><span class="n">mix_weights</span><span class="p">[</span><span class="n">cut_idxs</span><span class="p">],</span>
+        <span class="c1"># You can pass a single distribution to Mixture,</span>
+        <span class="c1"># in which case the last dimensions correspond to the mixture components.</span>
+        <span class="n">comp_dists</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">LogNormal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">mu</span><span class="o">=</span><span class="n">mix_means</span><span class="p">[</span><span class="n">cut_idxs</span><span class="p">],</span> <span class="n">sigma</span><span class="o">=</span><span class="n">mix_stds</span><span class="p">[</span><span class="n">cut_idxs</span><span class="p">]),</span>
+        <span class="n">observed</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;price&quot;</span><span class="p">],</span>
+        <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;obs&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+<p>That's a bit complicated... but not too bad once you write a couple of PyMC models. 
+PyMC comes with a whole set of utilities to help you define complex statistical models.</p>
+<p>In the example above we used coords, 
+to specify the shape of our parameters with human-readable labels.</p>
+<p>We can also request a graphical representation of our model:</p>
+<div class="hll"><pre><span></span><span class="n">pm</span><span class="o">.</span><span class="n">model_to_graphviz</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+</pre></div>
+<p><img src="output_36_0.svg" alt="Graphviz representation of model"></p>
+<p>Looks about right. 
+And here are the most likely parameters according to <a href="https://www.pymc.io/projects/docs/en/stable/api/generated/pymc.find_MAP.html">find_MAP</a>:</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">m</span><span class="p">:</span>
+    <span class="n">fit</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">find_MAP</span><span class="p">(</span><span class="n">include_transformed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">fit</span>
+</pre></div>
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style><div>
+  <progress value='236' class='' max='236' style='width:300px; height:20px; vertical-align: middle;'></progress>
+  100.00% [236/236 00:06&lt;00:00 logp = -4.9015e+05, ||grad|| = 7.9382]
+</div><pre><code>{'mix_means': array([[6.66074039, 7.75610166, 9.05369536],
+        [6.72625732, 8.39101105, 9.55073404],
+        [6.43443448, 8.29902563, 7.11347194],
+        [6.47404918, 8.18681784, 9.52971883],
+        [6.91160121, 8.16400639, 9.50047371]]),
+ 'mix_weights': array([[0.35500674, 0.43518759, 0.20980567],
+        [0.32025714, 0.59956718, 0.08017567],
+        [0.21574635, 0.73892949, 0.04532416],
+        [0.26608238, 0.68359   , 0.05032761],
+        [0.13718139, 0.78682301, 0.0759956 ]]),
+ 'mix_stds': array([[0.29090793, 0.58885309, 0.42603866],
+        [0.32267874, 0.61074076, 0.17280056],
+        [0.26029962, 0.68052945, 0.09724909],
+        [0.28147658, 0.69736908, 0.18833131],
+        [0.35619133, 0.52964347, 0.19005135]])}
+</code></pre>
+<p>Now that we have a set of parameter values, 
+we can take draws from the distribution of interest. 
+Hopefully it will resemble our data.</p>
+<div class="hll"><pre><span></span><span class="n">cut_labels</span><span class="o">.</span><span class="n">codes</span>
+</pre></div>
+<pre><code>array([0, 1, 3, 2, 4], dtype=int8)
+</code></pre>
+<div class="hll"><pre><span></span><span class="n">cut_idxs</span> <span class="o">=</span> <span class="n">cut_labels</span><span class="o">.</span><span class="n">codes</span>
+<span class="n">price</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Mixture</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span>
+    <span class="n">w</span><span class="o">=</span><span class="n">fit</span><span class="p">[</span><span class="s2">&quot;mix_weights&quot;</span><span class="p">][</span><span class="n">cut_idxs</span><span class="p">],</span>
+    <span class="n">comp_dists</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">LogNormal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span>
+        <span class="n">mu</span><span class="o">=</span><span class="n">fit</span><span class="p">[</span><span class="s2">&quot;mix_means&quot;</span><span class="p">][</span><span class="n">cut_idxs</span><span class="p">],</span> 
+        <span class="n">sigma</span><span class="o">=</span><span class="n">fit</span><span class="p">[</span><span class="s2">&quot;mix_stds&quot;</span><span class="p">][</span><span class="n">cut_idxs</span><span class="p">]</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+<span class="c1"># Each draw returns one price for each cut category</span>
+<span class="n">pm</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">price</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+</pre></div>
+<pre><code>array([ 681.86652441, 1559.814205  , 3460.20197464, 3291.09521261,
+       2400.54237695])
+</code></pre>
+<div class="hll"><pre><span></span><span class="n">draws</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">price</span><span class="p">,</span> <span class="n">draws</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode14" aria-expanded="false" aria-controls="collapseibleCode14">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode14" class="collapse">
+                <div class="hll"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="s2">&quot;col&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cut==&#39;</span><span class="si">{</span><span class="n">cut_labels</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">),</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;price&quot;</span><span class="p">,</span> <span class="n">binwidth</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">element</span><span class="o">=</span><span class="s2">&quot;step&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">col</span><span class="p">])</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">draws</span><span class="p">[:,</span> <span class="n">col</span><span class="p">],</span> <span class="n">binwidth</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">element</span><span class="o">=</span><span class="s2">&quot;step&quot;</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">col</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">col</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Observed data&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Simulated data&quot;</span><span class="p">);</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span> 
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cut=</span><span class="si">{</span><span class="n">cut_labels</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;price&quot;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">axi</span> <span class="ow">in</span> <span class="n">ax</span><span class="o">.</span><span class="n">ravel</span><span class="p">():</span>
+    <span class="n">axi</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">11</span><span class="p">);</span>
+</pre></div>
+
+            </div>
+            <p><img src="output_46_0.png" alt="Histogram of simulated diamond prices per cut category"></p>
+<p>The marginal simulated histograms do resemble those from the original dataset.</p>
+<p>Another way of checking their similarity is to look at the empirical CDF. 
+The two lines should look alike for distributions that are similar.</p>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode15" aria-expanded="false" aria-controls="collapseibleCode15">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode15" class="collapse">
+                <div class="hll"><pre><span></span><span class="n">r</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">displot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;price&quot;</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="s2">&quot;cut&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;ecdf&quot;</span><span class="p">,</span> <span class="n">log_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mf">0.85</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">ecdfplot</span><span class="p">(</span><span class="n">draws</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">ax</span><span class="o">=</span><span class="n">r</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+
+            </div>
+            <p><img src="output_49_0.png" alt="Empirical and simulated CDF plots for diamond prices per cut category"></p>
+<p>Looks close enough!</p>
+<p>If it didn't, we could go back to the Model and try something else. 
+Maybe more components, or different distribution families...</p>
+<p>But careful, if you do this enough times, you may end up as a 
+<a href="https://statmodeling.stat.columbia.edu/2021/02/19/fake-data-simulation-why-does-it-work-so-well/">data modelling</a> practitioner!</p>
+<h2 id="technical-advice">Technical advice</h2><p>In the examples above we used the handy <code>draw</code> function. 
+Under the hood, this function creates a compiled function that takes draws from your specified variables, seeds it, 
+and then calls it multiple times in a Python loop.</p>
+<p>If you are writing performance-critical code, 
+you should avoid calling <code>draw</code> in a loop, 
+as it will recompile the same function every time it is called. 
+Instead you can compile the underlying random function directly with <a href="https://www.pymc.io/projects/docs/en/stable/api/generated/pymc.compile_pymc.html">compile_pymc</a> and reuse it whenever needed.</p>
+<p>The internals of <code>draw</code> are pretty <a href="https://www.pymc.io/projects/docs/en/stable/_modules/pymc/sampling/forward.html#draw">straightforward</a>.</p>
+<div class="hll"><pre><span></span><span class="kn">from</span> <span class="nn">pymc.pytensorf</span> <span class="kn">import</span> <span class="n">compile_pymc</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">()</span>
+<span class="n">fn</span> <span class="o">=</span> <span class="n">compile_pymc</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="p">[],</span> <span class="n">outputs</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+<span class="n">fn</span><span class="p">(),</span> <span class="n">fn</span><span class="p">()</span>
+</pre></div>
+<pre><code>(array(-0.10568235), array(-0.6541993))
+</code></pre>
+<p>Secondly, if you need to take many draws from the same distribution, 
+it's better to define it with the final shape and call the function only once. 
+<strong>In the examples above we never did this!</strong></p>
+<p>This way, the random number generation can be vectorized.</p>
+<div class="hll"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="o">.</span><span class="n">dist</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,))</span>
+<span class="n">fn</span> <span class="o">=</span> <span class="n">compile_pymc</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="p">[],</span> <span class="n">outputs</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+<span class="n">fn</span><span class="p">()</span>
+</pre></div>
+<pre><code>array([-0.10568235, -0.6541993 ])
+</code></pre>
+<p>To better understand PyMC shapes, 
+check out <a href="https://www.pymc.io/projects/docs/en/stable/learn/core_notebooks/dimensionality.html">this page</a>.</p>
+<h2 id="concluding-remarks">Concluding remarks</h2><p>In this blog post we showed how PyMC can be used as a powerful replacement for NumPy and SciPy 
+when writing structured random generation routines.</p>
+<p>We also hinted at how the same code can be reused for both simulation and inference in the last example. 
+If you go a bit further, you can start doing predictions based on your estimated statistical model. 
+This is, in a nutshell, what model based data science is all about!</p>
+<p>If you are a data scientist, doing data simulation, we hope you give PyMC a try!</p>
+
+	<!--THIS IS THE FOOTER OF THE BLOGPSOT-->
+	<hr> 
+		<!--div class="container"-->
+			<h2 class="font-roboto">Work with PyMC Labs</h2>
+			<p>If you are interested in seeing what we at PyMC Labs can do for you, then please email <a href="mailto:info@pymc-labs.com">info@pymc-labs.com</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity.
+
+We also run <a href="https://www.pymc-labs.com/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics.
+			</p>
+		<!--/div-->
+    
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+
+        </div>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+            integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+            crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+            <div class="container">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBottom"
+                    aria-controls="navbarBottom" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarBottom">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-twitter"
+                                    aria-hidden="true"></i>
+                                Twitter</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-github"
+                                    aria-hidden="true"></i>
+                                GitHub</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-linkedin"
+                                    aria-hidden="true"></i>
+                                LinkedIn</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-youtube"
+                                    aria-hidden="true"></i>
+                                YouTube</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-meetup"
+                                    aria-hidden="true"></i>
+                                Meetup</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                    aria-hidden="true"></i>
+                                Newsletter</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/privacy-policy"><i class="fa fa-solid fa-lock"
+                                    aria-hidden="true"></i>
+                                Privacy Policy</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/impressum"><i class="fa fa-solid fa-info-circle"
+                                    aria-hidden="true"></i>
+                                Impressum</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/contact"><i class="fa fa-solid fa-file-signature"
+                                    aria-hidden="true"></i>
+                                Contact</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+    </body>
+
+</html>

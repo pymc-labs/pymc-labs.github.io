@@ -1,0 +1,508 @@
+<!doctype html><html lang="en">
+
+    <head>
+        
+
+        <style media="screen">
+            body {
+                padding-top: 70px;
+                padding-bottom: 70px;
+            }
+
+        </style>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+        <link rel="stylesheet" href="../../static/css/custom_style.css?h=16f93eb7">
+        <link rel="stylesheet" href="../../static/css/table_style.css?h=c677f945">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+
+        <!-- Extra meta tags: social site cards, browser icons... -->
+        <meta name="theme-color" content="#ffffff">
+        <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+        <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+        <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+        <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+
+        <title>PyMC, Aesara and AePPL: The New Kids on The Block - PyMC Labs</title>
+        <meta name="twitter:card" content="summary">
+        <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/2022-07-10-ricardo-video/" />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href="">
+        <meta property="og:title" content="PyMC, Aesara and AePPL: The New Kids on The Block - PyMC Labs" />
+        <meta property="og:description" content="Dive into the world of PyMC, Aesara, and AePPL, the new powerhouses in probabilistic programming. Discover how they revolutionize Bayesian modeling and open up new possibilities for data analysis." />
+        <meta property="og:image" content="https://pymc-labs.github.io/blog-posts/2022-07-10-ricardo-video/cover.png" />
+        <meta name="description" content="We are a Bayesian consulting firm specializing in data analysis and predictive modeling. Contact us today to learn how we can help your business.">
+        <meta name="keywords" content="Bayesian consulting, data analysis, predictive modeling">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+        <!-- <script>hljs.highlightAll();</script> -->
+
+        <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+        <!-- We use this to do syntax highlighting -->
+        <link rel="stylesheet" href="../../static/pygments.css">
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+        </script>
+        
+<script src="../../static/scripts/toggle_code.js?h=3a00c72f" defer></script>
+
+    </head>
+
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <div class="container">
+                <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+                <a class="navbar-brand" href="/"><img alt="logo" loading="eager" width="88" height="70" title="logo" class="navbar-logo"
+                        src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop"
+                    aria-controls="navbarTop" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarTop">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                    aria-hidden="true"></i>
+                                What we do</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                    aria-hidden="true"></i>
+                                Products</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                    aria-hidden="true"></i>
+                                Team</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                    aria-hidden="true"></i>
+                                Clients</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                    aria-hidden="true"></i>
+                                Workshops</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                    aria-hidden="true"></i>
+                                Blog</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container">
+            
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 blogpost">
+        <h2 class="font-roboto">PyMC, Aesara and AePPL: The New Kids on The Block</h2>
+        
+        <p class="mb-2 text-muted">Dive into the world of PyMC, Aesara, and AePPL, the new powerhouses in probabilistic programming. Discover how they revolutionize Bayesian modeling and open up new possibilities for data analysis.</p>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-6 author_name">
+                <small class="text-muted">AUTHORED BY</small>
+                <p class="font-bold">
+                    
+
+
+
+    
+
+
+
+    
+        Ricardo Vieira
+    
+
+
+
+                </p>
+            </div>
+            <div class="col-md-6 author_date">
+                <!-- <p>2022-07-10</p> -->
+                
+<small class="text-muted">DATE</small>
+<p class="font-lighter">2022-07-10</p>
+
+<!--<div class="cover-blogposts"><img src="../../static/images/blog_post/cover.jpg?h=653e9b57"></div>-->
+
+            </div>
+        
+            
+                <div class="embed-responsive embed-responsive-16by9">
+                    <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/_APNiXTfYJw" title="PyMC, Aesara and AePPL: The New Kids on The Block" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="padding: 0px 20px 5px 20px;"></iframe>
+                </div>
+            
+	    </div>
+        <hr> <h2 id="introduction">Introduction</h2><p>In July, 2022, PyMC Labs hosted a talk about PyMC, Aesara, and AePPL: the new kids on the block. Ricardo Vieira explored the inner workings of the newly released version of PyMC (v 4.0). He looked at the Aesara backend, focusing on the brand new <code>RandomVariable</code> operators, which are the foundation of PyMC models. He then talked about a self-contained PPL project (Aeppl) dedicated to converting Aesara RandomVariable graphs to probability functions and then, how PyMC makes use of these two packages to create efficient random generator functions and probability evaluation functions, with the ultimate goal of facilitating a fully-fledged modern Bayesian workflow.</p>
+<p><a href="https://www.pymc.io/welcome.html">PyMC</a> is a probabilistic programming library for Python that allows users to build Bayesian models with a simple Python API and fit them using Markov chain Monte Carlo (MCMC) methods.</p>
+<p><a href="https://aesara.readthedocs.io/en/latest/index.html">Aesara</a> is a Python library that allows users to define, optimize, and evaluate mathematical expressions involving multi-dimensional arrays efficiently. Aesara is based on Theano (<a href="https://github.com/Theano/Theano">https://github.com/Theano/Theano</a>), which has been powering large-scale computationally intensive scientific investigations since 2007.</p>
+<p><a href="https://aeppl.readthedocs.io/en/latest/">AePPL</a> is a new library focused on converting (arbitrary)  graphs containing Aesara RandomVariables into joint log-probability graphs. It can understand complex graphs that include nested operations, conditionals, loops, and advanced indexing, allowing one to generate rich probability functions automatically without having to muddle through the mathematical details.</p>
+<h2 id="about-speaker">About Speaker</h2><p>Ricardo Vieira is a PyMC developer and data scientist at PyMC Labs. He spent several years teaching himself Statistics and Computer Science at the expense of his official degrees in Psychology and Neuroscience.</p>
+<ul>
+<li>GitHub: <a href="https://github.com/ricardoV94/">https://github.com/ricardoV94/</a></li>
+<li>Twitter:  <a href="https://twitter.com/RicardoV944">https://twitter.com/RicardoV944</a></li>
+<li>Website:  <a href="https://ricardov94.github.io/posts/">https://ricardov94.github.io/posts/</a></li>
+</ul>
+<h2 id="resources">Resources</h2><ul>
+<li><a href="https://www.pymc.io/blog/v4_announcement.html">PyMC V4 Release announcement</a></li>
+<li><a href="https://github.com/pymc-devs/pymc/blob/main/RELEASE-NOTES.md">PyMC V4 Release notes</a></li>
+<li><a href="https://www.pymc.io/welcome.html">PyMC website</a></li>
+<li><a href="https://aesara.readthedocs.io/en/latest/index.html">About Aesara</a></li>
+<li><a href="https://aeppl.readthedocs.io/en/latest/">About Aeppl</a></li>
+</ul>
+<h2 id="outline">Outline</h2><ul>
+<li>Introduction</li>
+<li>Aesara and random variables</li>
+<li>AePPL and probabilities</li>
+<li>PyMC and the modern Bayesian workflow</li>
+<li>Q&amp;A</li>
+</ul>
+<p>The timestamps below provide a detailed outline of the talk.</p>
+<h2 id="timestamps">Timestamps</h2><h3 id="part-1-introduction">Part 1: Introduction</h3><p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=0s">00:00</a> Thomas Wiecki does introduction and background</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=510s">08:30</a> Ricardo begins presentation</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=518s">08:38</a> 1.0 Intro: PyMC, Aesara and AePPL: The New Kids on The Block</p>
+<h3 id="part-2-aesara">Part 2:Aesara</h3><p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=607s">10:07</a> 2.0 About Aesara</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=724s">12:04</a> 2.1 Crash course on: Numpy-like tensor operations</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=920s">15:20</a> 2.2 Compilation to different backends: Numba, JAX</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=952s">15:52</a> 2.3 Automatic differentiation</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=1015s">16:55</a> 2.4 Automatic computational stabilization and specialization</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=1115s">18:35</a> 2.5 User friendly graph manipulation</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=1212s">20:12</a> 2.6 Random variables (scalar, constant, shared variables in Aesara, create a normal random variable using Aesara, random number generator)</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=1445s">24:05</a> PyMC has a utility to create an Aesara function that updates seeds automatically</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=1480s">24:40</a> Q: no questions so far</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=1528s">25:28</a> 3.0 PyMC (random side); How PyMC uses Aesara functionality to do two of the most important operations in the Bayesian workflow, which are: doing prior predictive draws from a model &amp; taking posterior predictive draws from the same model</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=1548s">25:48</a> 3.1 Distributions in PyMC are just functions which return random variables</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=1612s">26:52</a> Handy way to debug models; helper function: pm.draw(x, draws=2)</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=1655s">27:35</a> 3.2 A PyMC model is just an Aesara graph composed of multiple RandomVariables</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=1745s">29:05</a> 3.3 Do prior predictive modeling with PyMC models</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=1832s">30:32</a> 3.4 Do posterior predictive modeling with PyMC models</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=1955s">32:03</a> Q: no questions</p>
+<h3 id="part-3-aeppl">Part 3: AePPL</h3><p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=1955s">32:35</a> 4.0 AePPL: a new library in ecosystem of PyMC and Aesara, “Ae” is the prefix used; AePPL = Aesara Probabilistic Programming Language; Goal: convert Aesara graphs made of random variables into log probability graphs</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=2040s">34:00</a> 4.1 Crash course in AePPL: Convert RandomVariable graphs into log-probability graphs</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=2220s">37:00</a> 4.2 Create log-probability graphs conditioned on (arbitrary) operations</p>
+<h3 id="part-4-q-a">Part 4: Q&amp;A</h3><p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=2670s">44:30</a> Q: Is there a PyMC example using a Gaussian random model with a unique distribution argument?</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=2695s">44:55</a> Q: Can PyMC now automatically exploit conjugacy during sampling? (AeMCMC)</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=2738s">45:38</a> 5.0 PyMC: probability side</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=2774s">46:14</a> 5.1 PyMC uses AePPLl to transform RandomVariable graphs into log-probability graphs</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=2964s">49:24</a> 5.2 Sampling (or optimizing). Once you have the densities and gradients, you can start doing Bayesian inference. pm.find_MAP()</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=3045s">50:45</a> 5.3 PyMC uses AePPL to build new distribution types (censoring process) (pm.Censored)</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=3250s">54:10</a> 5.4 Users will be able to define arbitrary distributions (WIP)</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=3530s">58:50</a> Q: Which composition estimator does AePPL not yet support?</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=3605s">01:00:05</a> Q: relationship between AePPL and Aesara</p>
+<p><a href="https://www.youtube.com/watch?v=_APNiXTfYJw&amp;t=3730s">01:02:10</a> Q: How difficult would it be to support other data types?</p>
+<h2 id="transcript">Transcript</h2><h3 id="thomas-wiecki-00-00-00-introduction-and-overview-of-pymc">Thomas Wiecki: 00:00:00 Introduction and overview of PyMC</h3><p>All right welcome everybody to our PyMC webinar. I’m very excited to have you all
+here and to present our amazing speaker Ricardo, who will be talking about PyMC and AePPL, pronounced AePPLe and the new kids on the block.  I wanted to call it the cool kids on the block but I was dismissed.
+Before I introduce Ricardo and we get into the actual talk I just wanted to basically give a bit of background and some announcements. So Ricardo and I we both work at PyMC labs and this is our amazing cool new bayesian consultancy, which basically is a whole bunch of the PyMC core developers teaming up to solve whatever hardcore business problems we can come across on the bayesian modeling and PyMC 2 and I really couldn't be more happy about the team that we have. I mean, it's all of us who have been working together for many years already on PyMC and now basically redirecting that to solve your business problems and yeah, so very happy with the people we have from all kinds of different backgrounds most of us actually coming originally from academia and yeah that's where we fell in love with based in modeling now can turn that into our day job. 
+We mostly while we do a whole bunch of stuff all centered around PyMC and bayesian modeling just a couple of to highlight, I mean one thing actually that fairly often is something that we get requests for is speeding up models like someone already has built a PyMC model and they're really happy with it but it takes six hours to run and then we I don't know get that down to 30 minutes, 10 minutes and then from there often that allows more breathing room to actually then extend the model further and add more structure to it make it hierarchical and all in the purpose of maximizing the value of that the model has right like improving the accuracy but yeah and the other thing of course that we do is training and workshops so these have been very popular this is just yeah if you are interested in that just email me thomaswiecki@pymc-labs.org, you can also follow me on twitter. Here are just some links to our website and there's a whole bunch of blog posts pymclabs.io and that's where we also find more information about the workshops. Here are a whole bunch of links for general PyMC, so if you have questions on the software then you can find us on discourse of course the code and everything lives on the GitHub our main page actually is listed here but it's pymc.io so that's really the main entry point and then it will have links to everything else. 
+Announcements you can find on our twitter for PyMC it's pymc_devs, we also have a labs account, pymc labs. We are on linkedin if you hang out there and then our youtube channel where this talk will be posted and a whole bunch of other materials and top box can be found and we have a code of conduct which we asked everyone to follow which you can read up on here.</p>
+<h3 id="00-03-38-bayesian-course-by-thomas-ravin-and-alex">00:03:38 Bayesian Course by Thomas, Ravin and Alex</h3><p>Also, we have a bayesian course, <a href="https://www.intuitivebayes.com/introductorycourse">Intuitive Bayes Introductory Course</a>, that we developed, this is with Ravin Kumar and Alex andorra and this is basically a self-paced learning course where you really focus on teaching the intuitions behind it and using that illustratively through code and using PyMC labs rather than just like give you the math like this is really the result of my own frustrations with how I had to learn basic modeling with like text books and like conjugate priors and all kinds of obscure stuff that actually no one really cares about toda,  so this is like the the updated version that really like cuts to the chase and hopefully gets you a lot to to start quickly quickly and with the focus for data scientists and python developers so people who already know python but maybe have frequent this background so this is who it's geared towards and it's using videos in
+code so that's intuitivebase.com.</p>
+<h3 id="00-04-42-pymc-4-0-and-its-features">00:04:42 PyMC 4.0 and its features</h3><p>Well, this is really what we'll be talking about a lot today. PyMC 4.0 actually now already 4.1. We couldn't be more excited about this release. It's been taking us a really long time to get there,
+it's more or less like a major rewrite of PyMC and of the core underlying features and this is really what Ricardo's talk is going to be about. Some of the really exciting features
+are the new jacks back-end so they are also with PyMC labs we've been able to
+now like build models of like unparalleled scale where with hundreds of thousands of data points hundreds of thousands of parameters like very complex hierarchical custom process models but on the gp, on the gpu with jack sampling they fit in an hour so the
+scale is just something completely new, so gpu support is something that is like really exciting.
+But also as you might have known Theano has been discontinued so we had to find a new back end so we decided to fork it and this is work that Bretton Willard is leading is now called Aesara which we'll be hearing much more about and a whole bunch of like things that have always been annoying for mainly the developers and we're now fixed where we really have like such a much more powerful base to build on and really enhance many things and there's like better nuts initialization whole and also actually our installation process is much more simplified thanks to Ben Morris who has just joined so you can really just do conda install -c  conda-forge pymc and no matter which platform it should just give you the compilers and everything and you shouldn't need to worry about anything so yeah that is cool.</p>
+<h3 id="00-06-42-thomas-introduces-ricardo">00:06:42 Thomas introduces Ricardo</h3><p>And so now let me introduce Ricardo who's a good friend of mine and co-developer of PyMC and a colleague at PyMC Labs, so he really has been like the main developer of PyMC in at least the last year and PyMC 4.0 is largely to his hard work on this in like all the different domains and also then Aesar and AePPL so there really couldn't be a better person to talk about really the technical underpinnings , so yeah it's really cool to have him here. He is self-taught which is really impressive for what he's able to do in statistics and computer science at the expense of his official degrees in psychology and neuroscience. So like many of us, he's a recovering academic. Follow him on GitHub, it's actually hard to keep up with him there so you can also follow with twitter for announcements. He has a cool blog and of course the PyMC labs website
+so with that I give it over to Ricardo to tell you about all the cool new developments and really the things underneath the hood and what makes PyMC 4.0 as powerful as it is, so with that thank you.
+It’s actually big enough but if you just zoom in once or twice it'll probably be even easier to read,yeah I was thinking about that,  I'll put it right here. Yeah, okay that's perfect.</p>
+<h3 id="00-08-38-pymc-aesara-aeppl-the-new-kids-on-the-block">00:08:38 PyMC, Aesara, AePPL: The new kids on the block</h3><p>All right, thanks for the very nice intro. If you folks want to check the notebook, I think it's just slightly updated from the presentation you can just write this link, I'll share it in the chat. So today I will give an overview of how PyMC 4.0 is built and mainly how it makes use of two very
+cool libraries Aesara and AePPL or AePPL, we are still debating the name and to give the cool functionality that PyMC offers for the whole bayesian workflow. I will assume you already used PyMC or you are familiar with the PyMC api so I will not dwell on that, I will just use it and actually during this talk I will perhaps show you how you would implement 90 percent of PyMC features by just understanding what Aesara and AePPL can offer you.
+All right, this will be how we run this notebook live so let's hope it's fast enough. Here are the new or the cool kids on the block. We'll import AePPL, Aesara and PyMC with the common  aliases and I'll be using this version of PyMC 4.1.1.
+Aesara 2.7.4 and AePPL 0.0.31 and also do import Aesara.tensor as at which is quite commonly used and I will just explain what we can do with these things. So Aesara we already had a bit of an introduction it's our fork of the Theano library which was a quite popular python library for tensor operations mostly used for deep learning back in the days but with which was actually much more flexible and hackable and the PyMC3 was built on top of Theano and now PyMC 4 is built on our fork of Theano, Aesara,  which still shares my most of the cool features that Theano had and also some new things.</p>
+<h3 id="00-10-07-about-aesara">00:10:07 About Aesara</h3><p>So just a quick overview, Aesara what it does is offers you a way to create graphs that
+do tensor operate operations that follow the numpy api so things like broadcasting, indexing just like you are used with numpy and most of the functions you find in numpy you'll find in Aesara, it goes beyond numpy in that it tries to, it can be used to compile these graphs into very efficient code that you can call from PyMC we can compile to code and now to number and tracks as well and obviously to support software differentiation and also it has some routines to optimize graphs and to manipulate graphs which come very in handy in a probabilistic
+programming language like PyMC and we'll talk a bit about today, it also has a
+very good support for graphs based on random variables to be able to take random draws from some distributions and then operate on them just like any other tensor variables.</p>
+<h3 id="00-12-04-numpy-like-tensor-operations">00:12:04 Numpy-like tensor operations</h3><p>So very quick crash course on Aesara, I will go line by line and feel free to after I finish this section, just write questions you have in between and maybe I will answer one or two
+that are more relevant. So, we'll just start by creating two input variables will be x which will be
+a scalar variable it will be a float scalar variable and y will be a vector variable.
+We'll combine them by just adding x plus y saving it in z and once we actually use these and evaluate a graph it will broadcast just like numpy so our scalar x will just broadcast into the shape of y which is a vector. i'm just giving names just to show then in the debug this is optional
+and then once we have z, I will just take the log usually you can do at dot some function with which is you have almost all the equivalent ones that you would have for numpy so if you do an numpy dot log you'll have a at.log and so we save the log of z in w and we'll just have a look at 
+what this graph looks like by using Aesara dprint which stands for debug print. This is very helpful to understand Aesara graphs. It's a bit verbose and a bit confusing at first but you'll get used to it.
+So we just start reading from the output w to the inputs which are nested inside
+so w is a log operation that's AePPLied element twice to all the values of w,
+the input of this log is an addition operation, that's also element wise which has two inputs
+y our vector and x a dim shuffle of x which just means broadcasting x to the shape of y.
+Then once you have a graph and you actually want to do computations with it you call Aesara.function, you specify the inputs in our case x y and the output w
+and once in this process is where the graph is compiled by default. It will compile it to the c backend after you compile into a function you can then evaluate it in this case we'll just call with x equals zero and y one and e which you just take the log of y and we get output zero one.<br>
+If you are in a hurry or you're just trying to debug or prototype you can call on any variable called that variable.eval and then pass the inputs in a dictionary and behind the scenes it will just compile the function and call it with these values and this is just handy if you just want to debug and see if it's giving you the numbers you would expect, and finally I presented you the graph going from x y to w but actually the tiles are you candefine any intermediate graph with any  number of inputs or outputs so we can also just say okay we'll use z as the input and w as the outputs instead of x and y as the inputs and now this is just a function which basically takes a vector because z is a vector and takes the logarithm of that vector and indeed we can compile evaluate and we get the logarithm of the what we passed as input.</p>
+<h3 id="00-15-20-compilation-to-different-backends">00:15:20 Compilation to different backends</h3><p>The second cool thing is we can specify different computational backends for our
+functions by just passing a different mode. In this case we'll just compile this
+function to number and this is running number code when we call f number
+or numba, I never know how that should be pronounced and equivalent to jax
+we can call it we'll get a warning that you can ignore for now but indeed this is all being computed in a Jax version and giving you back the output device array.</p>
+<h3 id="00-15-55-automatic-differentiation">00:15:55 Automatic differentiation</h3><p>Then the next big offering of files is automatic differentiation. Let's just do a simple graph which is a scalar x and take a logarithm of that and if you want a gradient you can just call at.grad specify a scalar cost and with respect to which variables you want the gradients so in this case we'll just get the gradient of y with respect to x, then we compile this function and you can actually have a function with multiple outputs. So we'll say we want y and the gradient of y with respect to x as the outputs and the input x so we get both the value and the gradient you can also dprint a function once it's compiled which will follow the same kind of d print you saw for graphs and we see we have two outputs just the log of x and the gradient which is a reciprocal of x if you remember it from calculus classes and indeed when you evaluate we got what we would expect.</p>
+<p>00:16:55 Automatic computational stabilization and specialization
+When you compile an Aesara functioning actually Aesara looks to see if your graph can be
+optimized or if you can be converted into an equivalent graph that's more numerically stable and this is really nice because you can just write the graph that you know is numerically correct, without having to worry about will this be like stable under float operations or is there another operator that would be faster to do this because as I will just replace these things when you compile it.  Here I'll show you an example, we're just taking a matrix x as an input and we'll take the logarithm of one minus the exponent of x this is an expression that appears so quite often when working with log probabilities or log cumulative functions and this is how the graph looks like when we just define it, then we can compile it and we can actually d print and we'll see the compiled graph looks quite different than the original one because it introduced this x specialized operator which is log one minus x which is just more numerical numerically stable than the naive way of computing a y like this.
+Another way that Aesara  produces efficient code is it avoids recomputing the same operations twice. So if you have a function of two inputs and is the same function and the same inputs it will just compute it once. This only happens after compilation so here the graph has the two exponents of x and then adds them but once we compile it, it will be clever and we'll just compute the exponent of x once and then add it twice and yeah.</p>
+<h3 id="00-18-40-user-friendly-graph-manipulation">00:18:40 User friendly graph manipulation</h3><p>Next step is Aesara, the reason we always talk about graphs and then functions that can be evaluated is that Aesara very strong graph manipulation features which are
+really cool when you want to do graph manipulation which you often want to do in a bayesian setting especially if you are developing a library for users. So I'll just give a quick example again,
+something simple. Let's just have two scalar input variables x and lambda and I'll just create a variable that I call pdf of x which I think is just the pdf of an exponential distribution evaluated at lambda and x. I'll use the helpful evolve to just debug it I get the number and then if I wanted to say that instead of providing x I want to provide the logarithm of x this is for instance used if you are doing optimization and you want to be able to offer any value as input not just valid values that must be positive in the case of the exponential distribution, you can do that and so here what we do is we call is our clone replace we say I want as the output my pdf x graph this expression but now I want you wherever there was x I want you to actually use the exponent of x.Okay, so now when I evaluate this this expression I’ll pass 0 instead of 1 but I'll get the same output because it will be just exponentiated before it's evaluated downstream.</p>
+<h3 id="00-20-12-random-variables-scalar-constant-shared-variables-in-aesara-create-a-normal-random-variable-using-aesara-random-number-generator">00:20:12 Random variables (scalar, constant, shared variables in Aesara, create a normal random variable using Aesara, random number generator)</h3><p>And last but not least, Aesara developed random variable operators which are all about creating graphs with that take random draws and they have a very nice well structured api that makes
+our life very easy in PyMC as we’ll see later. This is going to look a bit messy but
+just bear with me I will just show you the minimal way of creating a random variable graph in either we'll start by creating a scalar location variable and a scale which will be a constant
+variable instead of something we input it'll always be 1.0.
+I would be able to just use a python float or an integer or a numpy array but under the hood, it's good to know it's always converted to a constant in these cases so we just go ahead and create it directly. And then I will create another constant which will be a random number generator state which we just create with numpy random default rng, we pass a seed but instead of being a let's say a classical constant it will be a mutable constant which in Aesara are called shared variables, so you can think of this this would be a constant but we can change the value across calls and you'll see why this is useful in just a bit,  but so once we have these three variables we can go ahead and create a random normal variable which takes the location and scale as the first inputs, we specify size to be the default none just like numpy defaults to none, we give
+it a name that's optional and we pass the random number generator okay. The graph looks like this, it's just the inputs we had of the normal random variable in a different order. First comes the rng then this is the size none, it gets converted to an empty list. This is just a code for the type of the variable 11 stands for float64, this usually you can ignore and then the parameters of the distribution come afterwards so the location and the scale and all random variables in Aesara follow this format. The first three variables are always random number size,
+output d type and then the parameters of the distribution in order. Okay, so we'll just compile a function and take as input the location output, the normal and we'll evaluate it with a location of zero we'll get a random draw I'll call it again and i'm going to get the same value
+because the inputs are exactly the same, that might be a bit surprising but all
+Aesara graphs or functions they are deterministic operations or deterministic functions of the inputs so if you don't change the inputs you get the same output
+and in the case of random variables one of the inputs that's very relevant is this random number generator which tells the state of your random number generator and if you want a different value you have to update these.
+So we can in this case just call set value because this was a shared variable so
+it's a constant we can mutate so we just set it to a new random number generator with a
+different seed and now if we call it we'll get a different value for the function. Okay, again it's going to be the same across the evaluations so what happens in Aesara when you are taking random draws is, every time you call the function you are updating the random number generator behind the scene so that you get different draws in every call and this is actually exactly what numpy does if you are more familiar with our number random number generation works in numpy, Now this is obviously a bit cumbersome for users so there are utilities both in Aesara and also in pymc to make our lives easier.</p>
+<h3 id="00-24-05-pymc-utility-to-create-an-aesara-function-that-updates-seeds-automatically">00:24:05 PyMC utility to create an Aesara function that updates seeds automatically</h3><p>So in pymc you can use from the Aesara f module you can use a handy compile pymc, which is just a wrapper around the desired function so you pass inputs outputs you can pass a random seed and it will make sure to create a function that every time you call it will update all the random seeds that are present in the function and now you can call it multiple times and you'll always get different values.</p>
+<h3 id="00-24-40-question-break">00:24:40 Question break</h3><p>Okay I will take just if there's one or two questions, I will take them quickly before I go to the next section. I've mainly been answering questions in chat so yeah but like if someone has one maybe just unmute yourself and then you can ask but otherwise I think we can continue.
+I think you may need to raise your hand and then you can be unmuted.
+Okay, so I will continue feel free to pass in the chat and I will collect the
+questions in the next break or I see that some people have been answering that's also
+a good way to get your replies.</p>
+<h3 id="00-25-48-pymc-random-side-how-pymc-uses-aesara-functionality-to-do-prior-predictive-draws-from-a-model-taking-posterior-predictive-draws-from-the-same-model">00:25:48 PyMC (random side); How PyMC uses Aesara functionality to do prior predictive draws from a model &amp; taking posterior predictive draws from the same model</h3><p>So now that you have a crash course in Aesara and the random number generated in Aesara. I'll just show you how pymc makes use of these functionalities to do two of the
+most important operations in the bayesian workflow, which are taking prior predictive draws
+from a model and doing posterior predictive draws from the same model.</p>
+<h3 id="00-25-48-pymc-distributions-are-just-functions-that-return-random-variables">00:25:48 PyMC distributions are just functions that return random variables</h3><p>So the first thing to know about PyMC is that these things we call distributions in PyMC are just functions that return random variables. If you call pmnormal.dist so just I can create a normal random variable outside of a PyMC context, what you get back is the familiar normal random variable with the same exactly same type of inputs, again you can compile it and you can call it several times to get random draws and if you call it inside the model context it's exactly the same except we also register some meta information in the model object. So in this case we don't call the dot dist, we just call pm.normal we give it a name mu tau, some size and again its output is still just going to be a random variable which has different inputs, for instance a size of two okay. I don't know why I had x.eval, I will take it and I'll show you okay.</p>
+<h3 id="00-26-52-using-the-helper-function-pm-draw-to-debug-models">00:26:52 Using the helper function pm.draw to debug models</h3><p>So like every Aesara variable you saw, you can call a vowel on it in this case it takes no extra inputs because all the inputs were constant and of course if you call it multiple times it's always going to be the same because no input was changed including the random number generator. We could compile a function to just take
+random draws but because this is so useful and handy we just have a helper in PyMC called pm.draw you pass any variables, you specify how many draws you want and it will take care of compiling the function and calling the given number of times and also concatenates the outputs I think. So this is a handy way if you just want to debug models, just put the variables, take draws and see if they have like the right shape or values that seem reasonable.</p>
+<h3 id="00-27-35-a-pymc-model-is-just-an-aesara-graph-composed-of-multiple-randomvariables">00:27:35 A PyMC model is just an Aesara graph composed of multiple RandomVariables</h3><p>And then PyMC model is basically this, so when you create PyMC model you're just creating an Aesara graph that usually has multiple random variables and some also tensor operators on random variables, so this will be a graph that I will be reusing multiple times during this talk
+so let me just present it. We'll define a new variable that follows a normal distribution. a unit normal then a log sigma variable that also follows a unit normal and then we'll have a likelihood it's a y variable that follows a normal whose mean is the mu and sigma is the exponent of log sigma and we say that we observe the values four five six,okay. And in plot notation this looks like this and  if we just output y we'll see that this looks if we just dprint y we'll see it's just a graph, Aesara graph made with three random variables the output is our y variable whereas as inputs for the location mu which is itself a random variable, a normal random variable and for the scale it takes the exponent of the log sigma okay. All these variables because they were created in a model context are stored so in the model dot free rvs you get the random variables that are not observed are mu and log sigma, in model observed  rvs you get the likelihood y and the basic rvs contains both free random variables and observed
+random variables, okay.</p>
+<p>00:29:06 Prior predictive sampling with PyMC models
+So at this step we are ready to make prior, to do prior predictive sampling and the posterior predictive sampling with PyMC models. Prior predictive sampling is very simple, we just compile again PyMC function. We compile a function that will take care of doing the update of the random number generators in prior predictive usually don't have any inputs and outputs will be all the random variables in your model.
+The three random variables will be the prior and the observe will be the prior predictive
+but usually we use a single function to take both rows. We compile the function we can call it
+twice and we are getting draws from the prior predictive, prior predictive draws from the model.
+And this is not very different from what happens when you call pm dot sample price predictive
+except some more massaging of the output goes on so that for instance, if you call it by default you get a dictionary with the values concatenated for all the variables and if you call with inference data equals true you get an infrastate object with your prior draws mu sigma and in prior predictive you have y but behind the scenes not much more is happening than creating this function, right.</p>
+<h3 id="00-30-32-posterior-predictive-modeling-with-pymc-models">00:30:32 Posterior predictive modeling with PyMC models</h3><p>Posterior predictive, it's almost as easy except this will be a function whose outputs are usually observed in the variables only and the inputs, we actually will pass values in place of
+the free random variables those that we sample during you know posterior sampling.
+This is very similar to in the example above when I show that you could create a function
+that has as inputs intermediate nodes so when we had a function of y in terms of z instead of x and y you can think here that we have a function of the random variable y not in terms of
+the random draws of x and wait what was the mu and log sigma, yeah but it'll be some values that we input into the function that have the same shape as a mu and log sigma would. So we create that function, we'll just create some dummy values let's say we took two draws from the posterior and mu was five in the first draw the first sample and twelve in the
+second and log sigma was minus two and then one and positive predictive is just basically
+looping through the values and then calling the function with these values as inputs once at a time.And here we have two possible predictive draws for y and this is very similar to what you would get when you do this except instead of manually specifying the values we usually sample them.</p>
+<h3 id="00-32-03-question-break">00:32:03 Question break</h3><p>All right. So I'll make another break if there's new questions before I jump to the next section.
+Yeah there's a lot of discussion in the chat so you're good.</p>
+<h3 id="00-32-35-aeppl">00:32:35 AePPL</h3><p>All right AePPL is a new library in the ecosystem of PyMC and Aesara, ae is the prefix we are using for all the Aesara-like libraries so this can be read as Aesara probabilistic programming language and this is a new library that i'm really excited to to share with you who has a very narrow goal which is, convert graphs Aesara graphs made of random variables into log probability graphs . I’ll go a bit what this means and also what it can do
+in part how to say that, so the cool thing about AePPL is that you can define graphs that are not made just of raw random variables but you can actually condition on some operations on random variables, I'll show examples of that and these include vanilla tensor operations like exponentiation, logarithm, multiplication, indexing, conditionals loops.
+It supports variable transformations which are almost completely critical for net sampling for instance, and it also has it does some nice latex output of random variable graphs or low probability graphs once they are converted.</p>
+<h3 id="00-34-00-aeppl-crash-course-converting-random-variable-graphs-to-log-probability-graphs">00:34:00 AePPL crash course: Converting Random Variable graphs to log probability graphs</h3><p>So crash course in AePPL, we’ll create the most basic random variable graph with just
+a random normal, a unit random normal and we'll ask AePPL to give us the log
+probability of the random variable of this x rv evaluated at zero okay. The way we call is AePPL.jointlogprob and we pass a dictionary of random variable 2, where we want to evaluate
+the density or the log probability of this random variable and we get better back a
+verbose graph that just corresponds to basically the density of a normal distribution with
+some checks to make sure it's mathematically valid, and we can just evaluate and we get what we expect when we evaluate the unit normal distribution at zero, just like we can do here with Scipy. More common we don't want to just have a function of constant value but something we can change across multiple evaluations so we just say I want to evaluate the density of this variable at an input variable input scalar variable, we just do exactly the same except now our it will be a function of this x vv, v for value variable which we can change and evaluate at different
+points which would look something like this.
+Then AePPL can do obviously not just a single random variable but it can do the graph of multiple random variables that's why we call it joint log prob and so here is our graph that we already saw in PyMC before with our mu log sigma y but now all built directly with two Aesara  random variables and we'll specify that our mu and log sigma will be variables that we pass as input they'll be scalars but our y will be a constant so this is the observed variable so I always want it to be observed at 3 4 5.
+We call exactly the same function but the dictionary now includes all the three mappings of random variable to a point of evaluation. I will, I guess I can print a graph, is a long
+graph that has the three terms it just computes the log probability and then adds the terms and then adds the summation of those terms okay. So we'll make a function of this joint log prob graph, the inputs will be the mu vary variable and the log sigma variable the output will be this combined scalar log p and when we evaluate it we'll get a number and we can manually
+write it ourselves using Scipy functions just to make sure it's outputting the right results.
+And that's the main feature of AePPL.</p>
+<h3 id="00-37-00-create-log-probability-graphs-conditioned-on-arbitrary-operations">00:37:00 Create log-probability graphs conditioned on (arbitrary) operations</h3><p>And then where the the power of the library comes is that you can define graphs that are not just a mapping of a random variable to some input but this can be an arbitrary expression that built on top of random variables and not
+a random variable directly only. So the simplest case is is this one perhaps,
+we have a random normal variable let's call log x rv we take the exponent of that
+and we'll actually ask AePPL to give us the joint log probability of this exponent of a variable evaluated at a given point. For those that are familiar with distributions and probability, this graph corresponds to what's known as a log normal distribution and if AePPL did the right thing we should be getting the same output as calling Scipy stats log norm and that's exactly what happens. The cool thing here is that when we said when we create a graph that's an exponent of a variable, it didn't need to be a random normal could have been any other variable and you could just have I don't know beta takes maybe, two values okay, so we can equally easily create a log beta distribution not just things that are pre-built because the rules of how density flows through some deterministic operations are simple to write down. As a more strange case perhaps in this second example, I will create a vector of 10 unit random variables and I will take the cumulative sum of them and I will ask for them. I can also ask for the probability of this cumulative sum evaluated at a given value.
+Not well much but you can just notice that I pass as the value will be just 0 to 9
+and the AePPL graph when evaluated for this value gives the value given for the initial point and then all the others are just as if you had a normal variable evaluated at one okay, and this is exactly what the probability of a cumulative sum evaluated at these points would be like. So we get the first value just at zero and then all the others were just a difference of one so we are equivalent to evaluating the normal at one. We'll go one step further and also show you that we can ask the probability of not only tensor operations but also or not only these basic functions like exponentiation log scaling but also a bit more funky operations like concatenating two vectors of random variables.
+So I'll create a random variable of size three unit one and then one with a slightly
+larger signal of size four I will concatenate them and then I'll ask AePPL to give me a function that gives the log probability of this stack of two random variables and when I evaluate what we get is that it figures out that the first three values they should be evaluated at a normal, a unit normal and the last four values should be evaluated at a normal with a scale of two. So this is just you can think of this that we created a new distribution that is just a concatenation of different pure let's say random variables and we can evaluate the probability of this.
+And then I'll go a bit, I'll keep digging here sorry if I lost you folks, you can ask them to revisit this example if it was too fast so what i'm going to do is just show that you can combine these different operator kind of operations and nesting and your AePPL will still be able to give you
+a density for almost an arbitrary graph. So I will create an initial random variable which is just a log normal again an exponentiation of a normal, I will create this innovation random variable so vector of nine unit variables. I will concatenate the initial random variable with the innovations I just added one dimension and then I will take the cumulative sum. And for those that are familiar with time series this graph corresponds to a Gaussian random log where the initial point follows a different distribution and then we have innovations that all follow the same distribution. And I can evaluate and this is very similar to, this is exactly the same you would get if you use PyMC Gaussian random log with a given init distribution and the given mu and sigma and evaluated values 1 to 10 you get the probability back.
+And if it's not very obvious the cool thing is that nowhere did we have to tell what is the probability of any of these operations AePPL was able to figure it out and just give you back the graph when you asked it here.
+And I think this is the last example we just we can do this magic for multiple variables at a time so I will create another Gaussian random graph where the drift without an initial point but we'll have a drift parameter which is a negative exponential so we just multiply it by -1 and then we just take a cumulative sum of the ten normals with that drift and one for the scale
+and now we have two variables, so we'll have a scalar input for the drift random variable and a vector input for the Gaussian random log and we'll use a different function that's more core to AePPL which is factorized joint log prob instead of just a joint log prob ,which gives you pass the same input a dictionary that says for each random variable or for each variable that you want the density for what will be the inputs and it gives you back a dictionary which has keys are the value variables the drift v and Gaussian rumble will be and the keys are the graphs that represent the probability of these variables. So just create a function that takes as inputs this drift and Gaussian random walk and the outputs will be just the values of this dictionary okay.
+And you can just evaluate it drift 0 with always the same values for the Gaussian random walk and we get that the log probability of this negative exponential evaluated at zero which is zero and the probability of this Gaussian or this cumulative sum with this drift evaluated at one to ten.
+Here I just change the derivative to b minus one so we have now an exponential that allows for negative values and this is just then I just take the negative of the values one to ten so this is just a show how AePPL can give you a graph of log probabilities conditioned on almost arbitrary operations and obviously this is what PyMC will use once we start working with log probabilities.</p>
+<h3 id="00-44-30-question-is-there-a-pymc-example-using-gaussian-random-walk-with-a-unique-dist-argument">00:44:30 Question: Is there a PyMC example using Gaussian random Walk with a unique dist argument?</h3><p>Before I go, any new questions? Is there a PyMC example using Gaussian random Walk with a unique dist argument? No but I can show in the end. I mean I think the the docstrings of
+pm Gaussian random walks should show how to use the init dist it's just a different distribution as input.</p>
+<h3 id="00-44-55-question-can-pymc-now-automatically-exploit-conjugacy-during-sampling-where-available">00:44:55 Question: Can PyMC now automatically exploit conjugacy during sampling where available?</h3><p>And did I read somewhere that PyMC can now automatically exploit conjugacy during sampling where available. We are not yet doing this we will probably start doing that in the
+near future, there is another sister library of this ecosystem aemcmc that's working hard on doing exactly that, you give a given model made of random variables and it finds out
+whether it can sample from the posterior via conjugate sampling or via some specialized gibbs sampling so those things are really in the workings but I'm not going to mention them in this talk.</p>
+<h3 id="00-45-38-pymc-probability-side">00:45:38 PyMC: Probability side</h3><p>All right, so now we'll see PyMC, how does the probability side of PyMC works now that we understand what AePPL can do and I will just show how it uses AePPL to convert random variable graphs to log probability probability graphs and also uses AePPL to create these so-called distribution factories so that users can create more flexible distributions dynamically without having to create every possible permutation.</p>
+<h3 id="00-46-14-how-pymc-uses-aeppl-to-transform-random-variable-graphs-into-log-probability-graphs">00:46:14 How PyMC uses AePPL to transform random variable graphs into log probability graphs</h3><p>So yes PyMC uses AePPL behind the scenes to transform this the graph that users
+define which as I mentioned is a graph made of random variables into a log probability graph, so here is our old friend model just to remind, this is just an Aesara graph of random variables there's no densities anywhere here but when you when you create when you create
+distributions inside the model, one of the things we do is for every random variable we create this value variable very similar to how I was doing it here manually which is just the input variable of the same type as the random variable. So for the mu which is a scalar you'll have a scalar input variable for log sigma you’ll also have scalar and for y it will be just a constant vector of 3 for 5 because y was an observed variable.
+If you want a log p of a model you just call model log p which behind the scenes will just
+call AePPL basically passing this dictionary as input the graph will now be a graph of
+densities similar to what we saw before quite long but doing what we expect and we can get the value variables that are not observed from model value variables and with these we can create our function to evaluate the model joint log probability.
+So we just call our function, we pass this input mu and log sigma variables which are not the random variables even though they have the same name and I can show that.
+If I just do this you just see it's a graph that you when nothing happens it means there's no operation this is just an input variable mu and log sigma and I think I can also do this perhaps yeah and you can see it's of there are scalar variables that's what the parentheses mean and they are float64 so this is all these are. So we'll use those as the inputs the output
+will be the model log p that we called here with this helper function which behind the scene just called AePPL and now we have a function of the model joint log probability and because Aesara allows for automatic differentiation, we almost equally easily we can also get the gradients of our model in this case by just calling d log p and I can compile a function of the value variables the gradient of the value variables with respect to the log p and they evaluated
+here 3 1, I get these or I could also pass the model log p so we have both log p and d log as outputs the first output will be the log p and the second would be the d log p and one reason why you might want to do this is that as I mentioned before Aesara will reuse any shared computations, so if you have any operations that happen in both the log p and the d log p in this function they will just be computed once instead of if you call the function separately for the two outputs okay.</p>
+<h3 id="00-49-24-bayesian-inference-sampling-or-optimization">00:49:24 Bayesian inference: Sampling or optimization</h3><p>Once you have densities and gradients you can start doing bayesian inference, I will not show you just for the sake of time or you could just but you could easily do a metropolis sampler or if you know how nuts work you could write your own nut sampler, you're just using as inputs or just working with this Aesara function we define but for the sake of time I'll show you a more simple form of let's say bayesian inference which is just finding the maximum aposroriori, so the single point for which the model has the highest posterior probability. 
+PyMC obviously has this under the fine map function which finds that for this model condition on y being three four five the maximum auxiliary values for mu are these and for log sigma are these.
+If you didn't have PyMC or you had to write your own PyMC optimization functions manually
+you could do it because all you need again is this log p and d log P function so in this case you just use scipy optimization to do basically the same as the find map we just passed the function just wrapping in a lambda because scipy expects, uses a vector and do the function expects separate inputs and we just do negative because we are minimizing instead of maximizing but once we have that again we can just use any routines that are out there to do sampling or to do optimization from a PyMC model.</p>
+<h3 id="00-50-45-pymc-uses-aeppl-is-to-build-new-types-of-distributions">00:50:45  PyMC uses AePPL is to build new types of distributions</h3><p>And the last way how PyMC uses AePPL is to build new types of distributions.
+I will show an example for how PyMC creates sensor distributions basically online. I will just generate some random data that corresponds to a censoring process. If you are not familiar with censoring you can check some of the they're very good PyMC examples on censoring but the data generating process is basically this.
+We have a parameter that we'll want to recover which will be the mu true we'll set it to minus 1.5
+we take random draws from a normal with this mu, sigma of 1 and we take 10 of those draws and then we clip the values to be always between minus one and one so if you've
+got a minus two point something that becomes a minus one. The data might look something like this and  you'll see that yeah and to then create equivalent model in PyMC we just create a prior distribution for mu we create this y raw using the pm normal dist because we don't actually want to sample or do anything with this raw, it's just an input to pm censored which is a
+it's kind of a factory of distribution so it creates a censored distribution of any input distribution in this case a normal with this specific mu, could be a beta could be anything.  We say that we are truncating between minus one and one and we pass our observations and under the hood this call is just basically returning this graph at dot clip like we had numpy of y raw minus one minus and one, which AePPL knows how to basically derive the probability of this operation of this clipping operation which again corresponds in the statistical framework to censoring.
+So I'll just create a model, I'll not show you the whole graph but just to prove what I was saying y is a clipping operation, so it's indeed equivalent to this we can do prior predictive.
+This is our mu looks before, this is how our y looks before we observed any data so it's a normal with an excess of minus ones and ones because all those values get truncated to
+or clipped minus one and one. We can then sample condition on our observed data which should be pretty fast and behind the scenes AePPL gave you the log probability of this graph a
+condition on this specific likelihood, it's something you could take the gradients with respect to so we are using nuts to sample mu, I think sampling is done work well our posterior is nicely centered around the real mu which was minus 1.5 and we can now do posterior predictive draws and we'll see that after observing data we expect to have much more minus ones and not so many higher values which is just our model condition on data.</p>
+<h3 id="00-54-10-aeppl-to-allow-users-to-define-their-own-arbitrary-distributions">00:54:10 AePPL to allow users to define their own arbitrary distributions</h3><p>And finally, we hope to in the future use AePPL to allow users to define their own arbitrary distributions not just the ones that PyMC offers when you call pm.normal or pm.censored but anything that the user knows AePPL can parse or can try to see if it can. I will just give you an example, this is still work in progress so there is no nice api for users to define their own distribution so we'll just do it manually using things that you might not otherwise see. And so in this example I will write a mixture model in PyMC using AePPL to infer what is the probability of a mixture. So we just start by creating an index variable which will be a categorical with this specific probability of coming of getting 0 one or two and we'll this will be of size 10 and then we'll create components we'll just stack three different distributions roughly centered at minus five zero and five to be easy to visualize and then what the mixture corresponds to is basically when you have the components you index it by an integer and this will be basically you take a draw from the right basically component. And we can define this model so this is where we use basically AePPL or we'll use AePPL because AePPL will understand that when you have a stack of distributions and you index by another discrete variable with finite support, it does corresponds to a mixture of the components. So we'll have to manually register the variable because there's no way for users to do it automatically but so we just say I want to register this  mixture variable, I'll give it this name, I'll give it hese dims and I'll just say take a draw from, use the prior for setting an initial point. You can ignore this second point, this is working progress so when you do the plate graph it shows that actually the mixture is deterministic because it doesn't know that we can have variables that are arbitrary operations on pure random variables but it will work well trust me.
+And so we don't need that either, let me skip this so I'll just use it to take
+draws from the prior and this is what the prior of our mix looks like so just these three components with different mixture weights and now we'll do some inference, we'll use the first draw from the prior predictive as our observed data. So this is the values we observed and these were the true indexes that were used in these or meaning that the components from which these values came and so we'll just use exactly the same model but now we'll say the data is the first draw from the prior and I will do inference on the indexes.
+It should be relatively fast, we are using the categorical gibbs metropolis for our categorical variable, samples pretty pretty fast and we can confirm that our posterior for the indexing nicely matches what the true values were. So this is just to showcase that thanks to AePPL you were able to create a mixture distribution ourselves without PyMC doing anything by just basically creating the graph that when you take draws corresponds to a mixture process and trusting that AePPL knows how to then convert this to a valid log probability.
+All right, I think that's what I wanted to show so I hope you enjoyed it, I hope you didn't get too lost probably I went a bit too fast so if something was confusing I can
+revisit the example or if you just have other questions just feel free to ask.</p>
+<h3 id="00-58-50-which-composition-operators-does-aeppl-not-support-yet">00:58:50 Which composition operators does AePPL not support yet?</h3><p>Juan has a good question, which composition operators does AePPL not support yet?
+Quite a lot, we support basically multiplication, addition, exponentiation, logarithm and we support some basic support indexing, we support for loops and we support a couple more things like concatenating and stuff. This is a work in progress for instance, I think Larry who is in this joined the talk he's working in for the google summer of code is working on expanding the range of operators that AePPL support and we have nice beginner-friendly issues in the AePPL repo to support more operators so if this is something that you find interesting and you would like to collaborate and expand AePPL, this would be a great way. The ultimate goal is any arbitrary graph for which there's a valid you know there's a valid probability function with respect to it we would like AePPL to support it.</p>
+<h3 id="1-00-05-question-what-is-the-relation-between-aeppl-and-aesara">1:00:05 Question: What is the relation between AePPL and Aesara</h3><p>Carl Talon asks, what is the relation between AePPL and Aesara, I have
+to write an hypergeometric function for a library I'm working on and i'm wondering which
+library would be more appropriate. So before that, AePPL is here I show them side by side but AePPL works on top of Aesara, right so AePPL inputs or Aesara graphs outputs or Aesara graphs it depends exactly what you want to do with hypergeometric. If you want to create a random variable something you can take random draws from that would be pure Aesara code, if you want to define the log probability that could be done with help of AePPL or it might just not need AePPL at all if you just define the function yourself.
+So the most basic thing that AePPL does is, let me show you the first example, the most basic thing that AePPL does is just if you have a certain random variable of a type you can dispatch a given function that gives the probability of this random variable with the inputs and the value variables so for your hypergeometric you might just have a function that when it sees a similar at.random.hypergeometric or whatever object you created it will know this is the log probability of the distribution.
+We have in PyMC there are two notebooks you can use to go more in depth on these to understand exactly the code where the things are written of how you can create new random variables and define log probabilities for them in the PyMC docs.</p>
+<h3 id="1-02-10-how-difficult-would-it-be-to-support-other-data-types">1:02:10 How difficult would it  be to support other data types?</h3><p>How difficult would be to support, Sir Robert Mitchell asks how difficult would be to support other data types like polars as an example, could it be a beginner pr?
+So the way I read that it's, I mean the data is still numeric it's just each whether it's interpreted as a polar data yeah, so the way we do that in PyMC and AePPL is that we use transformations, so we have for instance for the von mises distribution we just transformed whatever input to be on the unit circle. I don't know if it would be a beginner pr but would be good to see if you can implement a distribution that uses polar input values and if you cannot then open an issue and ask on discord to see where the limitations are so that we can unblock that.</p>
+<p>The hypergeometric is a component of a log likelihood function? Sure, perhaps open a topic on our PyMC discourse maybe just exposing you what you had in mind and then I'll be able to give you more proper answer to your question about the hypergeometric and in general any questions about the libraries and what you can do with them the right place will be discourse where we can async give you all the answers. If I missed your question above just feel free to rewrite it or copy paste it, otherwise you can also just raise your hand or join in the chat with voice. Again the notebook is here.</p>
+<h3 id="1-04-42-thank-you">1:04:42 Thank you</h3><p>Wow! Awesome, thank you so much Ricardo for an amazing presentation I definitely learned a lot about how things fit together and most of all thanks everyone for joining for being a part of this community and being interested in how it actually works so yeah. With that thanks and have a great day stay involved in the various links that we posted and hope you'll join us for the next one.</p>
+
+	<!--THIS IS THE FOOTER OF THE BLOGPSOT-->
+	<hr> 
+		<!--div class="container"-->
+			<h2 class="font-roboto">Work with PyMC Labs</h2>
+			<p>If you are interested in seeing what we at PyMC Labs can do for you, then please email <a href="mailto:info@pymc-labs.com">info@pymc-labs.com</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity.
+
+We also run <a href="https://www.pymc-labs.com/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics.
+			</p>
+		<!--/div-->
+    
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+
+        </div>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+            integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+            crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+            <div class="container">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBottom"
+                    aria-controls="navbarBottom" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarBottom">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-twitter"
+                                    aria-hidden="true"></i>
+                                Twitter</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-github"
+                                    aria-hidden="true"></i>
+                                GitHub</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-linkedin"
+                                    aria-hidden="true"></i>
+                                LinkedIn</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-youtube"
+                                    aria-hidden="true"></i>
+                                YouTube</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-meetup"
+                                    aria-hidden="true"></i>
+                                Meetup</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                    aria-hidden="true"></i>
+                                Newsletter</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/privacy-policy"><i class="fa fa-solid fa-lock"
+                                    aria-hidden="true"></i>
+                                Privacy Policy</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/impressum"><i class="fa fa-solid fa-info-circle"
+                                    aria-hidden="true"></i>
+                                Impressum</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/contact"><i class="fa fa-solid fa-file-signature"
+                                    aria-hidden="true"></i>
+                                Contact</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+    </body>
+
+</html>

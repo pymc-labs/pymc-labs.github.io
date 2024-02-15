@@ -1,0 +1,510 @@
+<!doctype html><html lang="en">
+
+    <head>
+        
+
+        <style media="screen">
+            body {
+                padding-top: 70px;
+                padding-bottom: 70px;
+            }
+
+        </style>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+        <link rel="stylesheet" href="../../static/css/custom_style.css?h=16f93eb7">
+        <link rel="stylesheet" href="../../static/css/table_style.css?h=c677f945">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+
+        <!-- Extra meta tags: social site cards, browser icons... -->
+        <meta name="theme-color" content="#ffffff">
+        <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+        <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+        <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+        <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+
+        <title>MCMC for big datasets: faster sampling with JAX and the GPU - PyMC Labs</title>
+        <meta name="twitter:card" content="summary">
+        <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/pymc-stan-benchmark/" />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href="">
+        <meta property="og:title" content="MCMC for big datasets: faster sampling with JAX and the GPU - PyMC Labs" />
+        <meta property="og:description" content="Scaling PyMC using JAX to sample on the GPU" />
+        <meta property="og:image" content="https://pymc-labs.github.io/blog-posts/pymc-stan-benchmark/cover.png" />
+        <meta name="description" content="We are a Bayesian consulting firm specializing in data analysis and predictive modeling. Contact us today to learn how we can help your business.">
+        <meta name="keywords" content="Bayesian consulting, data analysis, predictive modeling">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+        <!-- <script>hljs.highlightAll();</script> -->
+
+        <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+        <!-- We use this to do syntax highlighting -->
+        <link rel="stylesheet" href="../../static/pygments.css">
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+        </script>
+        
+<script src="../../static/scripts/toggle_code.js?h=3a00c72f" defer></script>
+
+    </head>
+
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <div class="container">
+                <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+                <a class="navbar-brand" href="/"><img alt="logo" loading="eager" width="88" height="70" title="logo" class="navbar-logo"
+                        src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop"
+                    aria-controls="navbarTop" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarTop">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                    aria-hidden="true"></i>
+                                What we do</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                    aria-hidden="true"></i>
+                                Products</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                    aria-hidden="true"></i>
+                                Team</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                    aria-hidden="true"></i>
+                                Clients</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                    aria-hidden="true"></i>
+                                Workshops</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                    aria-hidden="true"></i>
+                                Blog</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container">
+            
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 blogpost">
+        <h2 class="font-roboto">MCMC for big datasets: faster sampling with JAX and the GPU</h2>
+        
+        <p class="mb-2 text-muted">Scaling PyMC using JAX to sample on the GPU</p>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-6 author_name">
+                <small class="text-muted">AUTHORED BY</small>
+                <p class="font-bold">
+                    
+
+
+
+    
+
+
+
+    
+        Martin Ingram
+    
+
+
+
+                </p>
+            </div>
+            <div class="col-md-6 author_date">
+                <!-- <p>2021-12-22</p> -->
+                
+<small class="text-muted">DATE</small>
+<p class="font-lighter">2021-12-22</p>
+
+<!--<div class="cover-blogposts"><img src="../../static/images/blog_post/cover.jpg?h=653e9b57"></div>-->
+
+            </div>
+        
+            
+                <div class="blog-cover-container">
+                    <img loading="lazy" title="cover image" alt="" class="cover-blogposts" src="cover.png">
+                </div>
+            
+	    </div>
+        <hr> <p><em>This post was written by <a href="https://twitter.com/xenophar">Martin Ingram</a>, with help from <a href="https://twitter.com/twiecki">Thomas Wiecki</a> and the PyMC team. You can find the original version <a href="https://martiningram.github.io/mcmc-comparison/">on his blog</a>.</em></p>
+<p>You'll often hear people say that MCMC is too slow for big datasets. For the very biggest datasets with millions of observations, there may be some truth to that. But the developers of PyMC and Stan are constantly refining their samplers, and it's now possible to fit models to much bigger datasets than you might think.</p>
+<p>In particular, since <a href="https://pymc-devs.medium.com/the-future-of-pymc3-or-theano-is-dead-long-live-theano-d8005f8a0e9b">the PyMC developers introduced it a bit over a year ago</a>, I've been really excited about PyMC's JAX support. I've been a fan of JAX for years and think that it's a great platform for Bayesian modelling. What's so intriguing about JAX is that it allows the use of both JIT compilation and GPUs, which can both accelerate model fitting. Currently, PyMC uses <a href="https://github.com/pyro-ppl/numpyro">numpyro's</a> NUTS sampler to do sampling with JAX. I'm more familiar with PyMC and Stan, so that's what I'll focus on here, but numpyro is also an interesting project in its own right, and I urge you to check it out.</p>
+<p>But how much faster is MCMC with JAX, and with a GPU? This blog post explores this question on a single example. It's limited, of course -- maybe other models will see more or less of a gain -- and, although I did my best to write code efficiently, things could probably be optimised further. Still, I hope you'll agree that there are some interesting results.</p>
+<h2 id="the-model">The model</h2><p>As people who follow my blog will know, I like to apply Bayesian modelling to tennis, so I'll do that in this blog post, too. What we're going to try to do is to rank tennis players across the entire Open Era, that is, from 1968 until now. That's a pretty big dataset: it's 160,420 matches in total. So not quite in the millions, but still quite sizable.</p>
+<p>The model I'll use is called a <em>Bradley-Terry model</em>. The idea in a Bradley-Terry model is that each player has a latent skill $\theta$. When players $i$ and $j$ play each other, player $i$ wins with probability:</p>
+<p>$$
+p(\text{i wins} | \theta_i, \theta_j) = \text{logit}^{-1}(\theta_i - \theta_j)
+$$</p>
+<p>Say, for example, player $i$ has skill $1$ and player $j$ has skill $-1$. Then player $i$ beats player $j$ with probability $\text{logit}^{-1}(2) \approx 88.1\%$.</p>
+<p>We could fit this model with some reasonable prior on the components of $\theta$, maybe $\mathcal{N}(0, 1)$. This would mean that we expect, before seeing the data, that players' skills are about 95% likely to fall between -2 and 2 on the logit scale. That's probably not a bad guess, but it's a bit arbitrary. Couldn't the range also be between -0.8 and 0.8, say? To get around this arbitrariness, we can fit a <em>hierarchical model</em>.</p>
+<p>How do we make this a hierarchical model? Well, we can put a prior on the $\theta$s:</p>
+<p>$$
+\theta_i \stackrel{iid}{\sim} \mathcal{N}(0, \sigma^2)
+$$</p>
+<p>We should also put a <em>hyperprior</em> on $\sigma$:</p>
+<p>$$
+\sigma \sim \mathcal{N}^{+}(1)
+$$</p>
+<p>The notation here means that we are putting a <em>half-normal</em> prior distribution on $\sigma$ with a scale parameter of 1. The guess of $\sigma = 1$ we talked about earlier would be quite plausible under this model, but we are also not ruling out smaller or larger values, making the model more reasonable.</p>
+<h3 id="translating-to-pymc">Translating to PyMC</h3><p>This model looks as follows in PyMC:</p>
+<div class="hll"><pre><span></span>    <span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+        <span class="n">player_sd</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;player_sd&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">player_skills_raw</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span>
+            <span class="s2">&quot;player_skills_raw&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_players</span><span class="p">,)</span>
+        <span class="p">)</span>
+        <span class="n">player_skills</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span><span class="s2">&quot;player_skills&quot;</span><span class="p">,</span> <span class="n">player_skills_raw</span> <span class="o">*</span> <span class="n">player_sd</span><span class="p">)</span>
+
+        <span class="n">logit_skills</span> <span class="o">=</span> <span class="n">player_skills</span><span class="p">[</span><span class="n">winner_ids</span><span class="p">]</span> <span class="o">-</span> <span class="n">player_skills</span><span class="p">[</span><span class="n">loser_ids</span><span class="p">]</span>
+        <span class="n">lik</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span>
+            <span class="s2">&quot;win_lik&quot;</span><span class="p">,</span> <span class="n">logit_p</span><span class="o">=</span><span class="n">logit_skills</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">winner_ids</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="p">)</span>
+</pre></div>
+<p>Pretty short, right!</p>
+<p>In Stan, the same model looks like this:</p>
+<div class="hll"><pre><span></span><span class="kn">data</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">n_matches</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">n_players</span><span class="p">;</span>
+
+    <span class="kt">int</span> <span class="n">winner_ids</span><span class="p">[</span><span class="n">n_matches</span><span class="p">];</span>
+    <span class="kt">int</span> <span class="n">loser_ids</span><span class="p">[</span><span class="n">n_matches</span><span class="p">];</span>
+<span class="p">}</span>
+<span class="kn">parameters</span> <span class="p">{</span>
+    <span class="kt">vector</span><span class="p">[</span><span class="n">n_players</span><span class="p">]</span> <span class="n">player_skills_raw</span><span class="p">;</span>
+    <span class="kt">real</span><span class="o">&lt;</span><span class="k">lower</span><span class="p">=</span><span class="mf">0</span><span class="o">&gt;</span> <span class="n">player_sd</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kn">transformed parameters</span> <span class="p">{</span>
+    <span class="kt">vector</span><span class="p">[</span><span class="n">n_players</span><span class="p">]</span> <span class="n">player_skills</span><span class="p">;</span>
+    <span class="n">player_skills</span> <span class="o">=</span> <span class="n">player_skills_raw</span> <span class="o">*</span> <span class="n">player_sd</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kn">model</span> <span class="p">{</span>   
+    <span class="kt">vector</span><span class="p">[</span><span class="n">n_matches</span><span class="p">]</span> <span class="n">mu</span><span class="p">;</span>
+
+    <span class="n">player_skills_raw</span> <span class="o">~</span><span class="w"> </span><span class="nb">std_normal</span><span class="p">();</span>
+    <span class="n">player_sd</span> <span class="o">~</span><span class="w"> </span><span class="nb">normal</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span> <span class="mf">1</span><span class="p">);</span>
+
+    <span class="c1">// As suggested by Bob Carpenter, do not vectorise.</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">n</span> <span class="k">in</span> <span class="mf">1</span><span class="o">:</span><span class="n">n_matches</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">mu</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">player_skills</span><span class="p">[</span><span class="n">winner_ids</span><span class="p">[</span><span class="n">n</span><span class="p">]]</span> <span class="o">-</span> <span class="n">player_skills</span><span class="p">[</span><span class="n">loser_ids</span><span class="p">[</span><span class="n">n</span><span class="p">]];</span>
+    <span class="p">}</span>
+
+    <span class="mf">1</span> <span class="o">~</span><span class="w"> </span><span class="nb">bernoulli_logit</span><span class="p">(</span><span class="n">mu</span><span class="p">);</span>
+
+<span class="p">}</span>
+</pre></div>
+<p>Also pretty short. Note that for both these models, I'm using the non-centred parameterisation (see e.g. <a href="https://mc-stan.org/docs/2_18/stan-users-guide/reparameterization-section.html">here</a> and <a href="https://twiecki.io/blog/2017/02/08/bayesian-hierchical-non-centered/">here</a>)  to try to make sampling as efficient as possible. In the PyMC model, I avoid a for loop by vectorising. I initially did this in Stan too, but Stan developer Bob Carpenter mentioned that actually, the for loop is likely to be more efficient in this case. If you're interested in the vectorised version, it's available <a href="https://github.com/martiningram/mcmc_runtime_comparison/blob/main/stan_model.stan">here</a>.</p>
+<h3 id="benchmark-setting">Benchmark setting</h3><p>I compare the following approaches, with the following shorthands:</p>
+<ul>
+<li><code>pymc</code>: I used the latest version of PyMC, which is version v4, currently under development.</li>
+<li><code>pymc_jax_cpu_parallel</code>: PyMC with JAX backend (numpyro sampler) and the CPU.</li>
+<li><code>pymc_jax_gpu_parallel</code>: PyMC with JAX backend (numpyro sampler) and GPU, running chains in sequence</li>
+<li><code>pymc_jax_gpu_vectorized</code>: PyMC with JAX backend (numpyro sampler) and GPU, running chains in parallel</li>
+<li><code>cmdstanpy</code>: I used cmdstanpy version 1.0.0 to fit the model in Stan, installed via <code>conda</code>. I initially used PyStan, but it turns out cmdstanpy is now the preferred frontend for Stan in Python. It was easy to use, and I can recommend it.</li>
+</ul>
+<p>To see how the runtime changes with different amounts of data, I choose different start years for the fits: 2020, 2019, 2015, 2010, 2000, 1990, 1980, and finally 1968.</p>
+<p>For each method, I'll be running 1000 warm-up steps and 1000 samples per chain, for a total of four chains.</p>
+<p>I'm running these comparisons on my laptop, a Razer Blade Advanced 15 from 2019 with an Intel i7 9750H, 16GB of RAM, an NVIDIA RTX 2070, running Ubuntu.</p>
+<h3 id="results-wall-time">Results: wall time</h3><p><img src="../../home/martin/projects/pymc3_vs_stan/writeup/walltime_plot.png" alt=""></p>
+<p>This plot is pretty interesting, I think. Let's only look at the three CPU methods first: the solid orange, blue and red lines. The first thing to see is that Stan and PyMC are pretty similar for the most part, with Stan a bit faster for smaller models, but taking somewhat longer for the largest ones. It seems that both approaches make good use of the CPU. PyMC with the JAX backend, shown in red, is somewhat faster on most datasets, but not hugely so, and for the largest datasets, PyMC and PyMC + JAX (CPU) are pretty similar.</p>
+<p>Now let's take a look at the GPU methods, in the dashed purple and green lines. First off, the vectorized approach which runs all chains at the same time on one GPU is somewhat faster than the parallel approach which runs them in sequence. This was my motivation to <a href="https://github.com/pymc-devs/pymc/pull/5248">submit a tiny pull request</a> to support it in PyMC. Both curves are quite flat: unlike the CPU approaches, the GPU runs don't slow down a great deal with more data. For small datasets, the GPU approach seems to incur an additional overhead. But once the number of matches exceeds about 50,000, the GPU really seems to shine. The log scale on the y axis might hide the fact that the differences <em>are</em> actually pretty significant for the full dataset. Here's a bar chart for just the biggest dataset:</p>
+<p><img src="walltime_full.png" alt=""></p>
+<p>The fastest GPU method takes just 2.7 minutes, while PyMC takes about 12 minutes, and Stan takes a bit over 20 minutes. I'd say that all of these timings are pretty great given how many matches are in this dataset. But the speedup of the GPU method is considerable: it's at least 4x vs the fastest CPU-based method, which is JAX on the CPU. I don't know about you, but when I develop models, I much prefer a fitting time of 2.7 minutes to one of 20 minutes -- the fast feedback can be really valuable. Before you conclude that Stan is slow though, please keep in mind the caveats of this comparison: it's only one model, Stan is not making use of the GPU, and <a href="https://statmodeling.stat.columbia.edu/2021/11/17/its-so-hard-to-compare-the-efficiency-of-mcmc-samplers/">benchmarks are hard</a>. Also, just looking at runtime on its own can be a bit misleading, as we'll see next.</p>
+<h3 id="comparing-effective-sample-size-per-second">Comparing effective sample size per second</h3><p>How can runtime be misleading? Well, what's more important is <em>effective sample size per second</em>. It could be that in the plot above, Stan is running for longer, but it's also producing more effective samples. And similarly, maybe PyMC's sampler is more efficient than the numpyro JAX sampler. So how do the methods stack up on this metric?</p>
+<p>To take a look, I used the excellent <code>arviz</code> tool to compute the effective sample size for each run, and then picked the minimum ESS for any parameter. This is a situation where <code>arviz</code> really shines, I think, because it makes it easy to compute ESS the same way for all of these methods. Here are the results:</p>
+<p><img src="ess_values.png" alt=""></p>
+<p>Overall, I think this plot presents a similar picture, with the CPU methods being more efficient for smaller datasets, but the GPU ones coming into their own for the largest datasets. Comparing PyMC and Stan, Stan starts out strong and is a bit worse than PyMC for some of the larger datasets, but things are dead even again for the largest dataset.</p>
+<p>As before, here is a bar chart for the full dataset:</p>
+<p><img src="ess_per_second_full.png" alt=""></p>
+<p>More ESS per second are better here. You can see that Stan does indeed seem to sample quite efficiently, and is very close to PyMC on this metric. Running JAX on the CPU does seem to be more efficient than both, giving about a 2.9x boost on this metric. The big improvements come from the GPU, though: the fastest GPU method is about 11x more efficient compared to PyMC and Stan, and about 4x compared to JAX on the CPU. So, if anything, the improvement for the JAX numpyro methods is actually bigger here, and the numpyro sampler looks really efficient.</p>
+<h3 id="do-they-agree">Do they agree?</h3><p>Some of these methods are a bit experimental, so I thought it would be good to check that the results actually agree with each other. A fast result that's wrong isn't worth much, after all! To do that, I took a look at the player means against each other. Here's what that looks like:</p>
+<p><img src="mean_comparison.png" alt=""></p>
+<p>To me, these look extremely similar. How about the standard deviations?</p>
+<p><img src="sd_comparison.png" alt="sd_comparison"></p>
+<p>There's a little more scatter here, but I'm almost certain it's just due to sampling variation. If anyone doubts that, let me know; it should be easy enough to test by plotting two independent runs from the same method against each other.</p>
+<h2 id="summary">Summary</h2><p>I think these results are pretty interesting. Some short takeaways for me, in bullet point form:</p>
+<ul>
+<li>For this (admittedly simple) model, the GPU seems really beneficial and leads to a speedup of at least around 4x in ESS / second for the biggest model.</li>
+<li>Among the CPU methods, PyMC and Stan are similarly efficient, and using JAX gives an additional boost of about 2-3x in terms of ESS / second.</li>
+<li>All methods produce similar estimates.</li>
+</ul>
+<p>Once again though, I'd like to emphasise that this is just a single model and may only be part of the story. It's possible, for example, that it's particularly well suited to the GPU, and gains for other models could be smaller. But I'm definitely excited about these speedups, and I think they could really help to make MCMC even more popular.</p>
+<p>Some things I'd like to try / think about:</p>
+<ul>
+<li>PyMC + JAX uses double precision on GPUs. It's known that float precision is much more efficient on most GPUs, especially on consumer ones like my RTX 2070. Spec sheets list it at 233 GFLOPS for double precision, but 7.465 TFLOPS for single precision -- that's a factor of 32x if I get my maths right! So it's likely that there would be another, possibly large, speedup here. However, I'm a little wary about trying it because I'm concerned about numerical issues with the lower precision. This will be interesting to explore.</li>
+<li><a href="https://github.com/blackjax-devs/blackjax">blackjax</a> is a really cool alternative to the <code>numpyro</code> sampler I used here. If I understood it right, the idea behind it is to decouple the development of model definition frameworks like PyMC and numpyro from that of the MCMC sampler itself, which makes a lot of sense. <code>blackjax</code> now has a NUTS sampler, and it would be interesting to compare it with the results above.</li>
+<li>More complicated models: It would be interesting to see what happens when surface effects are added, or I fit a <a href="https://www.degruyter.com/document/doi/10.1515/jqas-2018-0008/html">dynamic model</a>.</li>
+<li>As I mention later on, I'm currently on an older CUDA version (10.1), so I couldn't use the latest version of JAX. Maybe newer CUDA and JAX would give even better speed.</li>
+<li>GPU support in Stan: it would be interesting to give Stan's <a href="https://mc-stan.org/cmdstanr/articles/opencl.html">OpenCL support</a> a go, too.</li>
+</ul>
+<p>I hope you enjoyed this blog post. If you have any questions or comments, let me know by email or on <a href="https://twitter.com/xenophar">Twitter</a>. I'd like to thank <a href="https://twitter.com/twiecki">Thomas Wiecki</a> for suggesting this comparison, and for many valuable comments and suggestions from him, as well as from Aki Vehtari, Bob Carpenter, and the PyMC team!</p>
+<h3 id="addendum-1-tennis-player-skill-estimates">Addendum 1: Tennis player skill estimates</h3><p>What skills does the model actually estimate? Well, here they are:</p>
+<table>
+<thead><tr>
+<th style="text-align:left">Player name</th>
+<th style="text-align:right">Skill mean</th>
+<th style="text-align:right">Skill SD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Novak Djokovic</td>
+<td style="text-align:right">3.54</td>
+<td style="text-align:right">0.09</td>
+</tr>
+<tr>
+<td style="text-align:left">Rafael Nadal</td>
+<td style="text-align:right">3.43</td>
+<td style="text-align:right">0.09</td>
+</tr>
+<tr>
+<td style="text-align:left">Roger Federer</td>
+<td style="text-align:right">3.31</td>
+<td style="text-align:right">0.08</td>
+</tr>
+<tr>
+<td style="text-align:left">Bjorn Borg</td>
+<td style="text-align:right">3.25</td>
+<td style="text-align:right">0.1</td>
+</tr>
+<tr>
+<td style="text-align:left">Ivan Lendl</td>
+<td style="text-align:right">3.23</td>
+<td style="text-align:right">0.08</td>
+</tr>
+<tr>
+<td style="text-align:left">John McEnroe</td>
+<td style="text-align:right">3.18</td>
+<td style="text-align:right">0.09</td>
+</tr>
+<tr>
+<td style="text-align:left">Jimmy Connors</td>
+<td style="text-align:right">3.16</td>
+<td style="text-align:right">0.08</td>
+</tr>
+<tr>
+<td style="text-align:left">Rod Laver</td>
+<td style="text-align:right">3.01</td>
+<td style="text-align:right">0.11</td>
+</tr>
+<tr>
+<td style="text-align:left">Andy Murray</td>
+<td style="text-align:right">2.92</td>
+<td style="text-align:right">0.1</td>
+</tr>
+<tr>
+<td style="text-align:left">Pete Sampras</td>
+<td style="text-align:right">2.92</td>
+<td style="text-align:right">0.09</td>
+</tr>
+<tr>
+<td style="text-align:left">Boris Becker</td>
+<td style="text-align:right">2.83</td>
+<td style="text-align:right">0.09</td>
+</tr>
+<tr>
+<td style="text-align:left">Andre Agassi</td>
+<td style="text-align:right">2.77</td>
+<td style="text-align:right">0.08</td>
+</tr>
+<tr>
+<td style="text-align:left">Stefan Edberg</td>
+<td style="text-align:right">2.73</td>
+<td style="text-align:right">0.08</td>
+</tr>
+<tr>
+<td style="text-align:left">Andy Roddick</td>
+<td style="text-align:right">2.7</td>
+<td style="text-align:right">0.09</td>
+</tr>
+<tr>
+<td style="text-align:left">Juan Martin del Potro</td>
+<td style="text-align:right">2.68</td>
+<td style="text-align:right">0.11</td>
+</tr>
+<tr>
+<td style="text-align:left">Arthur Ashe</td>
+<td style="text-align:right">2.65</td>
+<td style="text-align:right">0.09</td>
+</tr>
+<tr>
+<td style="text-align:left">Ken Rosewall</td>
+<td style="text-align:right">2.62</td>
+<td style="text-align:right">0.1</td>
+</tr>
+<tr>
+<td style="text-align:left">Guillermo Vilas</td>
+<td style="text-align:right">2.59</td>
+<td style="text-align:right">0.08</td>
+</tr>
+<tr>
+<td style="text-align:left">John Newcombe</td>
+<td style="text-align:right">2.53</td>
+<td style="text-align:right">0.1</td>
+</tr>
+<tr>
+<td style="text-align:left">Mats Wilander</td>
+<td style="text-align:right">2.44</td>
+<td style="text-align:right">0.09</td>
+</tr>
+</tbody>
+</table>
+<p>The "Big 3" top the chart, followed by Borg, Lendl, McEnroe, Connors and Laver. A debatable list for sure, but also not a completely crazy one, I would say.</p>
+<h3 id="addendum-2-pymc-setup">Addendum 2: PyMC setup</h3><p>Because PyMC v4 and the JAX backend are still pretty new, the setup involves a few steps. Here's what worked for me:</p>
+<ul>
+<li>Install PyMC v4 following these instructions: <a href="https://github.com/pymc-devs/pymc/wiki/Installation-Guide-(Linux)#pymc-v4-installation">https://github.com/pymc-devs/pymc/wiki/Installation-Guide-(Linux)#pymc-v4-installation</a></li>
+<li>Downgrade <code>aeppl</code> to version 0.0.17 (see <a href="https://github.com/pymc-devs/pymc/issues/5240">here</a>) using <code>pip install aeppl==0.017</code>.</li>
+<li>Install <code>numpyro</code> by using <code>pip install numpyro</code>. I used v0.8.0.</li>
+<li>Install <code>JAX</code> following the <a href="https://github.com/google/jax#installation">instructions</a>. Note that I personally used an older version of JAX because I am still on CUDA 10.1, but newer versions should work. I used JAX v0.2.13 and jaxlib v0.1.65.</li>
+</ul>
+<h3 id="addendum-3-code-to-reproduce-these-results">Addendum 3: Code to reproduce these results</h3><p>Code to run these experiments is available here: <a href="https://github.com/martiningram/mcmc_runtime_comparison">https://github.com/martiningram/mcmc_runtime_comparison</a>.</p>
+
+	<!--THIS IS THE FOOTER OF THE BLOGPSOT-->
+	<hr> 
+		<!--div class="container"-->
+			<h2 class="font-roboto">Work with PyMC Labs</h2>
+			<p>If you are interested in seeing what we at PyMC Labs can do for you, then please email <a href="mailto:info@pymc-labs.com">info@pymc-labs.com</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity.
+
+We also run <a href="https://www.pymc-labs.com/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics.
+			</p>
+		<!--/div-->
+    
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+
+        </div>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+            integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+            crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+            <div class="container">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBottom"
+                    aria-controls="navbarBottom" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarBottom">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-twitter"
+                                    aria-hidden="true"></i>
+                                Twitter</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-github"
+                                    aria-hidden="true"></i>
+                                GitHub</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-linkedin"
+                                    aria-hidden="true"></i>
+                                LinkedIn</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-youtube"
+                                    aria-hidden="true"></i>
+                                YouTube</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-meetup"
+                                    aria-hidden="true"></i>
+                                Meetup</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                    aria-hidden="true"></i>
+                                Newsletter</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/privacy-policy"><i class="fa fa-solid fa-lock"
+                                    aria-hidden="true"></i>
+                                Privacy Policy</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/impressum"><i class="fa fa-solid fa-info-circle"
+                                    aria-hidden="true"></i>
+                                Impressum</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/contact"><i class="fa fa-solid fa-file-signature"
+                                    aria-hidden="true"></i>
+                                Contact</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+    </body>
+
+</html>

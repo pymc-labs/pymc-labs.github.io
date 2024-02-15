@@ -1,0 +1,531 @@
+<!doctype html><html lang="en">
+
+    <head>
+        
+
+        <style media="screen">
+            body {
+                padding-top: 70px;
+                padding-bottom: 70px;
+            }
+
+        </style>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+        <link rel="stylesheet" href="../../static/css/custom_style.css?h=16f93eb7">
+        <link rel="stylesheet" href="../../static/css/table_style.css?h=c677f945">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+
+        <!-- Extra meta tags: social site cards, browser icons... -->
+        <meta name="theme-color" content="#ffffff">
+        <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+        <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+        <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+        <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+
+        <title>Causal analysis with PyMC: Answering &#34;What If?&#34; with the new do operator - PyMC Labs</title>
+        <meta name="twitter:card" content="summary">
+        <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/causal-analysis-with-pymc-answering-what-if-with-the-new-do-operator/" />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href="">
+        <meta property="og:title" content="Causal analysis with PyMC: Answering &#34;What If?&#34; with the new do operator - PyMC Labs" />
+        <meta property="og:description" content="" />
+        <meta property="og:image" content="https://pymc-labs.github.io/blog-posts/causal-analysis-with-pymc-answering-what-if-with-the-new-do-operator/cover.png" />
+        <meta name="description" content="We are a Bayesian consulting firm specializing in data analysis and predictive modeling. Contact us today to learn how we can help your business.">
+        <meta name="keywords" content="Bayesian consulting, data analysis, predictive modeling">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+        <!-- <script>hljs.highlightAll();</script> -->
+
+        <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+        <!-- We use this to do syntax highlighting -->
+        <link rel="stylesheet" href="../../static/pygments.css">
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+        </script>
+        
+<script src="../../static/scripts/toggle_code.js?h=3a00c72f" defer></script>
+
+    </head>
+
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <div class="container">
+                <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+                <a class="navbar-brand" href="/"><img alt="logo" loading="eager" width="88" height="70" title="logo" class="navbar-logo"
+                        src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop"
+                    aria-controls="navbarTop" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarTop">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                    aria-hidden="true"></i>
+                                What we do</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                    aria-hidden="true"></i>
+                                Products</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                    aria-hidden="true"></i>
+                                Team</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                    aria-hidden="true"></i>
+                                Clients</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                    aria-hidden="true"></i>
+                                Workshops</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                    aria-hidden="true"></i>
+                                Blog</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container">
+            
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 blogpost">
+        <h2 class="font-roboto">Causal analysis with PyMC: Answering &#34;What If?&#34; with the new do operator</h2>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-6 author_name">
+                <small class="text-muted">AUTHORED BY</small>
+                <p class="font-bold">
+                    
+
+
+
+    
+
+
+
+    
+        
+            Benjamin Vincent
+        
+    
+        
+            and Thomas Wiecki
+        
+    
+
+
+
+                </p>
+            </div>
+            <div class="col-md-6 author_date">
+                <!-- <p>2023-08-01</p> -->
+                
+<small class="text-muted">DATE</small>
+<p class="font-lighter">2023-08-01</p>
+
+<!--<div class="cover-blogposts"><img src="../../static/images/blog_post/cover.jpg?h=653e9b57"></div>-->
+
+            </div>
+        
+            
+                <div class="blog-cover-container">
+                    <img loading="lazy" title="cover image" alt="" class="cover-blogposts" src="cover.png">
+                </div>
+            
+	    </div>
+        <hr> <h2 id="why-causal-analysis">Why Causal Analysis?</h2><p>Causal analysis is rapidly gaining popularity, but why?</p>
+<p>Without a causal understanding of the world, it's often impossible to identify which actions lead to a desired outcome. For example, if you wanted to cool down on a hot summer day, you would not put your thermometer into an ice bath to make the temperature go down. The obvious reason is that you know that the temperature affects the thermometer, but not the other way around.</p>
+<p><img src="dag1.png" alt=""></p>
+<p>In business, we are constantly taking actions to achieve a certain outcome (e.g. increase sales). So in order not to waste our time heating our proverbial thermometer, we need a solid understanding of the <em>causal relationships</em> underlying our business processes. This is the premise of <em>Decision Intelligence</em>.</p>
+<p>Machine learning methods might help us <em>predict</em> what's going to happen with great accuracy, but what's the value of that if it doesn't tell us <em>what to do</em> to achieve a desirable outcome.</p>
+<h2 id="why-bayesian-causal-analysis">Why Bayesian Causal Analysis?</h2><p>Causal analysis is often embedded in a frequentist framework, which comes with some well-documented baggage (see e.g. <a href="https://www.nature.com/articles/d41586-019-00857-9">Scientists rise up against statistical significance</a>).</p>
+<p>It is sometimes claimed that Bayesian statistics does not allow for causal analysis. However, as we will demonstrate in this blog post, this is wrong. Combining these two fields provides many benefits over traditional causal analysis.</p>
+<h2 id="why-bayesian-causal-analysis-in-pymc">Why Bayesian Causal Analysis <em>in PyMC</em>?</h2><p>PyMC is a mature and highly scalable Python package for building Bayesian models using an approachable syntax. Rather than invent new frameworks for performing structural causal analysis, we can super-charge PyMC for Bayesian Causal Analysis with a powerful feature: <strong>the new do operator</strong>.</p>
+<p>Note that we are specifically focusing on Structural Causal Modeling here, rather than e.g. quasi-experimentation which is the focus of packages like <a href="https://causalpy.readthedocs.io/"><code>CausalPy</code></a>.</p>
+<p>In sum, there are several advantages compared to more traditional frequentist causal inference approaches:</p>
+<ul>
+<li>Frequentist statistics has well-known pratical issues that make it prone to misuse (p-hacking etc).</li>
+<li>PyMC is a well-established tool that allows building and inference of highly sophisticated models.</li>
+<li>If you already have a PyMC model, now you can do scenario anaysis and ask "What If" questions natively.</li>
+</ul>
+<h2 id="setting-up">Setting up</h2><div class="hll"><pre><span></span><span class="kn">import</span> <span class="nn">arviz</span> <span class="k">as</span> <span class="nn">az</span>
+<span class="kn">import</span> <span class="nn">daft</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pymc</span> <span class="k">as</span> <span class="nn">pm</span>
+<span class="kn">import</span> <span class="nn">pytensor</span> <span class="k">as</span> <span class="nn">pt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">from</span> <span class="nn">packaging</span> <span class="kn">import</span> <span class="n">version</span>
+</pre></div>
+<div class="hll"><pre><span></span><span class="c1"># check we have the required versions</span>
+<span class="k">assert</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;5.8.0&quot;</span><span class="p">)</span>
+</pre></div>
+<div class="hll"><pre><span></span><span class="c1"># import the new functionality</span>
+<span class="kn">from</span> <span class="nn">pymc</span> <span class="kn">import</span> <span class="n">do</span><span class="p">,</span> <span class="n">observe</span>
+</pre></div>
+<div class="hll"><pre><span></span><span class="n">SEED</span> <span class="o">=</span> <span class="mi">42</span>
+</pre></div>
+<h2 id="example-estimating-impact-of-google-ads-with-tv-as-a-confounder">Example: Estimating impact of Google Ads with TV as a confounder</h2><p>The marketing team of our e-commerce company comes to us with a simple request: Estimate the effectiveness of the paid Google search ads in driving sales.</p>
+<p><img src="dag2.png" alt=""></p>
+<p>Pretty simple, right? We just correlate how much we're spending on search ads with our sales volume. If we wanted to get fancy, we could use a Bayesian Marketing-Mix Model or train a machine-learning model for this.</p>
+<p>There is just one complication: unbeknownst to us, the marketing team is also running TV ad campaigns. In order to maximize the impact of the TV ads, the marketing team is turning Google search ads on when TV ads are active, but when there are no TV campaigns, Google Ads are turned off to save on marketing budget.</p>
+<p>Thus our situation looks actually like this:</p>
+<p><img src="dag3.png" alt=""></p>
+<p>In causal inference terms, we're dealing with a <strong>confounder</strong> -- TV influences both: sales <em>and</em> Google ad spend. This is potentially highly problematic, because it's totally possible that it only looks like Google Ads increase sales, but that this effect is completely driven by the TV ads increasing search volume and that there is in fact <em>no causal effect of Google Ads on sales</em>.</p>
+<p>This example illustrates well why we really care about making <em>causal</em> claims about our data. Who cares if Google ad spend is <em>correlated</em> with sales or is very predictive, what we really want to know is what actions we should take to increase sales.</p>
+<h3 id="formalizing-the-underlying-bayesian-causal-network">Formalizing the underlying Bayesian Causal Network</h3><p>We can represent the above example with an idiomatic causal directed acyclic graph (DAG) where we have a binary treatment variable $Z$ (Google Ads on/off) which may or may not causally influence an outcome $Y$ (sales). However, this relationship suffers from confounding by $C$ (TV) which causally influences both treatment and outcome. Further, we turn this into a Bayesian causal DAG by specifying probabilistic causal relationships between the nodes. A prior is placed on $C$ as it has no parent nodes.</p>
+<p><img src="output_11_0.png" alt="png"></p>
+<p>As you can see, we are essentially setting up two regressions: a logistic regression of $C$ on $Z$, and a linear regression of $C$ <em>and</em> $Z$ on $Y$, all with the appropriate intercepts and regression coefficients.</p>
+<p>Because our main relationship of interest here is between the treatment $Z$ and the outcome $Y$, we can see that this example corresponds to the idiomatic <em>confounded relationship</em>.</p>
+<p>Our goal in this example is to establish the strength of the $Z \rightarrow Y$ causal relationship, expressed as parameter <span>$\beta_{ZY}$</span>. Assuming this is an accurate and complete causal story of our data (a big assumption!) we can quantify the uplift on sales that is caused by paid search.</p>
+<p>Note that in this blog post we assume we already know the causal graph. Where that is not the case, we need to look towards methods of <a href="https://en.wikipedia.org/wiki/Exploratory_causal_analysis">causal discovery</a>.</p>
+<p>Before we dive in to the code, let's specify some notation to make life a bit simpler:</p>
+<ul>
+<li>We have random variables $C$, $Z$, and $Y$</li>
+<li>These are different from observations, specific values, $c$, $z$, and $y$</li>
+<li>We have a set of latent parameters, <span>$\theta = \{ \beta_{z0}, \beta_{y0}, \beta_{cy}, \beta_{zy}, \beta_{cz}, \sigma_{y} \}$</span></li>
+</ul>
+<h3 id="define-the-full-data-generating-process-in-a-pymc-model">Define the full data generating process in a PyMC model</h3><p>This next step may seem slightly alien to many existing PyMC users. We are going to define an 'empty' model, not conditioned on any data at all. This can be thought of as a 'pure' description of our data generating process, totally divorced from any actual data.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">coords_mutable</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;i&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">]})</span> <span class="k">as</span> <span class="n">model_generative</span><span class="p">:</span>
+    <span class="c1"># priors on Y &lt;- C -&gt; Z</span>
+    <span class="n">beta_y0</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;beta_y0&quot;</span><span class="p">)</span>
+    <span class="n">beta_cy</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;beta_cy&quot;</span><span class="p">)</span>
+    <span class="n">beta_cz</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;beta_cz&quot;</span><span class="p">)</span>
+    <span class="c1"># priors on Z -&gt; Y causal path</span>
+    <span class="n">beta_z0</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;beta_z0&quot;</span><span class="p">)</span>
+    <span class="n">beta_zy</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;beta_zy&quot;</span><span class="p">)</span>
+    <span class="c1"># observation noise on Y</span>
+    <span class="n">sigma_y</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s2">&quot;sigma_y&quot;</span><span class="p">)</span>
+    <span class="c1"># core nodes and causal relationships</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;i&quot;</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">invlogit</span><span class="p">(</span><span class="n">beta_z0</span> <span class="o">+</span> <span class="n">beta_cz</span> <span class="o">*</span> <span class="n">c</span><span class="p">),</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;i&quot;</span><span class="p">)</span>
+    <span class="n">y_mu</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span><span class="s2">&quot;y_mu&quot;</span><span class="p">,</span> <span class="n">beta_y0</span> <span class="o">+</span> <span class="p">(</span><span class="n">beta_zy</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">beta_cy</span> <span class="o">*</span> <span class="n">c</span><span class="p">),</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;i&quot;</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">y_mu</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma_y</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;i&quot;</span><span class="p">)</span>
+
+<span class="n">pm</span><span class="o">.</span><span class="n">model_to_graphviz</span><span class="p">(</span><span class="n">model_generative</span><span class="p">)</span>
+</pre></div>
+<p><img src="output_16_0.svg" alt="svg"></p>
+<h3 id="simulating-data">Simulating data</h3><p>Having defined the full joint distribution, we are first going to use it to generate simulated data with known causal effect sizes, to then test if we can recover them.</p>
+<p>In order to do that, we are going to specify some true parameter values that govern the causal relationships between nodes. Importantly, we will set the true causal influence of $Z$ upon $Y$ to be equal to 0, that is $\beta_{zy}=0$. This is known as the true <a href="https://en.wikipedia.org/wiki/Average_treatment_effect">Average Treatment Effect (ATE)</a>. If you recall our real-world example, this would correspond to Google Ads having no causal effect on sales.</p>
+<p>Of course, in real-world situations we will not know what the true ATE is. We only know it here because we are simulating the data and know the ground truth. Our goal is to estimate what the ATE is, and testing how well we can infer known parameters from the data alone (an excercise called Parameter Recovery) is a very useful excercise. If we can't recover the parameters in a simple toy simulated world, then we shouldn't have much faith that we can estimate the true effects in more complex real-world dataset.</p>
+<p>While there are other ways to do this, here <strong>we will use the new <code>do</code> operator to generate a new model with the parameters set to certain values</strong>.</p>
+<div class="hll"><pre><span></span><span class="n">true_ATE</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+<span class="n">true_values</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;beta_z0&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="s2">&quot;beta_y0&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="s2">&quot;beta_cz&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span>
+    <span class="s2">&quot;beta_zy&quot;</span><span class="p">:</span> <span class="n">true_ATE</span><span class="p">,</span>
+    <span class="s2">&quot;beta_cy&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="s2">&quot;sigma_y&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">model_simulate</span> <span class="o">=</span> <span class="n">do</span><span class="p">(</span><span class="n">model_generative</span><span class="p">,</span> <span class="n">true_values</span><span class="p">)</span>
+</pre></div>
+<p>Let's unpack this a little bit. The <code>do</code>-function takes a <code>pymc.Model</code> object and a dict of parameter values. It then returns a <em>new</em> model where the original random variables (RVs) have been converted to constant nodes taking on the specified values.</p>
+<p>But we're just warming up here, a bit further below, we'll see a much cooler application of the <code>do</code>-operator.</p>
+<p>Next, we'll sample from this new model to obtain samples from distibution $P(C, Z, Y | \theta)$. Note that we'll use <code>pm.sample_prior_predictive</code> (not <code>pm.sample</code> because we are not doing any inference).</p>
+<div class="hll"><pre><span></span><span class="n">N</span> <span class="o">=</span> <span class="mi">100</span>
+
+<span class="k">with</span> <span class="n">model_simulate</span><span class="p">:</span>
+    <span class="n">simulate</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_prior_predictive</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="n">SEED</span><span class="p">)</span>
+
+<span class="n">observed</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="n">simulate</span><span class="o">.</span><span class="n">prior</span><span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+    <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">simulate</span><span class="o">.</span><span class="n">prior</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+    <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">simulate</span><span class="o">.</span><span class="n">prior</span><span class="p">[</span><span class="s2">&quot;z&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+<span class="p">}</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">observed</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+<p>If we just did the basic analysis of what our sales ($y$) look like based on Google Ads being turned on ($z=1$) or off ($z=0$), then it looks like there's a big difference:</p>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode18" aria-expanded="false" aria-controls="collapseibleCode18">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode18" class="collapse">
+                <div class="hll"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">displot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Sales, $y$&quot;</span><span class="p">);</span>
+</pre></div>
+
+            </div>
+            <p><img src="output_23_1.png" alt="png"></p>
+<p>We could further confirm a significant effect of Google Ads on sales using a t-test or Bayesian significance test but will skip that for now as it's fairly obvious that there is a large difference between the two groups.</p>
+<p><strong>The key point is that in our setup, while it looks like Google Ads has a big (positive) influence on sales, there is actually no underlying <em>causal</em> effect between them. The difference we see is entirely driven by the TV confounder.</strong></p>
+<h3 id="inferring-model-parameters">Inferring model parameters</h3><p>Let's next turn to inference. For that, we could just redefine the above model and use the <code>observed</code> kwarg as is common in PyMC.</p>
+<p>However, we can do something a bit cooler than that and use another new function called <code>observe()</code>. This function takes a model and data, and returns a new model with the data set as <code>observed</code> on our target RV, similar to the <code>do()</code> function.</p>
+<p>Importantly, we want to derive this observed model from our original "empty" <code>model_generative</code> from above, so that no parameters are fixed in place.</p>
+<div class="hll"><pre><span></span><span class="n">model_inference</span> <span class="o">=</span> <span class="n">observe</span><span class="p">(</span><span class="n">model_generative</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">],</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">],</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;z&quot;</span><span class="p">]})</span>
+<span class="n">model_inference</span><span class="o">.</span><span class="n">set_dim</span><span class="p">(</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">coord_values</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
+</pre></div>
+<p>Now we can press the Inference Button(TM) and sample from our posterior as if we had defined our model in the classic way.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">model_inference</span><span class="p">:</span>
+    <span class="n">idata</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">random_seed</span><span class="o">=</span><span class="n">SEED</span><span class="p">)</span>
+</pre></div>
+<p>We can inspect our posterior distributions using <code>arviz</code>. By plotting the known parameter values we used to generate the simulated data, we can confirm that the inference step has done a good job of estimating these values.</p>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode19" aria-expanded="false" aria-controls="collapseibleCode19">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode19" class="collapse">
+                <div class="hll"><pre><span></span><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span><span class="p">(</span>
+    <span class="n">idata</span><span class="p">,</span>
+    <span class="n">var_names</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">true_values</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+    <span class="n">ref_val</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">true_values</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span>
+</pre></div>
+
+            </div>
+            <p><img src="output_30_0.png" alt="png"></p>
+<p>So far we've simply demonstrated that the generative model we wrote can do a good job of recovering the parameters based on data which was generated directly from that data generating process. This can be a very valuable excercise and represents a new Bayesian workflow for those interested in parameter recovery studies. But let's not get distracted by this and return to our causal focus.</p>
+<h2 id="bayesian-causal-inference-simulating-interventions-with-the-new-do-operator">🔥 Bayesian Causal Inference - simulating interventions with the new <code>do</code> operator. 🔥</h2><p>Now we are ready for the coolest use case for the <code>do</code> operator -- doing counterfactual reasoning! This is where we're asking <strong>"What if?"</strong>: <em>What if</em> we stopped Google Ads? <em>What if</em> we increased spending on Google Ads? What would we expect our data to look like in these scenarios?</p>
+<p>Critically, these hypothetical interventions remove any influence of TV on Google Ads, because the assumption is that we turn Google Ads on and off <em>irrespective</em> of what TV is doing. This is the logic behind the <code>do</code> operator.</p>
+<p>Once we have these two hypotheticals, we estimate the thing we're really interested in: <strong>How strong is the causal influence of Google Ads on sales, independent of the TV confounder?</strong></p>
+<p>For those familiar with causal inference, you'll know this as the <em>Average Treatment Effect</em>:</p>
+<p>$$
+ATE = P(Y | c, do(z=1)) -  P(Y | c, do(z=0))
+$$</p>
+<p>To achieve this in PyMC, we can use the <code>do()</code> function again to generate the counterfactual scenarios as explained above. However, before diving in with something like the following:</p>
+<div class="hll"><pre><span></span><span class="n">model_z0</span> <span class="o">=</span> <span class="n">do</span><span class="p">(</span><span class="n">model_inference</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int32&quot;</span><span class="p">)})</span>
+</pre></div>
+<p>First, we have to replace the TV RV <code>c</code> with its observed data <code>df["C"]</code> so that it doesn't get resampled later.</p>
+<div class="hll"><pre><span></span><span class="c1"># Replace c with its observed values</span>
+<span class="n">model_counterfactual</span> <span class="o">=</span> <span class="n">do</span><span class="p">(</span><span class="n">model_inference</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">]})</span>
+</pre></div>
+<p>Now we are able to use the <code>do()</code> operator to set all the values of $Z$ to either 0 or 1 to calculate $P(Y | c, do(z=0))$ and $P(Y | c, do(z=1))$, respectively.</p>
+<div class="hll"><pre><span></span><span class="c1"># Generate models with Z=0 and Z=1</span>
+<span class="n">model_z0</span> <span class="o">=</span> <span class="n">do</span><span class="p">(</span><span class="n">model_counterfactual</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int32&quot;</span><span class="p">)},</span> <span class="n">prune_vars</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">model_z1</span> <span class="o">=</span> <span class="n">do</span><span class="p">(</span><span class="n">model_counterfactual</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int32&quot;</span><span class="p">)},</span> <span class="n">prune_vars</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+<p>This gives us our two What-If models. As we are interested in what data we would expect to observe under these hypothetical scenarios, we next need to simulate new data for both models.</p>
+<p>This is done using our trusted <code>pm.sample_posterior_predictive()</code> function which generates new data for given a model and a posterior inference trace (i.e. the <code>idata</code> from above when we fit the model to data containing the posteriors of our estimated regression coefficients).</p>
+<div class="hll"><pre><span></span><span class="c1"># Sample new sales data assuming Google Ads off: P(Y | c, do(z=0))</span>
+<span class="n">idata_z0</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span>
+    <span class="n">idata</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model_z0</span><span class="p">,</span>
+    <span class="n">predictions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;y_mu&quot;</span><span class="p">],</span>
+    <span class="n">random_seed</span><span class="o">=</span><span class="n">SEED</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># Sample new sales data assuming Google Ads on: P(Y | c, do(z=1))</span>
+<span class="n">idata_z1</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span>
+    <span class="n">idata</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model_z1</span><span class="p">,</span>
+    <span class="n">predictions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;y_mu&quot;</span><span class="p">],</span>
+    <span class="n">random_seed</span><span class="o">=</span><span class="n">SEED</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+<p>Given this hypothetical sales data from the two simulated interventions, we can compute the difference in sales between Google Ads on and off to give us the estimated Average Treatment Effect:</p>
+<div class="hll"><pre><span></span><span class="c1"># calculate estimated ATE</span>
+<span class="n">ATE_est</span> <span class="o">=</span> <span class="n">idata_z1</span><span class="o">.</span><span class="n">predictions</span> <span class="o">-</span> <span class="n">idata_z0</span><span class="o">.</span><span class="n">predictions</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Estimated ATE = </span><span class="si">{</span><span class="n">ATE_est</span><span class="o">.</span><span class="n">y_mu</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+<pre><code>Estimated ATE = 0.06
+</code></pre>
+<p>We get a small but positive ATE. If we didn't know any better, we might be tempted to say that there is indeed a small causal effect of Google Ads on sales.</p>
+<p>Fortunately, as the good Bayesians that we are, we know to be weary of point-estimates and always look at the full distribution of outcomes.</p>
+<style>
+    figcaption {
+      text-align: left;
+      width: 95%;
+      margin: 0 auto; /* Center the caption within the figure */
+    }
+</style><figure>
+  <img src="output_43_0.png" alt="results" style="width:100%">
+  <figcaption>Results of our Bayesian causal inference. The left panel shows our individual level estimates of the outcome $y$ under the counterfactual situations of Google Ads off ($\operatorname{do}(z=0)$) or on ($\operatorname{do}(z=1)$). Each day (y-axis) has a different outcome due to the influence of the confounding variable, $C$. The right panel shows our posterior estimate of the Average Treatment Effect of $Z \rightarrow Y$. While the ATE distribution is shifted to the right, we see that our uncertainty is nonetheless very high and that 0 is inside the Bayesian credible interval (the black line at the bottom of the right plot).</figcaption>
+</figure><p>So is the causal impact of Google Ads on sales large or small? There are many ways we could go about answering this question but here we'll calculate the size of the causal effect of Google Ads on sales ($Z \rightarrow Y$) as a percentage of the causal effect of TV advertising on sales ($C \rightarrow Y$).</p>
+<div class="hll"><pre><span></span><span class="n">percent</span> <span class="o">=</span> <span class="p">(</span><span class="n">idata</span><span class="o">.</span><span class="n">posterior</span><span class="p">[</span><span class="s2">&quot;beta_zy&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">idata</span><span class="o">.</span><span class="n">posterior</span><span class="p">[</span><span class="s2">&quot;beta_cy&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="mi">100</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Causal effect of Google Ads on sales is </span><span class="si">{</span><span class="n">percent</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% [</span><span class="si">{</span><span class="n">az</span><span class="o">.</span><span class="n">hdi</span><span class="p">(</span><span class="n">percent</span><span class="p">)</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%,</span><span class="si">{</span><span class="n">az</span><span class="o">.</span><span class="n">hdi</span><span class="p">(</span><span class="n">percent</span><span class="p">)</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%] of the effect of TV on sales&quot;</span>
+<span class="p">)</span>
+</pre></div>
+<pre><code>Causal effect of Google Ads on sales is 6.2% [-4.1%, 16.5%] of the effect of TV on sales
+</code></pre>
+<p>Despite a positive point-estimate of the ATE, we maybe don't conclude that the effect of Google Ads on sales is that high, if there is one at all.</p>
+<p>As this example has hopefully demonstrated, Bayesian statistics is the perfect framework for doing causal analysis, and the <code>do</code> operator is an enormously helpful tool.</p>
+<h2 id="summary">Summary</h2><h3 id="interpretation">Interpretation</h3><p>In this blog post we have used an example from marketing analytics to show how easy it is to get fooled by correlation. While it clearly looked like Google Ads were increasing sales, this difference was entirely driven by the TV confounder. This insight became quite obvious when we simulated data under two hypothetical interventions: manually turning Google Ads on and off (which removed the influence of TV on Google Ads).</p>
+<p>If we hadn't taken a causal approach, we might have well told the marketing team that increasing Google Ad spend is a good way to boost sales.</p>
+<p>In addition, we have shown how even with a causal approach, it is easy to get fooled by randomness. As we're always estimating causal effects from data, point estimates give us no sense of uncertainty. By embedding our causal analysis in a Bayesian framework we are able to use probabilities to quantify how certain we are of there being a causal effect.</p>
+<p>Causal models can be easily expressed in PyMC. We simply implement the Data Generating Process and hit the Inference Button. Combined with the newly added do() operator, we are able to simulate interventions that take causality as well as uncertainty into account.</p>
+<h3 id="causal-inference-in-marketing-analytics">Causal Inference in Marketing Analytics```</h3><p>Confounders are a big concern, especially in marketing analytics. While the example used here is realistic, it's definitely also quite simplistic. Usually we would consider not just two marketing channels, but many. In that case, the story becomes more complex, but we still can leverage our understanding of underlying causal structure: marketing channels higher up the funnel are more for brand-building and exhibit longer-term effects, while lower-funnel channels have more direct short-term effects.</p>
+<p>Here is a diagram that illustrates this idea:
+<img src="funnel.png" alt="funnel.png"></p>
+<p>As you can see, higher-funnel <strong>brand marketing spend</strong> (e.g. TV) is building awareness which drives interest which ultimately creates sales. Lower-funnel <strong>performance marketing spend</strong> (e.g. paid search ads) has a more direct influence on sales. Notably, we have all kinds of other factors and confounders as well here we can include as well. For example, we know that price plays a big role on sales, so this allows us to bridge MMMs with price elasticity modeling.</p>
+<p>Other real-world effects can be included as well, like channel saturation and delay (adstock) effects. Including these effects into our model turns it into the well-known <a href="https://www.pymc-labs.com/blog-posts/bayesian-media-mix-modeling-for-marketing-optimization/">Media Mix Model (MMM)</a> which we've done a lot of work on at PyMC Labs, such as <a href="https://www.pymc-labs.com/blog-posts/modelling-changes-marketing-effectiveness-over-time/">adding time-varying parameters</a>. This work culminated into releasing an open-source package to put Bayesian MMMs and customer lifetime value models in PyMC at your fingertips: <a href="https://www.pymc-marketing.io">https://www.pymc-marketing.io</a>.</p>
+<p>If this of interest to you, we have built a causal full-funnel Bayesian MMM that includes price-elasticity and are excited to show it around. <a href="mailto:info@pymc-labs.com">Get in touch, we are looking forward to hearing from you</a>.</p>
+<h3 id="from-predictions-to-decision-intelligence">From Predictions to Decision Intelligence</h3><p><strong>If we want to make better decisions, we need a solid understanding of how our actions affect outcomes. This is the domain of causal analysis.</strong></p>
+<p><strong>If we don't want to be fooled by the randomness in our data, we need to know how confident we are in our results. This is the domain of Bayesian statistics.</strong></p>
+<p>Combining these two gives us a very powerful framework for doing data science that provides actual business value. As we leave the domain of pure associations or predictions, we stop merely providing insight into what has happened or will happen, but also what to <em>do</em> to maximize chances of a favorable outcome. We enter the domain of <em>Decision Intelligence</em>.</p>
+<p>With the new functionality presented here, PyMC emerges as a powerful tool to aid in this endeavour.</p>
+<p><img src="meme.png" alt=""></p>
+<h2 id="technical-details">Technical details</h2><p>If you are hungry for even more detail, we've got you covered!</p>
+<ul>
+<li>You can find the notebook version of this blogpost <a href="https://github.com/pymc-labs/research/blob/main/blog-posts/do_operator/do_operator_blogpost.ipynb">here</a>.</li>
+<li>And you can find an in-depth yet accessible example of using the do operator to calculate interventional distributions <a href="https://www.pymc.io/projects/examples/en/latest/causal_inference/interventional_distribution.html">here</a>.</li>
+</ul>
+<h2 id="further-reading">Further reading</h2><ul>
+<li>Glymour, M., Pearl, J., &amp; Jewell, N. P. (2016). <a href="https://www.wiley.com/en-us/Causal+Inference+in+Statistics%3A+A+Primer-p-9781119186847">Causal inference in statistics: A primer</a>. John Wiley &amp; Sons.</li>
+<li>Pearl, J. &amp; Mackenzie, D. (2018). <a href="https://en.wikipedia.org/wiki/The_Book_of_Why">The book of why: the new science of cause and effect</a>. Basic books.</li>
+<li>Pearl, J. (2009). <a href="https://en.wikipedia.org/wiki/Causality_(book">Causality</a>). Cambridge University Press</li>
+<li>Talebi, S. (2022) <a href="https://towardsdatascience.com/causal-effects-via-the-do-operator-5415aefc834a">Causal Effects via the Do-operator</a>.</li>
+<li><a href="https://www.wiley.com/en-us/Causal+Inference+in+Statistics%3A+A+Primer-p-9781119186847">Causal inference in statistics: A primer</a>.</li>
+<li>Blog post on <a href="https://www.pymc-labs.com/blog-posts/out-of-model-predictions-with-pymc/">Out of model predictions with PyMC</a></li>
+<li>For the related approach of quasi-experimentation, check out <a href="https://causalpy.readthedocs.io/en/latest/"><code>CausalPy</code></a>, a package we put together for causal inference in situations, built on top of PyMC (also see our <a href="https://youtu.be/gV6wzTk3o1U">video from PyData Global 2022</a> about this topic).</li>
+</ul>
+
+	<!--THIS IS THE FOOTER OF THE BLOGPSOT-->
+	<hr> 
+		<!--div class="container"-->
+			<h2 class="font-roboto">Work with PyMC Labs</h2>
+			<p>If you are interested in seeing what we at PyMC Labs can do for you, then please email <a href="mailto:info@pymc-labs.com">info@pymc-labs.com</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity.
+
+We also run <a href="https://www.pymc-labs.com/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics.
+			</p>
+		<!--/div-->
+    
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+
+        </div>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+            integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+            crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+            <div class="container">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBottom"
+                    aria-controls="navbarBottom" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarBottom">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-twitter"
+                                    aria-hidden="true"></i>
+                                Twitter</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-github"
+                                    aria-hidden="true"></i>
+                                GitHub</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-linkedin"
+                                    aria-hidden="true"></i>
+                                LinkedIn</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-youtube"
+                                    aria-hidden="true"></i>
+                                YouTube</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-meetup"
+                                    aria-hidden="true"></i>
+                                Meetup</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                    aria-hidden="true"></i>
+                                Newsletter</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/privacy-policy"><i class="fa fa-solid fa-lock"
+                                    aria-hidden="true"></i>
+                                Privacy Policy</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/impressum"><i class="fa fa-solid fa-info-circle"
+                                    aria-hidden="true"></i>
+                                Impressum</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/contact"><i class="fa fa-solid fa-file-signature"
+                                    aria-hidden="true"></i>
+                                Contact</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+    </body>
+
+</html>

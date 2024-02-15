@@ -1,0 +1,306 @@
+<!doctype html><html lang="en">
+
+    <head>
+        
+
+        <style media="screen">
+            body {
+                padding-top: 70px;
+                padding-bottom: 70px;
+            }
+
+        </style>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+        <link rel="stylesheet" href="../../static/css/custom_style.css?h=16f93eb7">
+        <link rel="stylesheet" href="../../static/css/table_style.css?h=c677f945">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+
+        <!-- Extra meta tags: social site cards, browser icons... -->
+        <meta name="theme-color" content="#ffffff">
+        <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+        <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+        <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+        <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+
+        <title>Bayesian Modeling in Biotech: Using PyMC to Analyze Agricultural Data - PyMC Labs</title>
+        <meta name="twitter:card" content="summary">
+        <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/2022-08-11-indigo/" />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href="">
+        <meta property="og:title" content="Bayesian Modeling in Biotech: Using PyMC to Analyze Agricultural Data - PyMC Labs" />
+        <meta property="og:description" content="Uncover the power of Bayesian modeling in biotechnology. Learn how PyMC is used to analyze complex agricultural data, providing valuable insights for the industry." />
+        <meta property="og:image" content="https://pymc-labs.github.io/blog-posts/2022-08-11-indigo/cover.png" />
+        <meta name="description" content="We are a Bayesian consulting firm specializing in data analysis and predictive modeling. Contact us today to learn how we can help your business.">
+        <meta name="keywords" content="Bayesian consulting, data analysis, predictive modeling">
+
+        <!-- Highlight.js for syntax highlighting -->
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+        <!-- <script>hljs.highlightAll();</script> -->
+
+        <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+        <!-- We use this to do syntax highlighting -->
+        <link rel="stylesheet" href="../../static/pygments.css">
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+        </script>
+        
+<script src="../../static/scripts/toggle_code.js?h=3a00c72f" defer></script>
+
+    </head>
+
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <div class="container">
+                <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+                <a class="navbar-brand" href="/"><img alt="logo" loading="eager" width="88" height="70" title="logo" class="navbar-logo"
+                        src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop"
+                    aria-controls="navbarTop" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarTop">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                    aria-hidden="true"></i>
+                                What we do</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                    aria-hidden="true"></i>
+                                Products</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                    aria-hidden="true"></i>
+                                Team</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                    aria-hidden="true"></i>
+                                Clients</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                    aria-hidden="true"></i>
+                                Workshops</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                    aria-hidden="true"></i>
+                                Blog</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container">
+            
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 blogpost">
+        <h2 class="font-roboto">Bayesian Modeling in Biotech: Using PyMC to Analyze Agricultural Data</h2>
+        
+        <p class="mb-2 text-muted">Uncover the power of Bayesian modeling in biotechnology. Learn how PyMC is used to analyze complex agricultural data, providing valuable insights for the industry.</p>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-6 author_name">
+                <small class="text-muted">AUTHORED BY</small>
+                <p class="font-bold">
+                    
+
+
+
+    
+
+
+
+    
+        Thomas Wiecki
+    
+
+
+
+                </p>
+            </div>
+            <div class="col-md-6 author_date">
+                <!-- <p>2022-08-11</p> -->
+                
+<small class="text-muted">DATE</small>
+<p class="font-lighter">2022-08-11</p>
+
+<!--<div class="cover-blogposts"><img src="../../static/images/blog_post/cover.jpg?h=653e9b57"></div>-->
+
+            </div>
+        
+            
+                <div class="embed-responsive embed-responsive-16by9">
+                    <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/H4wPPfRztyk" title="Bayesian Modeling in Biotech: Using PyMC to Analyze Agricultural Data" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="padding: 0px 20px 5px 20px;"></iframe>
+                </div>
+            
+	    </div>
+        <hr> <h2 id="introduction">Introduction</h2><p>In July 2022, we organized a panel discussion with Manu Martinet of <a href="https://www.indigoag.com">Indigo Ag</a> and Thomas Wiecki and Bill Engels of PyMC Labs to discuss a case-study of measuring effects of crop-types in an agricultural setting.  The goal of the project was to identify the underlying spatial pattern and remove it in order to measure more accurately the treatment effect, which in this case are microbes which contribute to plant yield.</p>
+<p>PyMC Labs were consultants on this project which had limited data and which used Bayesian analyses and Gaussian processes to identify the treatment effect.  We demonstrate how Bayesian modeling is a powerful tool for solving problems in biotechnology.</p>
+<h2 id="timestamps">Timestamps</h2><p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=0s">00:00</a> Thomas Wiecki does PyMC introduction</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=169s">02:49</a> Thomas introduces self</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=213s">03:33</a> Manu Martinet introduces self</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=265s">04:25</a> Bill Engels introduces self</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=310s">05:10</a> Panel discussion begins</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=411s">06:51</a> Testing crop yields on fields</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=496s">08:16</a> How do you sell the product to farmers?</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=655s">10:55</a> Data modeling and challenges</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=784s">13:04</a> Goal of the project: Estimate the spatial pattern and remove it to get the treatment effect</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=920s">15:20</a> Gaussian processes and how they are used</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=1084s">18:04</a> Spatial Gaussian Processes</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=1149s">19:09</a> Spatial effects</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=1333s">22:13</a> Examples fields to show the spatial components</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=1468s">24:28</a> Question: How does modeling the spatial component with a Guassian process compare with other simpler methods?</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=1547s">25:47</a> Question: With the Gaussian Process(GP)  can you estimate the spatial scale?</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=1686s">28:06</a> Question: How does the Gaussian Process deal with latent variables?</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=1808s">30:08</a> Advantages of the a Bayesian framework</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=2100s">35:00</a> Collaboration between Indigo and PyMC Labs review</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=2563s">42:43</a> Question: What were the biggest challenges in the study?</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=2729s">45:29</a> Question: Is there any example online for PyMC based Hierarchical Gaussian Processes(GP) regression?</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=2797s">46:37</a> Question: How did the decomposition work out between signal, spatial and noise and how do you balance 
+the confidence between what is signal and what is noise?</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=2855s">47:35</a> Question: How to effectively use Bayesian methods to substantiate product claims to regulatory bodies?</p>
+<p><a href="https://www.youtube.com/watch?v=H4wPPfRztyk&amp;t=2887s">48:07</a> Thank you!</p>
+
+	<!--THIS IS THE FOOTER OF THE BLOGPSOT-->
+	<hr> 
+		<!--div class="container"-->
+			<h2 class="font-roboto">Work with PyMC Labs</h2>
+			<p>If you are interested in seeing what we at PyMC Labs can do for you, then please email <a href="mailto:info@pymc-labs.com">info@pymc-labs.com</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity.
+
+We also run <a href="https://www.pymc-labs.com/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics.
+			</p>
+		<!--/div-->
+    
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+
+        </div>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+            integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+            crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+            <div class="container">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBottom"
+                    aria-controls="navbarBottom" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarBottom">
+                    <ul class="navbar-nav ml-auto">
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-twitter"
+                                    aria-hidden="true"></i>
+                                Twitter</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-github"
+                                    aria-hidden="true"></i>
+                                GitHub</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-linkedin"
+                                    aria-hidden="true"></i>
+                                LinkedIn</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-youtube"
+                                    aria-hidden="true"></i>
+                                YouTube</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-meetup"
+                                    aria-hidden="true"></i>
+                                Meetup</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                    aria-hidden="true"></i>
+                                Newsletter</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/privacy-policy"><i class="fa fa-solid fa-lock"
+                                    aria-hidden="true"></i>
+                                Privacy Policy</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/impressum"><i class="fa fa-solid fa-info-circle"
+                                    aria-hidden="true"></i>
+                                Impressum</a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/contact"><i class="fa fa-solid fa-file-signature"
+                                    aria-hidden="true"></i>
+                                Contact</a>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+    </body>
+
+</html>
