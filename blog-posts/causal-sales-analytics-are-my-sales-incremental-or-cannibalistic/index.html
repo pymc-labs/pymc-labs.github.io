@@ -1,0 +1,415 @@
+<!doctype html><html lang="en">
+
+<head>
+    
+
+    <style media="screen">
+        body {
+            padding-top: 70px;
+            padding-bottom: 70px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            display: inline-block;
+            /* Ensures that the heading and the span are on the same line */
+            margin: 0;
+            /* Optional: Reset margin for better control */
+            position: relative;
+            /* Ensures that the span can be positioned relative to the heading */
+        }
+
+        .copy-span {
+            cursor: pointer;
+            /* Changes the cursor to a pointer when hovering over the # */
+            color: #81C240;
+            /* Sets the color of the # */
+            margin-left: 5px;
+            /* Adds some space between the heading text and the # */
+            font-size: 0.9em;
+            /* Adjusts the font size of the # to be slightly smaller relative to the heading */
+            visibility: hidden;
+            /* Initially hides the # */
+        }
+
+        h1:hover .copy-span,
+        h2:hover .copy-span,
+        h3:hover .copy-span,
+        .copy-span:hover {
+            visibility: visible;
+            text-decoration: none;
+            color: #81C240;
+            /* Makes the # visible when hovering over the heading or the span */
+        }
+    </style>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="../../static/css/custom_style.css?h=00853bf3">
+    <link rel="stylesheet" href="../../static/css/table_style.css?h=c677f945">
+
+    <!-- Highlight.js for syntax highlighting -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- Extra meta tags: social site cards, browser icons... -->
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+
+    <title>Causal sales analytics: Are my sales incremental or cannibalistic? - PyMC Labs</title>
+
+    <!-- Open Graph -->
+    <meta name="twitter:card" content="summary">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/causal-sales-analytics-are-my-sales-incremental-or-cannibalistic/" />
+    <meta property="og:title" content="Causal sales analytics: Are my sales incremental or cannibalistic? - PyMC Labs" />
+    <meta property="og:description" content="" />
+    <meta property="og:image" content="https://pymc-labs.github.io/blog-posts/causal-sales-analytics-are-my-sales-incremental-or-cannibalistic/cover.png" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@pymc_labs">
+    <meta name="twitter:url" content="https://pymc-labs.github.io/blog-posts/causal-sales-analytics-are-my-sales-incremental-or-cannibalistic/">
+    <meta name="twitter:title" content="Causal sales analytics: Are my sales incremental or cannibalistic? - PyMC Labs">
+    <meta name="twitter:description" content="">
+    <meta name="twitter:image" content="https://pymc-labs.github.io/blog-posts/causal-sales-analytics-are-my-sales-incremental-or-cannibalistic/cover.png">
+
+    <link rel="canonical" href="">
+    <meta name="description" content="We are a Bayesian consulting firm specializing in data analysis and predictive modeling. Contact us today to learn how we can help your business.">
+    <meta name="keywords" content="Bayesian consulting, data analysis, predictive modeling">
+
+    <!-- Highlight.js for syntax highlighting -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+    <!-- <script>hljs.highlightAll();</script> -->
+
+    <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+    <!-- We use this to do syntax highlighting -->
+    <link rel="stylesheet" href="../../static/pygments.css">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Base URL of the page (removing any existing fragment part)
+            const baseURL = window.location.href.split('#')[0];
+            // Select all h3 elements within elements of class 'blogpost'
+            const h3Elements = document.querySelectorAll('h3, h2, h1');
+            h3Elements.forEach((element) => {
+                const copyAnchor = document.createElement('a');
+                copyAnchor.textContent = `#`;
+                copyAnchor.classList.add('copy-span'); // Add a class for styling
+                copyAnchor.setAttribute('href', baseURL+`#${element.id}`); // Set href attribute to a placeholder
+                copyAnchor.setAttribute('title', 'Copy URL to clipboard'); // Tooltip text
+                // Insert the anchor after the <h1>, <h2>, or <h3> element
+                element.appendChild(copyAnchor);
+            });
+        });
+    </script>
+
+    
+<script src="../../static/scripts/toggle_code.js?h=3a00c72f" defer></script>
+
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container">
+            <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+            <a class="navbar-brand" href="/"><img alt="logo" loading="eager" width="88" height="70" title="logo"
+                    class="navbar-logo" src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop"
+                aria-controls="navbarTop" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarTop">
+                <ul class="navbar-nav ml-auto">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                aria-hidden="true"></i>
+                            What we do</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                aria-hidden="true"></i>
+                            Products</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                aria-hidden="true"></i>
+                            Team</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                aria-hidden="true"></i>
+                            Clients</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                aria-hidden="true"></i>
+                            Workshops</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                aria-hidden="true"></i>
+                            Blog</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 blogpost">
+        <h2 class="font-roboto">Causal sales analytics: Are my sales incremental or cannibalistic?</h2>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-6 author_name">
+                <small class="text-muted">AUTHORED BY</small>
+                <p class="font-bold">
+                    
+
+
+
+    
+
+
+
+    
+        Benjamin Vincent
+    
+
+
+
+                </p>
+            </div>
+            <div class="col-md-6 author_date">
+                <!-- <p>2024-09-19</p> -->
+                
+<small class="text-muted">DATE</small>
+<p class="font-lighter">2024-09-19</p>
+
+<!--<div class="cover-blogposts"><img src="../../static/images/blog_post/cover.jpg?h=653e9b57"></div>-->
+
+            </div>
+        
+            
+                <div class="blog-cover-container">
+                    <img loading="lazy" title="cover image" alt="" class="cover-blogposts" src="cover.png">
+                </div>
+            
+	    </div>
+        <hr> <p><em><strong>Executive summary:</strong> In today’s competitive and saturated consumer markets, companies struggle to gain market share through new product releases. Traditional methods of estimating where sales originate—whether they are incremental or cannibalistic—often fall short in complex, dynamic environments. Colgate-Palmolive approached PyMC Labs in 2023 to develop causal sales analytics software that could accurately quantify these aspects to guide product decision-making. This blog post delves into the intricacies of this problem and why standard solutions are insufficient. It explores the need for a bespoke approach incorporating causal and counterfactual thinking to understand sales impacts. By outlining an initial simple model and its limitations, the post sets the stage for the more sophisticated solution developed by PyMC Labs, which will be detailed in a subsequent post. This advanced approach aims to provide actionable insights for better product portfolio management, ultimately enhancing sales, market share, and profitability.</em></p>
+<h2 id="introduction">Introduction</h2><p>Imagine you are a product company in a competitive and saturated market - think consumer staples like food, beverages, and household products. It won’t be possible to get easy wins by appealing to brand new customers (i.e. growing the pie) because everyone is buying either your or your competitors’ products already. Instead, both you and your competitors have been vying for market share (i.e. slices of the pie) over time. In addition to marketing efforts, you have been trying to do this by releasing new products with attributes that you believe have higher appeal to customers or higher profit margins.</p>
+<p>Over time, the products available in the marketplace change - some products are classic and persist, others fall out of favor and are discontinued. And others are newly released with the hope of increasing your market share. So we have a complex and dynamic ecosystem of products. Each company makes decisions about when to discontinue a product, when to release new products, and what kinds of attributes they should have.</p>
+<p>Say you released a new product last year and it sold 100,000 units. How do you know where those sales came from? What we really want is for many of those sales to be incremental in that they took sales away from competitor products. But some proportion of those sales may have been cannibalistic in that they took sales away from your own existing products.</p>
+<p>You could build a statistical (or black-box Machine Learning) solution which might give correlational insights such as “When you release a product of type X, you tend to see Y% innovation.” However, you are aware that while statistical solutions are exactly the right approach in many situations, they can lead to unexpected outcomes once you start acting and intervening. And intervening, in the form of releasing or not releasing new products, is exactly what you want to do.</p>
+<p>So you need a causal model of how product sales are affected by product introductions and withdrawals. If this model is a close approximation of the real world, then we’d be better positioned to make predictions about counterfactual scenarios to understand what would have happened in alternative product launch scenarios.</p>
+<p>Clearly, companies have been making decisions about product releases for a long time. Some of this will be guided by good old human intuition, and some will be informed by sales data or customer research. But does this leave money on the table? Can we squeeze more insights from the data? Can we get quantitative estimates of where a product’s sales are coming from - what portion of sales are incremental versus cannibalistic? If so, these insights could be used to more effectively guide future product portfolio decisions with the ultimate goal of improving KPIs such as sales volume, market share, profits, or profit margins.</p>
+<p>Back in 2023, Colgate-Palmolive approached us with exactly these questions. While it is possible to buy retail sales data, the data alone does not give us all the answers we want. They asked us to build advanced sales analytics software to estimate where a product’s sales were coming from in order to guide their product decision making. While the end goal was a Python package which their data scientists could use going forward, the project was very research-heavy. A follow up blog post will describe the actual solution we provided, but the rest of this blog post outlines the richness of the problem and why a simple but sophisticated solution was not up to the task.</p>
+<p><img src="colpal.png" alt=""></p>
+<h2 id="no-obvious-off-the-shelf-solution">No obvious off-the-shelf solution</h2><p>Because many businesses share the same basic set of problems, an ecosystem of data science and modeling approaches have been applied to deliver business insights. The table below gives a brief overview of some common business questions and the solutions that are commonly deployed:</p>
+<table>
+<thead><tr>
+<th>Question</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What will happen to consumer demand in the near future?</td>
+<td>Time series forecasting tools</td>
+</tr>
+<tr>
+<td>Which are my most effective advertising channels and how should I allocate marketing budgets?</td>
+<td>Media Mix Modeling. Read more in our MMM blog post series (<a href="https://www.pymc-labs.com/blog-posts/bayesian-media-mix-modeling-for-marketing-optimization/">Part 1</a>,  <a href="https://www.pymc-labs.com/blog-posts/reducing-customer-acquisition-costs-how-we-helped-optimizing-hellofreshs-marketing-budget/">Part 2</a>,  <a href="https://www.pymc-labs.com/blog-posts/modelling-changes-marketing-effectiveness-over-time/">Part 3</a>), and find out about our open source <a href="https://www.pymc-marketing.io">pymc-marketing</a> package <a href="https://www.pymc-labs.com/blog-posts/pymc-marketing-a-bayesian-approach-to-marketing-data-science/">here</a>.</td>
+</tr>
+<tr>
+<td>How much should I spend to acquire a customer and still expect to profit?</td>
+<td>Customer Lifetime Value modeling. Read more about our work on CLV models <a href="https://www.pymc-labs.com/blog-posts/pareto-nbd/">here</a>, and find out about our open source pymc-marketing package <a href="https://www.pymc-marketing.io">here</a>.</td>
+</tr>
+<tr>
+<td>How should I price my product?</td>
+<td>Price elasticity estimation and price optimization</td>
+</tr>
+<tr>
+<td>Sales incrementality/cannibalization</td>
+<td>???</td>
+</tr>
+</tbody>
+</table>
+<p>However, when it comes to asking questions about which of my product sales are incremental or cannibalistic, or which product’s sales are affected by a new product, we don't have a well known go-to solution. There are of course some companies offering to provide such insights, but there is no transparency in which algorithms they are using or how effective or accurate they may be. So we needed to do our own research and build a bespoke solution. This is what we at PyMC Labs get out of bed for!</p>
+<h2 id="isnt-this-trivial">Isn’t this trivial?</h2><p>At first glance, estimating incrementality could seem trivial - you could just look at how the sales of existing products decline when a new product is launched, and there is your answer. In the scenario below, the new product sales (red) mostly come from product C (blue) and a bit from product A (green), but not from product B (orange).</p>
+<figure>
+  <img src="schematica.png" style="width:100%">
+  <figcaption>In an ultra-simplified scenario it is possible to establish where the sales of a new product came from. In this case, we can tell that most of the sales of the new product came from product C and some came from product A. But doing this involves assumptions which are perhaps only reasonable in highly simplified scenarios.</figcaption>
+</figure><p>However, this kind of “eyeball it” approach is only feasible in toy scenarios where you have a few products with easily predictable sales. While there may be a couple of real markets where this might be feasible, this is absolutely not the case for consumer packaged goods.</p>
+<h2 id="causal-thinking-beyond-statistics">Causal thinking - beyond statistics</h2><p>One of the key things we first identified was the need to go beyond statistical thinking and have causal and counterfactual thinking at the heart of the project. The whole concept of a new product’s sales being ‘taken’ from sales of existing products necessitates counterfactual thinking - It requires us to think about what the sales of the existing products would have been in the counterfactual scenario that a new product had not been released (see below).</p>
+<figure>
+  <img src="schematicb.png" style="width:100%">
+  <figcaption>A ‘reasonable’ counterfactual scenario, showing what would have happened to the sales of products A, B, and C if the new product had never been launched (after the time shown by the dashed line). These counterfactual sales are reasonable because the assumption that the constant sales before the new product launch would have carried on being at the same level is very plausible.</figcaption>
+</figure><p>By comparing the sales of the existing products in the counterfactual scenario to the sales in the ‘actual scenario’, and summing over the time period since introduction of the new product, we can estimate the total causal impact of the new product. And because we know which products belong to which companies, it is possible to estimate how many sales are incremental (coming from competitor products) and cannibalistic (coming from one’s own products).</p>
+<h2 id="a-simple-first-model-multivariate-interrupted-time-series">A simple first model - multivariate interrupted time series</h2><p>In order to underscore the complexity of the problem, we’ll walk through the construction of a simple but reasonable model. It might initially appear very elegant, and while it may be useful in some situations, it will not be able to serve our needs.</p>
+<p>Let’s start with a simple scenario, shown in the figure below. We have the total sales across your product line up, and the total sales of all products from all competitors*️⃣. Finally, we have the sales data for your own new product that was introduced at the point shown by the dashed line.</p>
+<p>*️⃣ While it may be surprising to those outside of the retail sector, it is possible to get data on competitor sales. There are companies which purchase sales information from retailers, aggregate, and sell that information on as a service.</p>
+<figure>
+  <img src="mvits.png" style="width:100%">
+  <figcaption>A schematic of a simple multivariate interrupted time series model with a highly simplified scenario.</figcaption>
+</figure><p>What we could do is to build a kind of multivariate interrupted time series model. We could model your and competitor products as normally distributed around some expected value with some level of variance, $\sigma$. This expected value would have an intercept parameter ($\gamma$) which describes the sales before the new product introduction. Then, the sales after the product introduction could be modeled as that baseline level minus some proportion of the new product sales. The parameter $c$ will define the extent of cannibalization. If $c=0$ then your sales are unaffected, if $c=1$ then all of the new product sales will have come from your own existing products. We can define incrementality as $i=1-c$; when $i=0$ we have no incrementality and it’s all cannibalization, and when $i=1$ we have pure incrementality.</p>
+<p>This model could be seen as a multivariate interrupted time series approach. In an interrupted time series approach you would typically have a single (univariate) time series and the task is to infer if an intervention delivered at a particular point in time had a causal effect. This model is different firstly in that we have multiple outcome variables, namely both your and your competitor’s total sales. Secondly, because the ‘treatment’ is effectively ‘graded’ because the number of new product sales (the ‘treatment’) varies over time.</p>
+<p>Below we plot the result of a simulation study where your company has 40% market share before the introduction of a new product. When the new product is launched, it is wildly successful, capturing 10% of the total market. The question is, where did those sales come from. In our simulation we made it such that there was 50% incrementality and 50% cannibalization, so you can see that both your and your competitors' sales decreased when your new product was released. The model does a good job and estimates a posterior distribution for the incrementality parameter centered almost exactly on 0.5, i.e. 50%.</p>
+<figure>
+  <img src="simple-simulation.png" alt="simple simulation" style="width:100%">
+  <figcaption>Simulated scenario where new product sales are 50% incremental. The model’s parameter estimate (right) shows a very reasonable estimate - 94% credible intervals from 49-59%.</figcaption>
+</figure><p>So we’ve solved the problem?</p>
+<h2 id="not-so-easy">Not so easy!</h2><p>Anyone working in the data science field knows that one of the major challenges is getting clean data to build your modeling work upon. One of our first steps was to familiarize ourselves with the nature of the sales data. We engaged in a thorough exploratory data analysis and worked with the client’s data scientists to make sure we understood the domain and the in’s and out’s of the retail datasets.</p>
+<p>There are a number of important aspects about the data which add to the complexity of the problem. In contrast to the simplified scenario presented above, real-world sales data involve many more products, sales are not flat over time, and within any given timeframe we can have multiple products (perhaps from different companies) being released or withdrawn. So the real data can look more like what we show schematically in the figure below. All of this combines to make it much more complex to model and estimate counterfactual sales data. In short, the task before us was not a trivial one!</p>
+<figure>
+  <img src="schematicc.png" alt="complex simulation" style="width:100%">
+  <figcaption>Real sales datasets involve many more products (sometimes multiple hundreds), with fluctuating sales, and multiple product introductions or withdrawals happening in overlapping periods. Here we have a new product’s sales in red. The gray lines represent the actual sales of existing products. But to work out where the new product sales came from we need to estimate the counterfactual sales of the existing products if the new product had never been launched. Even with this slightly more complex sales data, it is no longer trivial to estimate what these counterfactual sales would have been in the absence of a new product launch.</figcaption>
+</figure><p>In a marginally more complex scenario (below) we will see that our simple and elegant model fails. Here, a competitor releases a new product at $t=50$ which is 100% incremental for them, we can see your market share decrease and theirs increase. In response, you launch a new product at $t=100$ which is 100% incremental for you, resulting in a decrease in competitor market share and no change to sales of your own existing products. Despite this being a rather minor addition to the complexity of the scenario, our simple and elegant model fails. What actually happened was your product was 100% incremental, but the model’s estimate falls quite far short of this, estimating somewhere between 64-76% incrementality.</p>
+<figure>
+  <img src="complex-simulation.png" alt="complex simulation" style="width:100%">
+  <figcaption>This simulated scenario sees a competitor release a new product at $t=50$ which is 100% incremental (for them), which reduces your market share. In response, you launch a new product at $t=100$ which is 100% incremental (for you), resulting in a decrease in competitor market share. The model’s parameter estimate (right) under this more complex scenario now fails and underestimates incrementality by quite some margin. A simple hack to fix this would be to shrink the pre-introduction window to exclude the new introduction at $t=50$. Though we would pay a price in terms of less data and more uncertain estimates, especially when product introductions or withdrawals are very frequent. Alternatively, we could attempt to build a more advanced model of sales in the pre-introduction period. </figcaption>
+</figure><p>We found out early on in the project that a simple model like the multivariate interrupted time series would not help us solve our problems. Deviating even slightly from the idealized situation has resulted in the model producing biased estimates of incrementality and cannibalization. The toothpaste market is large with product introductions and withdrawals happening all the time, so it would be impossible to crop the data with sufficient pre- and post- product introduction observations without contamination from other product introductions/withdrawals.</p>
+<h2 id="the-promise-and-challenge-of-estimating-incrementality-and-cannibalization">The promise and challenge of estimating incrementality and cannibalization</h2><p>The core goal of our project was to estimate where new products’ sales were coming from - how much of products’ sales are incremental versus cannibalistic? Providing these business insights is enormously valuable for making product development decisions in a global market <a href="https://www.imarcgroup.com/toothpaste-market">estimated at $20.8 billion</a> in 2023.</p>
+<p>While we do of course want to know the net incrementality/cannibalization, we also really want insights on a product level. That is, we don’t just want to know if sales are coming from your own or any of your competitors' products, we want to know which products’ sales are being impacted and by how much. Launching a new whitening product is much more likely to take sales from other whitening products as compared to other categories such as childrens or cavity protection. And so a solution will have to operate on the product level - a much more challenging proposition than the simplified scenarios shown above. In fact, we would really want to incorporate product attribute information into our model as this will be highly informative about where sales may be coming from. Doing this with a generic time-series type approach would be hard, which makes the model we’ve presented so far even less satisfactory.</p>
+<p>While we’ve talked about saturated markets, this characteristic may not always hold, and so our modeling solution must be robust to this. There are a few reasons for this. It is plausible to assume the toothpaste market is close to saturated in most wealthy countries. However, because there are so many toothpaste brands and products, it is not necessarily true that all toothpaste products enter into the retail sales data. This can pose a challenge - from a modeling perspective we must take into account that there may be a small “dark pool” of toothpaste products that customers may enter or leave at different points in time. Additionally, while many markets may be considered as saturated, the global “<a href="https://www.imarcgroup.com/toothpaste-market">market is experiencing significant growth, driven by increasing global awareness of oral hygiene and the expanding middle class in emerging economies</a>.” And so our modeling solution needs to be flexible for these different situations.</p>
+<p>How much confidence should we place in our incrementality and cannibalization estimates? It is less and less acceptable to provide so-called point-estimates, where we have single-number estimates such as “12.4% incrementality.” Instead, if we are to base high-value decisions on business insights, then they need to carry levels of confidence so that decision makers can be informed. For us, this was not hard! PyMC Labs is Bayesian at heart and so virtually everything we do sits within the Bayesian framework. This allows us to attach Bayesian credible intervals to all of our insights so we know when we know and know when we don’t know.</p>
+<p>Hopefully at this point you appreciate the value that accurate incrementality and cannibalization estimates can provide to companies regularly making product launch and withdrawal decisions. And hopefully we have conveyed that it is complex, and non-trivial to provide these estimates. We have shown a simple yet elegant solution (multivariate interrupted time series), but shown that this is not robust enough to use in many complex markets. In the next post we will outline the solution that we handed over. We believe that it does a very good job - and we hope you are excited to learn about it soon. And even better - we are going to open-source a form of the model in the near future. Stay tuned!</p>
+
+	<!--THIS IS THE FOOTER OF THE BLOGPSOT-->
+	<hr> 
+		<!--div class="container"-->
+			<h2 class="font-roboto">Work with PyMC Labs</h2>
+			<p>If you are interested in seeing what we at PyMC Labs can do for you, then please email <a href="mailto:info@pymc-labs.com">info@pymc-labs.com</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity.
+
+We also run <a href="https://www.pymc-labs.com/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics.
+			</p>
+		<!--/div-->
+    
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBottom"
+                aria-controls="navbarBottom" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarBottom">
+                <ul class="navbar-nav ml-auto">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-brands fa-twitter"
+                                aria-hidden="true"></i>
+                            Twitter</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-brands fa-github"
+                                aria-hidden="true"></i>
+                            GitHub</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-brands fa-linkedin"
+                                aria-hidden="true"></i>
+                            LinkedIn</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-brands fa-youtube"
+                                aria-hidden="true"></i>
+                            YouTube</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-brands fa-meetup"
+                                aria-hidden="true"></i>
+                            Meetup</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                aria-hidden="true"></i>
+                            Newsletter</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/privacy-policy"><i class="fa fa-solid fa-lock"
+                                aria-hidden="true"></i>
+                            Privacy Policy</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/impressum"><i class="fa fa-solid fa-info-circle"
+                                aria-hidden="true"></i>
+                            Impressum</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+</body>
+
+</html>

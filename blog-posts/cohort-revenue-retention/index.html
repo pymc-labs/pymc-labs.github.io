@@ -1,0 +1,614 @@
+<!doctype html><html lang="en">
+
+<head>
+    
+
+    <style media="screen">
+        body {
+            padding-top: 70px;
+            padding-bottom: 70px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            display: inline-block;
+            /* Ensures that the heading and the span are on the same line */
+            margin: 0;
+            /* Optional: Reset margin for better control */
+            position: relative;
+            /* Ensures that the span can be positioned relative to the heading */
+        }
+
+        .copy-span {
+            cursor: pointer;
+            /* Changes the cursor to a pointer when hovering over the # */
+            color: #81C240;
+            /* Sets the color of the # */
+            margin-left: 5px;
+            /* Adds some space between the heading text and the # */
+            font-size: 0.9em;
+            /* Adjusts the font size of the # to be slightly smaller relative to the heading */
+            visibility: hidden;
+            /* Initially hides the # */
+        }
+
+        h1:hover .copy-span,
+        h2:hover .copy-span,
+        h3:hover .copy-span,
+        .copy-span:hover {
+            visibility: visible;
+            text-decoration: none;
+            color: #81C240;
+            /* Makes the # visible when hovering over the heading or the span */
+        }
+    </style>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="../../static/css/custom_style.css?h=00853bf3">
+    <link rel="stylesheet" href="../../static/css/table_style.css?h=c677f945">
+
+    <!-- Highlight.js for syntax highlighting -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- Extra meta tags: social site cards, browser icons... -->
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+
+    <title>Cohort Revenue &amp; Retention Analysis - PyMC Labs</title>
+
+    <!-- Open Graph -->
+    <meta name="twitter:card" content="summary">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/cohort-revenue-retention/" />
+    <meta property="og:title" content="Cohort Revenue &amp; Retention Analysis - PyMC Labs" />
+    <meta property="og:description" content="" />
+    <meta property="og:image" content="https://pymc-labs.github.io/blog-posts/cohort-revenue-retention/cover.png" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@pymc_labs">
+    <meta name="twitter:url" content="https://pymc-labs.github.io/blog-posts/cohort-revenue-retention/">
+    <meta name="twitter:title" content="Cohort Revenue &amp; Retention Analysis - PyMC Labs">
+    <meta name="twitter:description" content="">
+    <meta name="twitter:image" content="https://pymc-labs.github.io/blog-posts/cohort-revenue-retention/cover.png">
+
+    <link rel="canonical" href="">
+    <meta name="description" content="We are a Bayesian consulting firm specializing in data analysis and predictive modeling. Contact us today to learn how we can help your business.">
+    <meta name="keywords" content="Bayesian consulting, data analysis, predictive modeling">
+
+    <!-- Highlight.js for syntax highlighting -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+    <!-- <script>hljs.highlightAll();</script> -->
+
+    <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+    <!-- We use this to do syntax highlighting -->
+    <link rel="stylesheet" href="../../static/pygments.css">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Base URL of the page (removing any existing fragment part)
+            const baseURL = window.location.href.split('#')[0];
+            // Select all h3 elements within elements of class 'blogpost'
+            const h3Elements = document.querySelectorAll('h3, h2, h1');
+            h3Elements.forEach((element) => {
+                const copyAnchor = document.createElement('a');
+                copyAnchor.textContent = `#`;
+                copyAnchor.classList.add('copy-span'); // Add a class for styling
+                copyAnchor.setAttribute('href', baseURL+`#${element.id}`); // Set href attribute to a placeholder
+                copyAnchor.setAttribute('title', 'Copy URL to clipboard'); // Tooltip text
+                // Insert the anchor after the <h1>, <h2>, or <h3> element
+                element.appendChild(copyAnchor);
+            });
+        });
+    </script>
+
+    
+<script src="../../static/scripts/toggle_code.js?h=3a00c72f" defer></script>
+
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container">
+            <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+            <a class="navbar-brand" href="/"><img alt="logo" loading="eager" width="88" height="70" title="logo"
+                    class="navbar-logo" src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop"
+                aria-controls="navbarTop" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarTop">
+                <ul class="navbar-nav ml-auto">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                aria-hidden="true"></i>
+                            What we do</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                aria-hidden="true"></i>
+                            Products</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                aria-hidden="true"></i>
+                            Team</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                aria-hidden="true"></i>
+                            Clients</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                aria-hidden="true"></i>
+                            Workshops</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                aria-hidden="true"></i>
+                            Blog</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 blogpost">
+        <h2 class="font-roboto">Cohort Revenue &amp; Retention Analysis</h2>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-6 author_name">
+                <small class="text-muted">AUTHORED BY</small>
+                <p class="font-bold">
+                    
+
+
+
+    
+
+
+
+    
+        Juan Orduz
+    
+
+
+
+                </p>
+            </div>
+            <div class="col-md-6 author_date">
+                <!-- <p>2024-05-14</p> -->
+                
+<small class="text-muted">DATE</small>
+<p class="font-lighter">2024-05-14</p>
+
+<!--<div class="cover-blogposts"><img src="../../static/images/blog_post/cover.jpg?h=653e9b57"></div>-->
+
+            </div>
+        
+            
+                <div class="blog-cover-container">
+                    <img loading="lazy" title="cover image" alt="" class="cover-blogposts" src="cover.png">
+                </div>
+            
+	    </div>
+        <hr> <p>Customer lifetime value (CLV) is a crucial metric to evaluate and steer long-term success
+for a product or service. We not only want to optimize the cost per-cost per acquisition
+(for example, with a <a href="https://www.pymc-marketing.io/en/stable/guide/mmm/mmm_intro.html">media mix model</a>
+with <a href="https://www.pymc-marketing.io/en/stable/index.html">PyMC-Marketing</a>),
+but also make sure this investment pays off through long-term revenue generated by users.
+Many CLV models exist in the literature (for contractual and non-contractual settings).
+Peter Fader and Bruce Hardie pioneered many of them, especially for models specified through
+a transparent probabilistic data-generating process driven by the user behavior mechanism.
+Currently, <a href="https://www.pymc-marketing.io/en/stable/index.html">PyMC-Marketing</a> 's CLV
+module provides the best Python production-ready implementations of these
+<a href="https://www.pymc-marketing.io/en/stable/api/generated/pymc_marketing.clv.models.html#module-pymc_marketing.clv.models">models</a>.
+Many of these models allow user-level external time-invariant covariates (e.g. acquisition channel)
+to explain the variance of the data better.</p>
+<p>In strategic business situations, we often need to look beyond user-level CLV and focus
+on a higher granularity: a cohort. These cohorts can be defined by registration or by
+first-time date. There are several reasons for working at the cohort level. For one,
+new privacy regulations such as GDPR might prohibit using sensitive individual-level
+data in models. In reality, individual-level predictions are not always necessary for
+strategic decision-making. On the other hand, from a technical perspective, while we
+can aggregate individual-level CLV at the cohort level, incorporating time-sensitive
+factors into these models is not straightforward and requires significant effort.</p>
+<p>These observations led to the development of an alternative top-down modeling approach,
+where we model all cohorts simultaneously. This simple and flexible approach provides a
+robust baseline for CLV across the entire user pool. The key idea is to combine two model
+components in a single model: retention and revenue. We can use this model for
+inference (say, what drives retention and revenue changes) and forecasting.</p>
+<p>This approach is based on <a href="https://juanitorduz.github.io/revenue_retention/">Cohort Revenue &amp; Retention Analysis: A Bayesian Approach</a>.</p>
+<h2 id="the-data">The Data</h2><p>To illustrate the approach, we consider a <a href="https://raw.githubusercontent.com/juanitorduz/website_projects/master/data/retention_data.csv">synthetic dataset</a> with the following features:</p>
+<ul>
+<li><code>cohort</code>:  month-level cohort tag</li>
+<li><code>n_users</code>: number of users per cohort</li>
+<li><code>period</code>: observation time</li>
+<li><code>n_active_users</code>: number of active users (defined by, e.g., if they had made a purchase)
+for a given cohort at a given period.</li>
+<li><code>revenue</code>: revenue generated by a cohort at a given period.</li>
+<li><code>age</code>: the number of weeks since the cohort started with respect to the latest observation period.</li>
+<li><code>cohort_age</code>: number of months the cohort has existed.</li>
+</ul>
+<p>We can define the observed <strong>retention</strong> for a given cohort and period combination as
+<code>n_active_users / n_users</code>. As this is a synthetic dataset, we have the actual retention
+values, which we use for model evaluation.</p>
+<p>Studying cohorts gives us much more information than working on aggregated data.</p>
+<p><img src="retention_11_1.png" alt="png"></p>
+<p>Let's look into the retention values as a matrix:</p>
+<p><img src="revenue_retention_17_1.png" alt="png"></p>
+<p>For example, in the upper left corner, we see the value of 17%; this means that for the
+2020-01 cohort, 17% percent of the users were active during 2020-2.</p>
+<p>From this plot, we see the following characteristics:</p>
+<ol>
+<li><p>There is a yearly seasonality pattern in the observation period.</p>
+</li>
+<li><p>The retention values vary smoothly with both features <code>cohort age</code> (number of months
+the cohort has existed) and <code>age</code> (the number of weeks since the cohort started with
+respect to the latest observation period.). We do not see spikes or strong discontinuities.</p>
+</li>
+</ol>
+<p>Let's visualize the retention as time series to better understand the seasonal pattern:</p>
+<p><img src="revenue_retention_19_1.png" alt="png"></p>
+<p>Retention usually peaks twice yearly, with the biggest spike around February. It is also
+interesting that overall retention increases with the cohort's age.</p>
+<p>Let's look now into the revenue matrix:</p>
+<p><img src="revenue_retention_23_1.png" alt="png"></p>
+<p>The newer cohorts (especially after 2021-5) have a much higher revenue volume. We also
+see that the seasonal pattern is present but much milder. This revenue matrix becomes
+much more transparent when looking into the matrix of active users:</p>
+<p><img src="revenue_retention_21_1.png" alt="png"></p>
+<p>As expected, there is a strong correlation between revenue and the number of active users.
+We could also understand this relation as a combination of the cohort size and the retention values.</p>
+<p>To start simple, let us first consider the retention model component.</p>
+<h2 id="baseline-retention-model">Baseline Retention Model</h2><p>We start with a period-based time split to get training and test sets. We use the former
+ to fit the model and the latter to evaluate the output forecast.</p>
+<p>Next, let's think about retention as a metric. First, it is always between
+zero and one; this provides a hint for the likelihood function to choose. Second, it is
+a quotient. This fact is essential to understanding the uncertainty around it.
+For example, for cohort A, you have a retention of 20 % coming from a cohort of size 10.
+This retention value indicates that two users were active out of these 10. Now consider
+cohort B, which also has a 20% retention but with one million users. Both cohorts have
+retention, but intuitively, you are more confident about this value for the bigger cohort.
+This observation hints that we should not model retention directly but rather the number
+of active users. We can then see retention as a <em>latent variable </em>.</p>
+<p>After this digression about retention, a natural model structure is the following:</p>
+<ul>
+<li>A binomial likelihood to model the number of active users as a function of cohort size and retention.</li>
+</ul>
+<p><span>
+$$
+N_{\text{active}}  \sim \text{Binomial} (N, p)
+$$
+</span></p>
+<ul>
+<li>Use a link function to model the retention as a linear model in terms of the age,
+cohort age, and seasonality component (plus an interaction term).</li>
+</ul>
+<p><span>
+$$
+\textrm{logit}(p) = \beta_{0} + \beta_{1} \text{cohort age} + \beta_{2} \text{age} + \beta_{3} \times \text{cohort age} \times \text{age} + \beta_{4} \text{seasonality} 
+$$
+</span></p>
+<p>This model is good enough for a baseline (see <a href="https://juanitorduz.github.io/retention/">A Simple Cohort Retention Analysis in PyMC</a>).
+The key observation is that all of the features (age, cohort age, and seasonality)  are
+also known in the test set! Hence, we can use this model to generate forecasts for any
+forecasting window. In addition, we can easily add covariates to the regression component
+(for forecasting purposes, one has to have the covariates available in the future as well).
+Here, domain knowledge and feature engineering should work together to build a meaningful
+and actionable model.</p>
+<h2 id="bart-retention-model">BART Retention Model</h2><p>For this synthetic data set, the model above works well. Nevertheless, disentangling the
+relationship between features in many real applications is not straightforward and often
+requires an iterative feature engineering process. An alternative is to use a model that
+can reveal these non-trivial feature interactions for us while keeping the model
+interpretable. Given the vast success in machine learning applications, a natural
+candidate is tree ensembles. Their Bayesian version is known as BART (Bayesian Additive
+Regression Trees), a non-parametric model consisting of a sum of $m$ regression trees.</p>
+<blockquote><p>One of the reason BART is Bayesian is the use of priors over the regression trees.
+The priors are defined in such a way that they favor shallow trees with leaf values close to zero.
+A key idea is that a single BART-tree is not very good at fitting the data but when
+we sum many of these trees we get a good and flexible approximation.</p>
+</blockquote>
+<p>Luckily, a PyMC version is available <a href="https://www.pymc.io/projects/bart/en/latest/">PyMC BART</a>,
+which we can use to replace the linear model component from the baseline model above.
+Concretely, the BART model enters the equation as</p>
+<p><span>
+$$
+\textrm{logit}(p) = \text{BART}(X)
+$$
+</span></p>
+<p>Here, $X$ denotes the design matrix of covariates, which includes age, cohort age, and
+seasonality features.</p>
+<p>This is how the model looks in PyMC:</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="n">features</span><span class="p">})</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+    <span class="c1"># --- Data ---</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add_coord</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;obs&quot;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">train_obs_idx</span><span class="p">,</span> <span class="n">mutable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">MutableData</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">x_train</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;obs&quot;</span><span class="p">,</span> <span class="s2">&quot;feature&quot;</span><span class="p">))</span>
+    <span class="n">n_users</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">MutableData</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;n_users&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">train_n_users</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;obs&quot;</span><span class="p">)</span>
+    <span class="n">n_active_users</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">MutableData</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;n_active_users&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">train_n_active_users</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;obs&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># --- Parametrization ---</span>
+    <span class="c1"># The BART component models the image of the retention rate under</span>
+    <span class="c1"># the logit transform so that the range is not constrained to [0, 1].</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">pmb</span><span class="o">.</span><span class="n">BART</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mu&quot;</span><span class="p">,</span>
+        <span class="n">X</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+        <span class="n">Y</span><span class="o">=</span><span class="n">train_retention_logit</span><span class="p">,</span>
+        <span class="n">m</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">response</span><span class="o">=</span><span class="s2">&quot;mix&quot;</span><span class="p">,</span>
+        <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;obs&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># We use the inverse logit transform to get the retention</span>
+    <span class="c1"># rate back into [0, 1].</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">invlogit</span><span class="p">(</span><span class="n">mu</span><span class="p">),</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;obs&quot;</span><span class="p">)</span>
+    <span class="c1"># We add a small epsilon to avoid numerical issues.</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">switch</span><span class="p">(</span><span class="n">pt</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">eps</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">switch</span><span class="p">(</span><span class="n">pt</span><span class="o">.</span><span class="n">eq</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">eps</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+
+    <span class="c1"># --- Likelihood ---</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">Binomial</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;likelihood&quot;</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n_users</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">n_active_users</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;obs&quot;</span><span class="p">)</span>
+</pre></div>
+<p>For more details, see the complete blog post <a href="https://juanitorduz.github.io/retention_bart/">Cohort Retention Analysis with BART</a>.</p>
+<p><strong>Remark:</strong> The <code>response="mix"</code> option in the BART class allows us to combine two ways
+of generating prediction from the trees: (1) taking the mean and (2) using a linear model.
+Having a linear model component on the leaves will allow us to generate better
+out-of-sample predictions.</p>
+<p>Let us see the in-sample and out-of-sample prediction for some subset of cohorts:</p>
+<ul>
+<li>In-sample</li>
+</ul>
+<p><img src="revenue_retention_51_1.png" alt="png"></p>
+<ul>
+<li>Out-of-sample</li>
+</ul>
+<p><img src="revenue_retention_66_1.png" alt="png"></p>
+<p>Here are some remarks about the results:</p>
+<ul>
+<li>As expected from the modeling approach, the credible intervals are wider for the
+smaller (in this example, the younger) cohorts.</li>
+<li>The out-of-sample predictions are good! The model can capture the trends and seasonal components.</li>
+<li>As we use age and cohort age as features, we expect closer cohorts to behave similarly
+(this is something we saw in the exploratory data analysis part above). In particular,
+we can generate forecasts for very young cohorts with very little data!</li>
+</ul>
+<p>The PyMC BART implementation provides excellent tools to interpret how the model
+generates predictions. One of them is
+<a href="https://christophm.github.io/interpretable-ml-book/pdp.html">partial dependence plots</a> (PDP).
+These plots provide a way of understanding how a feature affects the predictions by
+averaging the marginal effect over the whole data set. Let us take a look at how these
+look for this example:</p>
+<p><img src="retention_bart_31_2.png" alt="png"></p>
+<p>Here, we can visualize how each feature affects the model's retention predictions. We
+see that cohort age has a higher effect on retention than age, and we also see a clear
+yearly seasonal pattern. 
+Moreover, we can additionally use individual conditional expectation (ICE) plots to
+detect interactions across features.</p>
+<h2 id="revenue-component">Revenue Component</h2><p>The BART model performs very well on the retention component. Still, our ultimate goal
+is to predict future cohort-level value measured in money (not just retention metrics).
+Hence, it is crucial to add the monetary value to the analysis. Fortunately, the
+Bayesian framework allows enough flexibility to do this in a single model! Let's think
+about the revenue variable:</p>
+<ul>
+<li><p>It has to be non-negative.</p>
+</li>
+<li><p>In general, we expect bigger cohorts to generate more revenue.</p>
+</li>
+<li><p>The more active users, the more the revenue.</p>
+</li>
+<li><p>Therefore, a natural metric to compare cohorts evenly is the <em>average revenue per user</em>.</p>
+</li>
+</ul>
+<p>Given these observations, it is reasonable to model the revenue component as:</p>
+<p><span>
+$$
+\text{Revenue} \sim \text{Gamma}(N_{\text{active}}, \lambda), \quad \lambda > 0
+$$
+</span></p>
+<p>where $1 / \lambda$ represents the <em>average revenue per user</em>. Observe that the mean of
+this distribution is $N_{\text{active}} / \lambda$.</p>
+<p>We are now free to choose to model the parameter $\lambda$. For this specific example,
+we see that the strong seasonality in retention mainly drives the seasonal component in
+the revenue component. Thus, we do not include seasonal features from the $\lambda$ model.
+A linear model in the cohort and cohort age features (plus an interaction term) provides
+a good baseline for many applications. As $\lambda$ is always positive, we need to use
+a link function to use a liner model:</p>
+<p><span>
+$$
+\textrm{log}(\lambda) = \gamma_{0} + \gamma_{1} \text{cohort age} + \gamma_{2} \text{age} + \gamma_{3} \times \text{cohort age} \times \text{age}
+$$
+</span></p>
+<p>The retention and revenue models coupled by the variable $N_{\text{active}}$ through the
+latent variables $p$ (retention) and $1 / \lambda$ (average revenue per user) is what we
+call the <em>cohort-revenue-retention model</em>.</p>
+<p>Here is a diagram of the model structure:</p>
+<p><img src="revenue_retention_33_1.svg" alt="svg"></p>
+<p>The out-of-sample predictions for the revenue component are pretty good as well:</p>
+<p><img src="revenue_retention_68_1.png" alt="png"></p>
+<p>Note that the revenue predictions have a seasonal component, which comes from the
+$N_{\text{active}}$ through the retention $p$. In addition, similarly, as for the
+retention predictions, the credible intervals are wider for the smaller
+(in this case, younger) cohorts, and we can provide very good predictions for very
+young cohorts as, in some sense, we are pooling information across cohorts through
+the model.</p>
+<p>We can also get insights into the average revenue per user and active user behavior as
+a function of the cohort features.</p>
+<p><img src="revenue_retention_56_1.png" alt="png"></p>
+<h2 id="conclusion">Conclusion</h2><p>In this blog post, we described how to leverage Bayesian methods to develop a solid
+baseline for a customer lifetime value at the cohort level by coupling retention and
+revenue components. This model is flexible, interpretable, and provides good forecasts
+(demonstrated in a synthetic dataset and from experience from real case applications).
+Moreover, it is a model on which we can build  upon of. We can:</p>
+<ul>
+<li><p>Seamlessly add more features to the BART model. We need to ensure they are available
+in the future if we want to do forecasting.</p>
+</li>
+<li><p>We can split the data and consider cohort matrices per acquisition channel. Then, we
+could combine this with media mix model results to have a better estimate (it is not
+perfect because the user-level channel assignment had to be through an attribution
+model) of CAC / CLV (i.e. cost-per-acquisition / customer lifetime value).</p>
+</li>
+<li><p>Include more features in the revenue component. We can control them via a linear model
+or use more complex methods, such as Gaussian processes or even neural networks. See,
+for example, the blog post <a href="https://juanitorduz.github.io/revenue_retention_numpyro/">Cohort Revenue Retention Analysis with Flax and NumPyro</a>
+where we use a neural network instead of a BART model.</p>
+</li>
+</ul>
+<p>The model parametrization is "not that important" aspect of the model. What is key is
+the coupling mechanism driving the CLV: retention and average revenue per user.</p>
+<p>Another exciting application of this model is causal analysis. For example, assume we
+ran a global marketing campaign to increase the order rate (for example). Suppose we
+can not do an A/B test and have to rely on quasi-experimental methods like "causal impact".
+In that case, we might underestimate the campaign's effect if we aggregate all the cohorts
+together. An alternative is to use this cohort model to estimate the
+"what-if-we-had-no-campaign" counterfactual at the cohort level. It might be that newer
+cohorts were more sensitive to the campaign than older ones, and this could explain why
+we are not seeing a significant effect on the aggregation.</p>
+<p>There are still many things to discover and explore about these cohort-level models.
+For example, a hierarchical model across markets on which we pool information across
+many of these retention and revenue matrices. This approach would allow us to tackle
+the cold-start problem when we do not have historical data. Stay tuned!</p>
+
+	<!--THIS IS THE FOOTER OF THE BLOGPSOT-->
+	<hr> 
+		<!--div class="container"-->
+			<h2 class="font-roboto">Work with PyMC Labs</h2>
+			<p>If you are interested in seeing what we at PyMC Labs can do for you, then please email <a href="mailto:info@pymc-labs.com">info@pymc-labs.com</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity.
+
+We also run <a href="https://www.pymc-labs.com/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics.
+			</p>
+		<!--/div-->
+    
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBottom"
+                aria-controls="navbarBottom" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarBottom">
+                <ul class="navbar-nav ml-auto">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-brands fa-twitter"
+                                aria-hidden="true"></i>
+                            Twitter</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-brands fa-github"
+                                aria-hidden="true"></i>
+                            GitHub</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-brands fa-linkedin"
+                                aria-hidden="true"></i>
+                            LinkedIn</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-brands fa-youtube"
+                                aria-hidden="true"></i>
+                            YouTube</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-brands fa-meetup"
+                                aria-hidden="true"></i>
+                            Meetup</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                aria-hidden="true"></i>
+                            Newsletter</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/privacy-policy"><i class="fa fa-solid fa-lock"
+                                aria-hidden="true"></i>
+                            Privacy Policy</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/impressum"><i class="fa fa-solid fa-info-circle"
+                                aria-hidden="true"></i>
+                            Impressum</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+</body>
+
+</html>

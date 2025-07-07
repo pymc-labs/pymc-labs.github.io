@@ -1,0 +1,984 @@
+<!doctype html><html lang="en">
+
+<head>
+    
+
+    <style media="screen">
+        body {
+            padding-top: 70px;
+            padding-bottom: 70px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            display: inline-block;
+            /* Ensures that the heading and the span are on the same line */
+            margin: 0;
+            /* Optional: Reset margin for better control */
+            position: relative;
+            /* Ensures that the span can be positioned relative to the heading */
+        }
+
+        .copy-span {
+            cursor: pointer;
+            /* Changes the cursor to a pointer when hovering over the # */
+            color: #81C240;
+            /* Sets the color of the # */
+            margin-left: 5px;
+            /* Adds some space between the heading text and the # */
+            font-size: 0.9em;
+            /* Adjusts the font size of the # to be slightly smaller relative to the heading */
+            visibility: hidden;
+            /* Initially hides the # */
+        }
+
+        h1:hover .copy-span,
+        h2:hover .copy-span,
+        h3:hover .copy-span,
+        .copy-span:hover {
+            visibility: visible;
+            text-decoration: none;
+            color: #81C240;
+            /* Makes the # visible when hovering over the heading or the span */
+        }
+    </style>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="../../static/css/custom_style.css?h=00853bf3">
+    <link rel="stylesheet" href="../../static/css/table_style.css?h=c677f945">
+
+    <!-- Highlight.js for syntax highlighting -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- Extra meta tags: social site cards, browser icons... -->
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+
+    <title>Bayesian Baseball Monkeys - PyMC Labs</title>
+
+    <!-- Open Graph -->
+    <meta name="twitter:card" content="summary">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/bayesian-marcel/" />
+    <meta property="og:title" content="Bayesian Baseball Monkeys - PyMC Labs" />
+    <meta property="og:description" content="" />
+    <meta property="og:image" content="https://pymc-labs.github.io/blog-posts/bayesian-marcel/cover.png" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@pymc_labs">
+    <meta name="twitter:url" content="https://pymc-labs.github.io/blog-posts/bayesian-marcel/">
+    <meta name="twitter:title" content="Bayesian Baseball Monkeys - PyMC Labs">
+    <meta name="twitter:description" content="">
+    <meta name="twitter:image" content="https://pymc-labs.github.io/blog-posts/bayesian-marcel/cover.png">
+
+    <link rel="canonical" href="">
+    <meta name="description" content="We are a Bayesian consulting firm specializing in data analysis and predictive modeling. Contact us today to learn how we can help your business.">
+    <meta name="keywords" content="Bayesian consulting, data analysis, predictive modeling">
+
+    <!-- Highlight.js for syntax highlighting -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+    <!-- <script>hljs.highlightAll();</script> -->
+
+    <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+    <!-- We use this to do syntax highlighting -->
+    <link rel="stylesheet" href="../../static/pygments.css">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Base URL of the page (removing any existing fragment part)
+            const baseURL = window.location.href.split('#')[0];
+            // Select all h3 elements within elements of class 'blogpost'
+            const h3Elements = document.querySelectorAll('h3, h2, h1');
+            h3Elements.forEach((element) => {
+                const copyAnchor = document.createElement('a');
+                copyAnchor.textContent = `#`;
+                copyAnchor.classList.add('copy-span'); // Add a class for styling
+                copyAnchor.setAttribute('href', baseURL+`#${element.id}`); // Set href attribute to a placeholder
+                copyAnchor.setAttribute('title', 'Copy URL to clipboard'); // Tooltip text
+                // Insert the anchor after the <h1>, <h2>, or <h3> element
+                element.appendChild(copyAnchor);
+            });
+        });
+    </script>
+
+    
+<script src="../../static/scripts/toggle_code.js?h=3a00c72f" defer></script>
+
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container">
+            <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+            <a class="navbar-brand" href="/"><img alt="logo" loading="eager" width="88" height="70" title="logo"
+                    class="navbar-logo" src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop"
+                aria-controls="navbarTop" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarTop">
+                <ul class="navbar-nav ml-auto">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                aria-hidden="true"></i>
+                            What we do</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                aria-hidden="true"></i>
+                            Products</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                aria-hidden="true"></i>
+                            Team</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                aria-hidden="true"></i>
+                            Clients</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                aria-hidden="true"></i>
+                            Workshops</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                aria-hidden="true"></i>
+                            Blog</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 blogpost">
+        <h2 class="font-roboto">Bayesian Baseball Monkeys</h2>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-6 author_name">
+                <small class="text-muted">AUTHORED BY</small>
+                <p class="font-bold">
+                    
+
+
+
+    
+
+
+
+    
+        Chris Fonnesbeck
+    
+
+
+
+                </p>
+            </div>
+            <div class="col-md-6 author_date">
+                <!-- <p>2024-08-01</p> -->
+                
+<small class="text-muted">DATE</small>
+<p class="font-lighter">2024-08-01</p>
+
+<!--<div class="cover-blogposts"><img src="../../static/images/blog_post/cover.jpg?h=653e9b57"></div>-->
+
+            </div>
+        
+            
+                <div class="blog-cover-container">
+                    <img loading="lazy" title="cover image" alt="" class="cover-blogposts" src="cover.png">
+                </div>
+            
+	    </div>
+        <hr> <p>The <a href="https://tangotiger.net/marcel/">MARCEL baseball projection model</a>, developed by <a href="https://en.wikipedia.org/wiki/Tom_Tango">Tom Tango</a>, is a deliberately simple forecasting system for Major League Baseball (MLB) player performance. Named humorously after Marcel the Monkey, it aims to represent the "minimum level of competence" that should be expected from any forecaster.</p>
+<blockquote><p>Actually, it is the most basic forecasting system you can have, that uses as little intelligence as possible. So, that's the allusion to the monkey. It uses 3 years of MLB data, with the most recent data weighted heavier. It regresses towards the mean. And it has an age factor. -- <em>Tom Tango</em></p>
+</blockquote>
+<p>Yet, this minimalist approach makes it a transparent, reliable starting point for projecting player performance without requiring extensive computational resources or complex algorithms.</p>
+<h3 id="key-features-of-the-marcel-model">Key Features of the MARCEL Model</h3><ol>
+<li><p><strong>Data Utilization</strong>:</p>
+<ul>
+<li>The model uses three years of MLB data, with the most recent year weighted more heavily. This approach ensures that the projections are based on a player's recent performance while still considering their historical data.</li>
+</ul>
+</li>
+<li><p><strong>Regression to the Mean</strong>:</p>
+<ul>
+<li>MARCEL incorporates a regression towards the mean, which helps to temper extreme performances and provide more balanced projections.</li>
+</ul>
+</li>
+<li><p><strong>Age Factor</strong>:</p>
+<ul>
+<li>The model includes an age factor to account for the natural aging process of players, which can affect their performance. For most performance measures, this typically means improvement at younger ages, followed by decline at older ages.</li>
+</ul>
+</li>
+</ol>
+<p>Here is Tango's recipe for the model, taken from his website describing the 2004 version of the model:</p>
+<blockquote><ol>
+<li>Weight each season as 5/4/3. 2003 counts as "5" and 2001 counts as "3".</li>
+<li>Determine each player's league average. I removed all pitchers' hitting totals from the league average. I lumped in AL and NL together. I weighted the player's league average using the 5/4/3 process and that's player's PA for that season. I then forced in that player's league average to come in at a total of 1200 PA for each player (2 weights x 600 PA). This is the regression towards the mean component.</li>
+<li>Add the above two.</li>
+<li>Determine the projected PA = 0.5 <em> 2004PA + 0.1 </em> 2003PA + 200. I take the result of #3, and prorate it to this projected PA.</li>
+<li>Determine an age adjustment. Age = 2004 - yearofbirth. If over 29, AgeAdj = (age - 29) <em> .003. If under 29, AgeAdj = (age - 29) </em> .006. Apply this age adjustment to the result of #4.</li>
+<li>Rebaseline the results against an assumed league average of 2003.</li>
+</ol>
+</blockquote>
+<p>This description relates speficically to batter data, but the methodology can be applied to any annual player statistics.</p>
+<h2 id="a-bayesian-marcel">A Bayesian MARCEL?</h2><p>An interesting exercise is to consider how we might implement an analog of MARCEL using Bayesian methods. By incorporating a Bayesian framework, we can introduce uncertainty estimates into the projections, which can be valuable for risk assessment and decision-making. Moreover, a hierarchical model structure would provide a natural way to implement regression to the mean.</p>
+<p>In the spirit of MARCEL, the goal here is not to have a sophisticated model for making accurate projections, but rather to have a simple, general purpose model that can be used to project arbitrary metrics, usually intended to provide baseline one-year-ahead projections. The only difference is that we will now have probabilistic uncertainty estimates around the resulting projections.</p>
+<p>To this end, I've adapted the three core components as follows:</p>
+<ol>
+<li>Data weights for previous seasons estimated from the data using a Dirichlet distribution.</li>
+<li>A triangular aging function, whose midpoint is estimated from the data.</li>
+<li>A hierarchical random effect for league-wide mean regression.</li>
+</ol>
+<h2 id="case-study-hard-hit-rate">Case study: Hard hit rate</h2><p>As a motivating example, we will look at projecting batter hard hit rate. Hard hit rate (Hard%) measures the percentage of batted balls that are hit with exit velocities exceeding 95 miles per hour. Developed by Sports Info Solutions, it was originally based on a subjective classification of batted balls as either "soft," "medium," or "hard" hit. The introduction of Statcast data (via HitFX, Trackman, and now Hawkeye) allowed batted ball exit velocities to be measured directly.</p>
+<p>Hard hit rate is often a leading indicator of  performance in other statistics such as home run (HR) per fastball rate and batting average on balls in play (BABIP), while for pitchers, it can help explain their expected fielding-independent pitching (xFIP), among others. The league average hard hit rate is around 35%, so consistently exceeding this mark is generally considered positive for hitters (and concerning for pitchers).  The relationship between hard hit rate and weighted on-base average (wOBA), a measure of batting performance that accounts for the quality of hit outcomes, is shown below, demonstrating an inflection around 95 MPH.</p>
+<p><img src="https://github.com/fonnesbeck/bayesian_marcel/blob/main/assets/hardhit.jpeg?raw=true" alt=""></p>
+<p><strong>Image: mlb.com</strong></p>
+<h2 id="data-preparation">Data Preparation</h2><p>It's generally pretty easy to get your hands on baseball data. We will use the <code>pybaseball</code> package to obtain the data that we need for this model. The package provides a convenient interface to the Statcast data, which contains detailed player statistics for each season.</p>
+<p>Since MARCEL models require three seasons of data, we will use hard hit rates for years 2020 trhough 2022 to fit values observed in 2023, and then use the resulting parameter estimates to predict the 2024 rate from seasons 2021 through 2023. Therefore, we will query all batter data from 2020 through the games in 2024 at the time of this writing.</p>
+<div class="hll"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pymc</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">arviz</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">az</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pybaseball</span><span class="w"> </span><span class="kn">import</span> <span class="n">batting_stats</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">)</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">batting_stats</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">2024</span><span class="p">,</span> <span class="n">qual</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">hard_hit_subset</span> <span class="o">=</span> <span class="n">data</span><span class="p">[[</span><span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Season&quot;</span><span class="p">,</span> <span class="s2">&quot;Team&quot;</span><span class="p">,</span> <span class="s2">&quot;Age&quot;</span><span class="p">,</span> <span class="s2">&quot;HardHit&quot;</span><span class="p">,</span> <span class="s2">&quot;Events&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+<p>So, we will be using years 2020 to 2022 to fit to 2023 outcomes, where the target variable is observed hard hits (<code>HardHit</code>). The sample size will be the corresponding number of batted balls (<code>Events</code>) in each year.</p>
+<p>For convenience, we are using players who have complete data over all 4 seasons. Incidentally, it would be easy to impute missing data to allow for the inclusion of players with partial data, but we are trying to keep things simple!</p>
+<p>We need to do a little bit of data processing. Specifically, we need to pivot the data from long- to wide-format so that we have a row for each batter and columns representing each year of data.</p>
+<div class="hll"><pre><span></span><span class="n">hard_hit_by_season</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">hard_hit_subset</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Name&#39;</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Events&quot;</span><span class="p">,</span> <span class="s2">&quot;HardHit&quot;</span><span class="p">,</span> <span class="s2">&quot;Age&quot;</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Season&#39;</span><span class="p">])</span>
+    <span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;HardHit&#39;</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">2024</span><span class="p">)])</span>
+<span class="p">)</span>
+<span class="n">hard_hit_by_season</span><span class="p">[(</span><span class="s1">&#39;Age&#39;</span><span class="p">,</span> <span class="mi">2024</span><span class="p">)]</span> <span class="o">=</span> <span class="n">hard_hit_by_season</span><span class="p">[(</span><span class="s1">&#39;Age&#39;</span><span class="p">,</span> <span class="mi">2023</span><span class="p">)]</span> <span class="o">+</span> <span class="mi">1</span>
+</pre></div>
+<h2 id="model-formulation">Model formulation</h2><p>Let's start by creating a PyMC <code>Model</code> and adding our data to it. Rather than just using NumPy arrays or pandas DataFrames, creating <code>Data</code> nodes in our model graph will permit us to easily generate predictions for new data after we fit the model.</p>
+<div class="hll"><pre><span></span><span class="n">fit_seasons</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">2021</span><span class="p">,</span> <span class="mi">2022</span><span class="p">]</span>
+
+<span class="n">coords</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;batter&#39;</span><span class="p">:</span> <span class="n">hard_hit_by_season</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> 
+    <span class="s1">&#39;season&#39;</span><span class="p">:</span> <span class="n">fit_seasons</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">)</span> <span class="k">as</span> <span class="n">marcel</span><span class="p">:</span>
+
+    <span class="n">events_x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="s2">&quot;events_x&quot;</span><span class="p">,</span> <span class="n">hard_hit_by_season</span><span class="p">[</span><span class="s2">&quot;Events&quot;</span><span class="p">][</span><span class="n">fit_seasons</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+    <span class="n">hard_hit_x</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="s2">&quot;hard_hit_x&quot;</span><span class="p">,</span> <span class="n">hard_hit_by_season</span><span class="p">[</span><span class="s2">&quot;HardHit&quot;</span><span class="p">][</span><span class="n">fit_seasons</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+    <span class="n">age_y</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="s2">&quot;age_y&quot;</span><span class="p">,</span> <span class="n">hard_hit_by_season</span><span class="p">[</span><span class="s2">&quot;Age&quot;</span><span class="p">][</span><span class="mi">2023</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+    <span class="n">events_y</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="s2">&quot;events_y&quot;</span><span class="p">,</span> <span class="n">hard_hit_by_season</span><span class="p">[</span><span class="s2">&quot;Events&quot;</span><span class="p">][</span><span class="mi">2023</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+    <span class="n">hard_hit_y</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="s2">&quot;hard_hit_y&quot;</span><span class="p">,</span> <span class="n">hard_hit_by_season</span><span class="p">[</span><span class="s2">&quot;HardHit&quot;</span><span class="p">][</span><span class="mi">2023</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+</pre></div>
+<p>Let's start with the <strong>mean regression</strong> component of the model.</p>
+<p>If we look at the distribution of empirical rates in the dataset, we can see a few issues that can largely be associated with small sample sizes: several zero and one counts from players with only a handfull of batted balls, and generally longer tails on both sides with unsustainable values.</p>
+<div class="hll"><pre><span></span><span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">&quot;HardHit%&quot;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">trim</span><span class="o">=</span><span class="kc">True</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_11_0.png" alt="png"></p>
+<p>In the original MARCEL model, Tango dealt with this problem by calculating a weighted average of each player's observed data and the league average. Here, we will use a <strong>hierarchical model</strong> to partially pool the data according to the relative quantity of data for each player-season. Since we are modeling the number of hard hits per batted balls, a binomial sampling distribution with beta-distributed rates is appropriate.</p>
+<p>As we were told that the league average hard hit rate is around 35 percent, we can take advantage of the <strong>mean-variance parameterization</strong> of the beta distribution in PyMC:</p>
+<p>$$\Large p_i \sim \text{Beta}(\mu=\mu_p, \sigma=\sigma_p)$$</p>
+<p>Then, we can assign a weakly-informative priors to $\mu_p$ and $\sigma_p$:</p>
+<p>$$\Large \mu_p \sim \text{Beta}(\mu=0.35, \sigma=0.2)$$
+$$\Large \sigma_p \sim \text{Uniform}(0, 0.5)$$</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">marcel</span><span class="p">:</span>
+
+    <span class="c1"># Empirical rates, regressed to mean with beta-binomial</span>
+    <span class="n">mu_p</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Beta</span><span class="p">(</span><span class="s2">&quot;mu_p&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.35</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+    <span class="n">sigma_p</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">&quot;sigma_p&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Beta</span><span class="p">(</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu_p</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma_p</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;batter&quot;</span><span class="p">,</span> <span class="s2">&quot;season&quot;</span><span class="p">))</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">Binomial</span><span class="p">(</span><span class="s2">&quot;rate_like&quot;</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">events_x</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">hard_hit_x</span><span class="p">)</span>
+</pre></div>
+<p>The core of the Marcel projection model is the weighted averaging of previous seaons' observations. While the original model is a hard-coded a 5/4/3 weighting scheme, we will estimate optimal weights from the data, which is straightforward in a Bayesian framework. Thus, we are looking to project $p_i^{(t-1)}$ via:</p>
+<p>$$\Large p_i^{(t+1)} = w_0 p_i^{(t)} + w_1 p_i^{(t-1)} + w_2 p_i^{(t-2)}$$</p>
+<p>where the $p_i$ are the latent partially-pooled rates from above.</p>
+<p>The set of weights $w$, in turn, are modeled with a Dirichlet distribution:</p>
+<p>$$\Large {w_0, w_1, w_2}\sim \text{Dirichlet}(\phi)$$</p>
+<p>A Dirichlet distribution is a generalization of the beta distribution, which is a distribution over a probability simplex of dimension $k$. In our case, $k=3$ and in keeping with the spirit of the original model, we will allocate hyperpriors $\phi = (5, 4, 3)$ as the concentration parameters of the three values.</p>
+<!-- For pitcher $i$ having observed values of some quantity of interest in three consecutive years $y_i^{(t)}, y_i^{(t-1)}, y_i^{(t-2)}$ we are predicting $y_i^{(t+1)}$ via:
+
+$$\theta_i^{(t+1)} = \mu_i + w_0 (\theta_i^{(t)}) + w_1 (\theta_i^{(t-1)}) + w_2 (\theta_i^{(t-2)}) + $$
+
+where $\{w_0, w_1, w_2\}\sim \text{Dirichlet}(\phi)$ are constrained to be ordered and the $\theta_i$ are partially pooled observations to regress extreme values. For Gaussian data, the likelihood is:
+
+$$y_i^{(t)} \sim N(\theta_i^{(t)}, \sigma)$$
+
+For other types of data, this likelihood may be binomial or Poisson.
+
+
+
+All inputs are automatically standardized to aid in convergence. -->
+
+
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">marcel</span><span class="p">:</span>
+
+    <span class="c1"># Marcel weights</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Dirichlet</span><span class="p">(</span>
+        <span class="s2">&quot;w&quot;</span><span class="p">,</span>
+        <span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]),</span>
+        <span class="n">dims</span><span class="o">=</span><span class="s1">&#39;season&#39;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Raw projection</span>
+    <span class="n">p_proj</span> <span class="o">=</span> <span class="n">p</span> <span class="o">@</span> <span class="n">w</span>
+</pre></div>
+<p>Finally, we implement the aging effect as a simple triangular (piecewise-linear) model on the logit scale, where the hard hit rate increases up to some "peak" age, and then decreases at the same rate thereafter. Both the value of the slope and the peak age are parameters of the model that we can estimate.</p>
+<p>$$\Large \alpha_i^{(t+1)} =  \beta (a_0 - a_i^{(t+1)})$$
+$$\Large \beta \sim N(0, 1)$$
+$$\Large a_0 \sim \text{Uniform}(a_{\min}, a_{\max})$$</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">marcel</span><span class="p">:</span>
+
+    <span class="c1"># Coefficient for triangular aging</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;beta&quot;</span><span class="p">)</span>
+    <span class="c1"># Estimate of peak age</span>
+    <span class="n">peak_age</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">&quot;peak_age&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">Age</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">data</span><span class="o">.</span><span class="n">Age</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>    
+
+    <span class="n">age_effect</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="p">(</span><span class="n">peak_age</span> <span class="o">-</span> <span class="n">age_y</span><span class="p">)</span>
+</pre></div>
+<p>So, the projected rate is the age-adjusted weighted average of the latent rates over the three-year period, appropriately transformed to stay on the unit interval (see below).</p>
+<p>Since we are modeling binary events occuring from a fixed number of chances, the binomial distribution is an obvious likelihood function.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">marcel</span><span class="p">:</span>
+
+    <span class="n">projected_rate</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span>
+        <span class="s2">&quot;projected_rate&quot;</span><span class="p">,</span>
+        <span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">invlogit</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">logit</span><span class="p">(</span><span class="n">p_proj</span><span class="p">)</span> <span class="o">+</span> <span class="n">age_effect</span><span class="p">),</span>
+        <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;batter&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># # Likelihood of observed hard hits</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">Binomial</span><span class="p">(</span><span class="s2">&quot;prediction&quot;</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">events_y</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">projected_rate</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">hard_hit_y</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;batter&quot;</span><span class="p">)</span>
+</pre></div>
+<p>Before we go ahead and fit the model, let's look at the model graph. It serves as a useful graphical summary of the model, and allows you to verify that you have specified the model correctly.</p>
+<p><img src="https://github.com/fonnesbeck/bayesian_marcel/blob/main/assets/dag.png?raw=true" alt=""></p>
+<p>The shaded nodes are related to observed quantities in our problem, specifically the two likelihoods (ovals) and the data itself (rectangles). Open circles are the unboserved random variables, while the open rectangle is the expected hard hit rate, a deterministic sum of other model components. Enclosing <em>plates</em> denote vector-valued nodes, here confirming that we have included 332 players over 3 seasons in our analysis.</p>
+<p>We will estimate the model using Markov chain Monte Carlo (MCMC) sampling, specifically the No-U-Turn Sampler (NUTS) algorithm, as implemented in PyMC v5. It should only take a few seconds to sample.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">marcel</span><span class="p">:</span>
+    <span class="n">trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+</pre></div>
+<pre><code>Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [mu_p, sigma_p, p, w, beta, peak_age]
+
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 29 seconds.
+The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+</code></pre>
+<p>You want to keep an eye on this output for any warning messages that may require additional intervention in order to improve the model. This example should run fine under the default arguments.</p>
+<h2 id="model-checking">Model Checking</h2><p>Even in the absence of warnings, its always important to check your model. In model checking, we want to know at least two things: did the model fitting algorithm work, and does the model fit the data adequately?</p>
+<p>For the first part, we want to do <strong>convergence diagnostics</strong> because we have used a stochastic sampling approach (MCMC) to fit the model. That is, we want some assurance that the sampler <em>converged</em> to what the model specifies as the posterior distribution. This implies that the algorithm has had a chance to adequately explore the parameter space of the model.</p>
+<p>The <code>az.plot_energy</code> function will produce an <strong>energy plot</strong> of the fiitted model that gives a visual indication as to whether the model has been able to freely explore the parameter space. You will see two distributions: a marginal energy distribution and an energy transition distribution. It's not important to understand exactly what these are, but you are looking for these two distribtions to mostly overlap, as they do below. When they do not, the difference is usually rather dramatic.</p>
+<div class="hll"><pre><span></span><span class="n">az</span><span class="o">.</span><span class="n">plot_energy</span><span class="p">(</span><span class="n">trace</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_24_0.png" alt="png"></p>
+<p>Another useful convergence diagnostic is the <strong>R-hat statistic</strong>, also known as the potential scale reduction factor. It compares the variance of chain means to the mean of chain variances across multiple chains, with values close to 1 indicating good convergence. If R-hat is substantially greater than 1, it suggests that the chains have not yet converged to a common distribution, indicating that more iterations may be needed.</p>
+<p>The sampler will return warnings if it detects large R-hat values for any of the parameters, but we can manually check them using the <code>rhat</code> function:</p>
+<div class="hll"><pre><span></span><span class="n">az</span><span class="o">.</span><span class="n">rhat</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+</pre></div>
+<div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg>
+<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
+ *
+ */
+
+:root {
+  --xr-font-color0: var(--jp-content-font-color0, rgba(0, 0, 0, 1));
+  --xr-font-color2: var(--jp-content-font-color2, rgba(0, 0, 0, 0.54));
+  --xr-font-color3: var(--jp-content-font-color3, rgba(0, 0, 0, 0.38));
+  --xr-border-color: var(--jp-border-color2, #e0e0e0);
+  --xr-disabled-color: var(--jp-layout-color3, #bdbdbd);
+  --xr-background-color: var(--jp-layout-color0, white);
+  --xr-background-color-row-even: var(--jp-layout-color1, white);
+  --xr-background-color-row-odd: var(--jp-layout-color2, #eeeeee);
+}
+
+html[theme=dark],
+body[data-theme=dark],
+body.vscode-dark {
+  --xr-font-color0: rgba(255, 255, 255, 1);
+  --xr-font-color2: rgba(255, 255, 255, 0.54);
+  --xr-font-color3: rgba(255, 255, 255, 0.38);
+  --xr-border-color: #1F1F1F;
+  --xr-disabled-color: #515151;
+  --xr-background-color: #111111;
+  --xr-background-color-row-even: #111111;
+  --xr-background-color-row-odd: #313131;
+}
+
+.xr-wrap {
+  display: block !important;
+  min-width: 300px;
+  max-width: 700px;
+}
+
+.xr-text-repr-fallback {
+  /* fallback to plain text repr when CSS is not injected (untrusted notebook) */
+  display: none;
+}
+
+.xr-header {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: solid 1px var(--xr-border-color);
+}
+
+.xr-header > div,
+.xr-header > ul {
+  display: inline;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.xr-obj-type,
+.xr-array-name {
+  margin-left: 2px;
+  margin-right: 10px;
+}
+
+.xr-obj-type {
+  color: var(--xr-font-color2);
+}
+
+.xr-sections {
+  padding-left: 0 !important;
+  display: grid;
+  grid-template-columns: 150px auto auto 1fr 20px 20px;
+}
+
+.xr-section-item {
+  display: contents;
+}
+
+.xr-section-item input {
+  display: none;
+}
+
+.xr-section-item input + label {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-item input:enabled + label {
+  cursor: pointer;
+  color: var(--xr-font-color2);
+}
+
+.xr-section-item input:enabled + label:hover {
+  color: var(--xr-font-color0);
+}
+
+.xr-section-summary {
+  grid-column: 1;
+  color: var(--xr-font-color2);
+  font-weight: 500;
+}
+
+.xr-section-summary > span {
+  display: inline-block;
+  padding-left: 0.5em;
+}
+
+.xr-section-summary-in:disabled + label {
+  color: var(--xr-font-color2);
+}
+
+.xr-section-summary-in + label:before {
+  display: inline-block;
+  content: '►';
+  font-size: 11px;
+  width: 15px;
+  text-align: center;
+}
+
+.xr-section-summary-in:disabled + label:before {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-summary-in:checked + label:before {
+  content: '▼';
+}
+
+.xr-section-summary-in:checked + label > span {
+  display: none;
+}
+
+.xr-section-summary,
+.xr-section-inline-details {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.xr-section-inline-details {
+  grid-column: 2 / -1;
+}
+
+.xr-section-details {
+  display: none;
+  grid-column: 1 / -1;
+  margin-bottom: 5px;
+}
+
+.xr-section-summary-in:checked ~ .xr-section-details {
+  display: contents;
+}
+
+.xr-array-wrap {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 20px auto;
+}
+
+.xr-array-wrap > label {
+  grid-column: 1;
+  vertical-align: top;
+}
+
+.xr-preview {
+  color: var(--xr-font-color3);
+}
+
+.xr-array-preview,
+.xr-array-data {
+  padding: 0 5px !important;
+  grid-column: 2;
+}
+
+.xr-array-data,
+.xr-array-in:checked ~ .xr-array-preview {
+  display: none;
+}
+
+.xr-array-in:checked ~ .xr-array-data,
+.xr-array-preview {
+  display: inline-block;
+}
+
+.xr-dim-list {
+  display: inline-block !important;
+  list-style: none;
+  padding: 0 !important;
+  margin: 0;
+}
+
+.xr-dim-list li {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}
+
+.xr-dim-list:before {
+  content: '(';
+}
+
+.xr-dim-list:after {
+  content: ')';
+}
+
+.xr-dim-list li:not(:last-child):after {
+  content: ',';
+  padding-right: 5px;
+}
+
+.xr-has-index {
+  font-weight: bold;
+}
+
+.xr-var-list,
+.xr-var-item {
+  display: contents;
+}
+
+.xr-var-item > div,
+.xr-var-item label,
+.xr-var-item > .xr-var-name span {
+  background-color: var(--xr-background-color-row-even);
+  margin-bottom: 0;
+}
+
+.xr-var-item > .xr-var-name:hover span {
+  padding-right: 5px;
+}
+
+.xr-var-list > li:nth-child(odd) > div,
+.xr-var-list > li:nth-child(odd) > label,
+.xr-var-list > li:nth-child(odd) > .xr-var-name span {
+  background-color: var(--xr-background-color-row-odd);
+}
+
+.xr-var-name {
+  grid-column: 1;
+}
+
+.xr-var-dims {
+  grid-column: 2;
+}
+
+.xr-var-dtype {
+  grid-column: 3;
+  text-align: right;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-preview {
+  grid-column: 4;
+}
+
+.xr-index-preview {
+  grid-column: 2 / 5;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-name,
+.xr-var-dims,
+.xr-var-dtype,
+.xr-preview,
+.xr-attrs dt {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 10px;
+}
+
+.xr-var-name:hover,
+.xr-var-dims:hover,
+.xr-var-dtype:hover,
+.xr-attrs dt:hover {
+  overflow: visible;
+  width: auto;
+  z-index: 1;
+}
+
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  display: none;
+  background-color: var(--xr-background-color) !important;
+  padding-bottom: 5px !important;
+}
+
+.xr-var-attrs-in:checked ~ .xr-var-attrs,
+.xr-var-data-in:checked ~ .xr-var-data,
+.xr-index-data-in:checked ~ .xr-index-data {
+  display: block;
+}
+
+.xr-var-data > table {
+  float: right;
+}
+
+.xr-var-name span,
+.xr-var-data,
+.xr-index-name div,
+.xr-index-data,
+.xr-attrs {
+  padding-left: 25px !important;
+}
+
+.xr-attrs,
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  grid-column: 1 / -1;
+}
+
+dl.xr-attrs {
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 125px auto;
+}
+
+.xr-attrs dt,
+.xr-attrs dd {
+  padding: 0;
+  margin: 0;
+  float: left;
+  padding-right: 10px;
+  width: auto;
+}
+
+.xr-attrs dt {
+  font-weight: normal;
+  grid-column: 1;
+}
+
+.xr-attrs dt:hover span {
+  display: inline-block;
+  background: var(--xr-background-color);
+  padding-right: 10px;
+}
+
+.xr-attrs dd {
+  grid-column: 2;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.xr-icon-database,
+.xr-icon-file-text2,
+.xr-no-icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1em;
+  height: 1.5em !important;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
+</style><pre class='xr-text-repr-fallback'>&lt;xarray.Dataset&gt; Size: 56B
+Dimensions:         ()
+Data variables:
+    beta            float64 8B 1.001
+    mu_p            float64 8B 1.001
+    p               float64 8B 1.011
+    peak_age        float64 8B 1.002
+    projected_rate  float64 8B 1.007
+    sigma_p         float64 8B 1.0
+    w               float64 8B 1.005</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-d6d07627-1d3c-4638-b349-fca5ef30bc39' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-d6d07627-1d3c-4638-b349-fca5ef30bc39' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-9c8f9087-ee50-41ae-84ef-5ea5538669c6' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-9c8f9087-ee50-41ae-84ef-5ea5538669c6' class='xr-section-summary'  title='Expand/collapse section'>Coordinates: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'></ul></div></li><li class='xr-section-item'><input id='section-35325269-b377-4f88-a121-904f5dcd9539' class='xr-section-summary-in' type='checkbox'  checked><label for='section-35325269-b377-4f88-a121-904f5dcd9539' class='xr-section-summary' >Data variables: <span>(7)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>beta</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.001</div><input id='attrs-a1300fc2-b689-4040-b823-92984ddd1130' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-a1300fc2-b689-4040-b823-92984ddd1130' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-88c2f219-0ee8-4434-ba77-fbfbd2cbcbeb' class='xr-var-data-in' type='checkbox'><label for='data-88c2f219-0ee8-4434-ba77-fbfbd2cbcbeb' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array(1.00059156)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>mu_p</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.001</div><input id='attrs-018b7e34-bc72-4cfe-9ce8-f32958f516ed' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-018b7e34-bc72-4cfe-9ce8-f32958f516ed' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-37e1cbf4-af3d-4eab-a0f4-307c27c26049' class='xr-var-data-in' type='checkbox'><label for='data-37e1cbf4-af3d-4eab-a0f4-307c27c26049' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array(1.00091256)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>p</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.011</div><input id='attrs-0f0b6d82-44b4-47b6-85ac-41e035a2ea8a' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-0f0b6d82-44b4-47b6-85ac-41e035a2ea8a' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-09dbe0c5-285d-4bae-a486-865489fc3432' class='xr-var-data-in' type='checkbox'><label for='data-09dbe0c5-285d-4bae-a486-865489fc3432' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array(1.01080222)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>peak_age</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.002</div><input id='attrs-2c825340-bcad-4dbb-a7fa-db87e365be88' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-2c825340-bcad-4dbb-a7fa-db87e365be88' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-c5b5328a-3e7e-460d-9306-6a3b1957cbef' class='xr-var-data-in' type='checkbox'><label for='data-c5b5328a-3e7e-460d-9306-6a3b1957cbef' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array(1.00228717)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>projected_rate</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.007</div><input id='attrs-9bbed7d6-7c24-443d-9136-7ec77175dc19' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-9bbed7d6-7c24-443d-9136-7ec77175dc19' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-66a6c381-9c43-4b50-abeb-18387e507b89' class='xr-var-data-in' type='checkbox'><label for='data-66a6c381-9c43-4b50-abeb-18387e507b89' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array(1.00689678)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>sigma_p</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.0</div><input id='attrs-bbc5ce2b-a04d-415f-aef1-4fe8f5bf6708' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-bbc5ce2b-a04d-415f-aef1-4fe8f5bf6708' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-650a452d-ce23-42bf-a510-bd636c9cd488' class='xr-var-data-in' type='checkbox'><label for='data-650a452d-ce23-42bf-a510-bd636c9cd488' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array(1.00011266)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>w</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>1.005</div><input id='attrs-038e1742-9e53-4f15-a334-30c1c789c925' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-038e1742-9e53-4f15-a334-30c1c789c925' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d355d062-6f70-4309-9337-2e03d0c02a5a' class='xr-var-data-in' type='checkbox'><label for='data-d355d062-6f70-4309-9337-2e03d0c02a5a' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array(1.0052571)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-d9f30336-7216-4711-92c3-c36f26d984ea' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-d9f30336-7216-4711-92c3-c36f26d984ea' class='xr-section-summary'  title='Expand/collapse section'>Indexes: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'></ul></div></li><li class='xr-section-item'><input id='section-8e13fde7-9f8c-404b-a997-c16232f42340' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-8e13fde7-9f8c-404b-a997-c16232f42340' class='xr-section-summary'  title='Expand/collapse section'>Attributes: <span>(0)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'></dl></div></li></ul></div></div><p>Despite the warning during sampling, these all look fine -- one value is borderline, but nothing to worry about.</p>
+<p>If we are satisfied that the model has converged, we can move on to checking the model fit. This is largely the same idea as a model <strong>calibration</strong> check: seeing whether the model predictions correspond adequately to observed values. Since we have a Bayesian model, we can use <strong>posterior predictive checks</strong> for this. This involves generating simulated datasets from the fitted model, and comparing the simulations to the actual observed data (in this case, the data used to fit the model). If the model fits, we would expect the observed data to be indistinguishable from some random draw from the model.</p>
+<div class="hll"><pre><span></span><span class="k">with</span> <span class="n">marcel</span><span class="p">:</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">extend_inferencedata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">az</span><span class="o">.</span><span class="n">plot_ppc</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">False</span><span class="p">);</span>
+</pre></div>
+<pre><code>Sampling: [prediction, rate_like]
+</code></pre>
+<p><img src="output_28_4.png" alt="png"></p>
+<p>This doesn't look bad -- the observed data behaves like just another sample from the model.</p>
+<h2 id="parameter-estimates">Parameter Estimates</h2><p>Having confirmed the fit of the model, we can move on to looking at some of the latent parameters and seeing if they make sense.</p>
+<p>The estimated set of weights decline in magnitude with time, as we would expect. They correspond approximately to a 6/2/1 weighting, which gives the most recent season much more influence relative to the original MARCEL model and its 5/4/3 weighting. Recall that we used 5/4/3 as a prior weighting, but the evidence in the data shifted the weights away from this starting point.</p>
+<div class="hll"><pre><span></span><span class="n">az</span><span class="o">.</span><span class="n">plot_forest</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_30_0.png" alt="png"></p>
+<p>From the posterior estimates below, we see that the mean hard hit rate is around 39%. Realistically, this value is probably best regarded as temporally dynamic, but we are resisting the urge to expand the model right now.</p>
+<div class="hll"><pre><span></span><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;mu_p&#39;</span><span class="p">,</span> <span class="s1">&#39;sigma_p&#39;</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span>
+</pre></div>
+<p><img src="output_32_0.png" alt="mu and sigma"></p>
+<p>What about the aging effect? The model estimates "peak" hard-hit age to be approximately 28 years (albeit with a wide range of posterior uncertainty), which seems a reasonable inflection point. The corresponding <code>beta</code> parameter is positive, indicating a positive slope at ages below 28 and negative above.</p>
+<div class="hll"><pre><span></span><span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;peak_age&#39;</span><span class="p">,</span> <span class="s1">&#39;beta&#39;</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span>
+</pre></div>
+<p><img src="output_34_0.png" alt="png"></p>
+<h2 id="generating-projections">Generating Projections</h2><p>Once we have checked the model and are comfortable with the evaluation, we can use it to generate projections for 2024, using input data from 2021 through 2023. Here, we are not estimating anything; we are merely applying the fitted model parameters to a new set of inputs.</p>
+<p>In PyMC, the <code>set_data</code> function is used to replace existing data in the model with new data, after which we can use the <code>sample_posterior_predictive</code> function to generate predictions. This performs <strong>forward</strong> sampling, drawing values from the posterior distributions we have estimated and using them to simulate projections. For this model, predictive sampling should be almost instantaneous.</p>
+<div class="hll"><pre><span></span><span class="n">pred_seasons</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2021</span><span class="p">,</span> <span class="mi">2022</span><span class="p">,</span> <span class="mi">2023</span><span class="p">]</span>
+
+<span class="k">with</span> <span class="n">marcel</span><span class="p">:</span>
+    <span class="n">pm</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span>
+        <span class="p">{</span><span class="s1">&#39;age_y&#39;</span><span class="p">:</span> <span class="n">hard_hit_by_season</span><span class="p">[</span><span class="s2">&quot;Age&quot;</span><span class="p">][</span><span class="mi">2024</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+         <span class="s1">&#39;hard_hit_x&#39;</span><span class="p">:</span> <span class="n">hard_hit_by_season</span><span class="p">[</span><span class="s2">&quot;HardHit&quot;</span><span class="p">][</span><span class="n">pred_seasons</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+         <span class="s1">&#39;events_x&#39;</span><span class="p">:</span> <span class="n">hard_hit_by_season</span><span class="p">[</span><span class="s2">&quot;Events&quot;</span><span class="p">][</span><span class="n">pred_seasons</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="n">pm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;projected_rate&#39;</span><span class="p">],</span> <span class="n">predictions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extend_inferencedata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+<p>Let's take a peek and see how the model performs. Below are predictive intervals for each player's expected hard hit rate in 2024, along with the observed rate (which, keep in mind, is only for about a half-season). To help evaluate the predictions, the observed rate is color-coded by sample size -- darker red indicates a larger sample size.</p>
+<p>The model performs well, considering how stripped-down it is. The weighted averaging and partial pooling components have done a nice job of protecting the model from overfitting. The sharing of information via the hierarchical component also means that the predictive intervals are narrow, even for players with relatively sparse data.</p>
+<p>If we focus on the players with substantive sample size (<em>i.e.</em> those with dark red data points), we can potentially identify hitters that are over- or under-performing. Certainly, Juan Soto, Ketel Marte, and Marcell Ozuna are having great seaons so far, while Whitt Merrifield was released by the Phillies shortly before this writing.</p>
+<div class="hll"><pre><span></span><span class="n">p_obs</span> <span class="o">=</span> <span class="p">(</span><span class="n">hard_hit_by_season</span><span class="p">[</span><span class="s1">&#39;HardHit&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">hard_hit_by_season</span><span class="p">[</span><span class="s1">&#39;Events&#39;</span><span class="p">])[</span><span class="mi">2024</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">axes</span> <span class="o">=</span> <span class="n">az</span><span class="o">.</span><span class="n">plot_forest</span><span class="p">(</span><span class="n">trace</span><span class="o">.</span><span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;projected_rate&#39;</span><span class="p">],</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">72</span><span class="p">))</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">p_obs</span><span class="o">.</span><span class="n">values</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_yticks</span><span class="p">(),</span> <span class="n">c</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">hard_hit_by_season</span><span class="o">.</span><span class="n">Events</span><span class="p">[</span><span class="mi">2024</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Reds&#39;</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_38_0.png" alt="projections"></p>
+<p>A scatter plot of projections vs observtions (shaded proportionally to sample size) shows the model to be reasonably well-calibrated.</p>
+<div class="hll"><pre><span></span><span class="n">p_proj</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;projected_rate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;chain&#39;</span><span class="p">,</span> <span class="s1">&#39;draw&#39;</span><span class="p">))</span>
+<span class="n">n</span> <span class="o">=</span> <span class="n">hard_hit_by_season</span><span class="p">[</span><span class="s2">&quot;Events&quot;</span><span class="p">][</span><span class="mi">2024</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+<span class="n">p_obs</span> <span class="o">=</span>  <span class="n">hard_hit_by_season</span><span class="p">[</span><span class="s2">&quot;HardHit&quot;</span><span class="p">][</span><span class="mi">2024</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span> <span class="o">/</span> <span class="n">n</span>
+
+<span class="n">projection</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="n">p_proj</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">p_obs</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">regplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;projection&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;observed&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">projection</span><span class="p">,</span> <span class="n">scatter_kws</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;alpha&#39;</span><span class="p">:</span><span class="n">n</span><span class="o">/</span><span class="n">n</span><span class="o">.</span><span class="n">max</span><span class="p">()})</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axline</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">slope</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">despine</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">trim</span><span class="o">=</span><span class="kc">True</span><span class="p">);</span>
+</pre></div>
+<p><img src="output_40_0.png" alt="png"></p>
+<h2 id="when-things-go-wrong">When Things Go Wrong</h2><p>With such a simple model that can be applied to virtually any metric, inevitably things will go wrong with certain datasets. The first place to look for symptoms of a problem are in the warnings during model fitting. For example, you may read something like the following:</p>
+<pre><code>UserWarning: Chain 0 contains 6 diverging samples after tuning. Increase `target_accept` or reparameterize.
+</code></pre>
+<p>This means that the model is (occasionally) having trouble sampling from the model, which results in a <strong>diverging</strong> sample. If this happens only a few times things are probably okay, but if there are hundreds or even entirely divergent samples, you will not be able to reliably use inference from the model.</p>
+<p>The underlying PyMC model tries to give advice when it can: while you cannot reparameterize this model, it is possible to change the <code>target_accept</code> parameter passed to <code>sample</code>.</p>
+<div class="hll"><pre><span></span><span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">target_accept</span><span class="o">=</span><span class="mf">0.99</span><span class="p">)</span>
+</pre></div>
+<p><code>target_accept</code> is the target acceptance rate of the MCMC algorithm, which in PyMC is 0.8 by default. For difficult models, upping this value to 0.9, 0.95 or 0.99 can sometimes solve this issue. Note that higher acceptance rates result in longer runtimes, since it involves taking more steps at every iteration of the model.</p>
+<p>If you run into issues with convergence--for example, if the energy plots do not look slimiar--the easiest remedy is to run the MCMC model longer by  adding more <strong>tuning steps</strong>. The default number is 1000, but you can change this with the <code>tune</code> argument.</p>
+<div class="hll"><pre><span></span><span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">tune</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+</pre></div>
+<p>Of course, there will be some scenarios where a simple, general model like this will just not work. If there are issues with the data, or the data do not conform to a simple statistical likelihood like a binomial, then you may need to build a bespoke model to account for the particular characteristics of the quantity you are trying to project.</p>
+<h2 id="conclusions">Conclusions</h2><p>In one sense, the MARCEL model represents the core of almost any viable player projection model: it uses past performance to predict future performance, regresses projections to some population mean, and adjusts for the effects of aging. While I used it here to project hard hit rate via a binomial sampling process, we could just as easily have modeled pitcher fastball velocity with essentially the same model, swapping out the binomial likelhood for a Gaussian. For that matter, it could have been used to project <strong>wide receiver sprint speed in football</strong> or <strong>goalie save percentage in ice hockey</strong>.</p>
+<p>Re-casting MARCEL in the Bayesian paradigm proved to be a straightforward enhancement that preserved the overall simplicity of the original model. It gave us <strong>a natural way of regressing projections to the mean, a principled was of weighting past performance, and a probabilistic measure of uncertainty in our projections</strong>. We used the same ingredients for the model, merely implementing them in a different way.</p>
+<p>Of course, the Bayesian monkey might not be the best choice for all of your projection needs. Clearly, we've left a lot on the table, and this is by design. It is best to think of MARCEL (Bayesian or otherwise) as a starting point in the development of a performant projection system. With relatively little effort (or additional data), the model could be expanded to account for obvious shortcomings. For example:</p>
+<ul>
+<li>Aging curves for most performance time series are not triangular, as we've assumed here. One might, for example, swap in a <strong>quadratic</strong> or some other <strong>polynomial</strong> function, or get fancy and use a <strong>spline</strong>. </li>
+<li>Further, there is often age-related <strong>selection bias</strong> at play, whereby older players are not representative of the general population at that age, since only top veterans tend to play into their late thirties and forties. Some type of <strong>censoring model</strong> can be used to account for this.</li>
+<li>Performance can often be influenced by location. With sufficiently large data sets, its possible to estimate <strong>venue effects</strong> that can be used to adjust projections to be venue-neutral. </li>
+<li>The weighting scheme implemented by MARCEL is essentially a third-order autoregressive model. It may be worth considering alternative time series models, depending on the metric in question. For example, there may be processes operating at multiple time scales that may influence performance, in which case Gaussian processes can be effective for describing them.</li>
+</ul>
+<p>The workflow for constructing sports projection models is really no different than what we recommend for other types of models. Rather than attempting to build a feature-complete model at the outset, start with a baseline model that is easy to understand and implement, then expand according to how that model falls short relative to the goals of the project. The Bayesian MARCEL provides a reasonable starting point for a baseball projection system, not unlike the ordinary least squares model does for regression problems.</p>
+<p>This is the sort of thing we do here at PyMC Labs -- squeezing extra value and insights from your data using the power of probabilistic programming! Feel free to <a href="mailto:info@pymc-labs.com">get in touch</a> to chat about our approach to sports analytics, if you think we could be helpful 😉
+If you want to learn more about <strong>hierarchical modeling</strong> in particular, <a href="https://www.pymc.io/projects/examples/en/latest/generalized_linear_models/multilevel_modeling.html">this free PyMC tutorial</a> is full of tips and tricks that you may find useful. <a href="https://learnbayesstats.com/">The "Learn Bayes Stats" podcast</a> also has a huge catalogue of technical episodes, or if you're more of a visual learner, <a href="https://www.intuitivebayes.com/">the Intuitive Bayes platform</a> has several high-quality courses.</p>
+
+	<!--THIS IS THE FOOTER OF THE BLOGPSOT-->
+	<hr> 
+		<!--div class="container"-->
+			<h2 class="font-roboto">Work with PyMC Labs</h2>
+			<p>If you are interested in seeing what we at PyMC Labs can do for you, then please email <a href="mailto:info@pymc-labs.com">info@pymc-labs.com</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity.
+
+We also run <a href="https://www.pymc-labs.com/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics.
+			</p>
+		<!--/div-->
+    
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBottom"
+                aria-controls="navbarBottom" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarBottom">
+                <ul class="navbar-nav ml-auto">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-brands fa-twitter"
+                                aria-hidden="true"></i>
+                            Twitter</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-brands fa-github"
+                                aria-hidden="true"></i>
+                            GitHub</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-brands fa-linkedin"
+                                aria-hidden="true"></i>
+                            LinkedIn</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-brands fa-youtube"
+                                aria-hidden="true"></i>
+                            YouTube</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-brands fa-meetup"
+                                aria-hidden="true"></i>
+                            Meetup</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                aria-hidden="true"></i>
+                            Newsletter</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/privacy-policy"><i class="fa fa-solid fa-lock"
+                                aria-hidden="true"></i>
+                            Privacy Policy</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/impressum"><i class="fa fa-solid fa-info-circle"
+                                aria-hidden="true"></i>
+                            Impressum</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+</body>
+
+</html>

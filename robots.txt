@@ -1,0 +1,12 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /login/
+Disallow: /private/
+
+User-agent: Googlebot
+Allow: /public/
+
+User-agent: Bingbot
+Allow: /public/
+
+Sitemap: http://pymc-labs.com/sitemap/

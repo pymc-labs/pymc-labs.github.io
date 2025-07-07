@@ -1,0 +1,434 @@
+<!doctype html><html lang="en">
+
+<head>
+    
+
+    <style media="screen">
+        body {
+            padding-top: 70px;
+            padding-bottom: 70px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            display: inline-block;
+            /* Ensures that the heading and the span are on the same line */
+            margin: 0;
+            /* Optional: Reset margin for better control */
+            position: relative;
+            /* Ensures that the span can be positioned relative to the heading */
+        }
+
+        .copy-span {
+            cursor: pointer;
+            /* Changes the cursor to a pointer when hovering over the # */
+            color: #81C240;
+            /* Sets the color of the # */
+            margin-left: 5px;
+            /* Adds some space between the heading text and the # */
+            font-size: 0.9em;
+            /* Adjusts the font size of the # to be slightly smaller relative to the heading */
+            visibility: hidden;
+            /* Initially hides the # */
+        }
+
+        h1:hover .copy-span,
+        h2:hover .copy-span,
+        h3:hover .copy-span,
+        .copy-span:hover {
+            visibility: visible;
+            text-decoration: none;
+            color: #81C240;
+            /* Makes the # visible when hovering over the heading or the span */
+        }
+    </style>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="../../static/css/custom_style.css?h=00853bf3">
+    <link rel="stylesheet" href="../../static/css/table_style.css?h=c677f945">
+
+    <!-- Highlight.js for syntax highlighting -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- Extra meta tags: social site cards, browser icons... -->
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+
+    <title>AI Innovation Lab: An agentic platform for transforming product development - PyMC Labs</title>
+
+    <!-- Open Graph -->
+    <meta name="twitter:card" content="summary">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/innovation-lab/" />
+    <meta property="og:title" content="AI Innovation Lab: An agentic platform for transforming product development - PyMC Labs" />
+    <meta property="og:description" content="" />
+    <meta property="og:image" content="https://pymc-labs.github.io/blog-posts/innovation-lab/cover.png" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@pymc_labs">
+    <meta name="twitter:url" content="https://pymc-labs.github.io/blog-posts/innovation-lab/">
+    <meta name="twitter:title" content="AI Innovation Lab: An agentic platform for transforming product development - PyMC Labs">
+    <meta name="twitter:description" content="">
+    <meta name="twitter:image" content="https://pymc-labs.github.io/blog-posts/innovation-lab/cover.png">
+
+    <link rel="canonical" href="">
+    <meta name="description" content="We are a Bayesian consulting firm specializing in data analysis and predictive modeling. Contact us today to learn how we can help your business.">
+    <meta name="keywords" content="Bayesian consulting, data analysis, predictive modeling">
+
+    <!-- Highlight.js for syntax highlighting -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+    <!-- <script>hljs.highlightAll();</script> -->
+
+    <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+    <!-- We use this to do syntax highlighting -->
+    <link rel="stylesheet" href="../../static/pygments.css">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Base URL of the page (removing any existing fragment part)
+            const baseURL = window.location.href.split('#')[0];
+            // Select all h3 elements within elements of class 'blogpost'
+            const h3Elements = document.querySelectorAll('h3, h2, h1');
+            h3Elements.forEach((element) => {
+                const copyAnchor = document.createElement('a');
+                copyAnchor.textContent = `#`;
+                copyAnchor.classList.add('copy-span'); // Add a class for styling
+                copyAnchor.setAttribute('href', baseURL+`#${element.id}`); // Set href attribute to a placeholder
+                copyAnchor.setAttribute('title', 'Copy URL to clipboard'); // Tooltip text
+                // Insert the anchor after the <h1>, <h2>, or <h3> element
+                element.appendChild(copyAnchor);
+            });
+        });
+    </script>
+
+    
+<script src="../../static/scripts/toggle_code.js?h=3a00c72f" defer></script>
+
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container">
+            <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+            <a class="navbar-brand" href="/"><img alt="logo" loading="eager" width="88" height="70" title="logo"
+                    class="navbar-logo" src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop"
+                aria-controls="navbarTop" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarTop">
+                <ul class="navbar-nav ml-auto">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                aria-hidden="true"></i>
+                            What we do</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                aria-hidden="true"></i>
+                            Products</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                aria-hidden="true"></i>
+                            Team</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                aria-hidden="true"></i>
+                            Clients</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                aria-hidden="true"></i>
+                            Workshops</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                aria-hidden="true"></i>
+                            Blog</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 blogpost">
+        <h2 class="font-roboto">AI Innovation Lab: An agentic platform for transforming product development</h2>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-6 author_name">
+                <small class="text-muted">AUTHORED BY</small>
+                <p class="font-bold">
+                    
+
+
+
+    
+
+
+
+    
+        Nina Rismal
+    
+
+
+
+                </p>
+            </div>
+            <div class="col-md-6 author_date">
+                <!-- <p>2025-06-02</p> -->
+                
+<small class="text-muted">DATE</small>
+<p class="font-lighter">2025-06-02</p>
+
+<!--<div class="cover-blogposts"><img src="../../static/images/blog_post/cover.jpg?h=653e9b57"></div>-->
+
+            </div>
+        
+            
+                <div class="embed-responsive embed-responsive-16by9">
+                    <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/uM-N9D9fDDo" title="AI Innovation Lab: An agentic platform for transforming product development" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="padding: 0px 20px 5px 20px;"></iframe>
+                </div>
+            
+	    </div>
+        <hr> <h1 id="abstract">Abstract</h1><p>At PyMC Labs, we’re tackling a core problem in the CPG industry: product innovation is too slow, fragmented, and disconnected from real consumer needs.</p>
+<p>The <strong>AI Innovation Lab</strong> is an end-to-end platform that uses AI-powered synthetic consumers and expert agent collaboration to streamline every stage of product development — from smarter concept briefs and design iteration to pricing simulation and market validation.</p>
+<p>Validated through custom metrics and real-world benchmarks, our U.S. panel <strong>replicates up to 90% of consumer behavior patterns</strong>. And we’re just getting started — this is the foundation of a broader vision: where virtual consumer panel insights can be used to evaluate product characteristics, pricing and even marketing creatives and branding providing quantitative assessments that can be fed as priors in Bayesian models such as Media Mix Models.</p>
+<h2 id="reimagining-product-innovation-with-synthetic-consumers-and-agentic-frameworks">Reimagining Product Innovation with Synthetic Consumers and Agentic Frameworks</h2><p>Across the CPG industry, product innovation is falling behind. It’s too slow, too fragmented, and too costly — and too often, it’s disconnected from what real consumers actually want.</p>
+<p>In response, a growing number of startups and industry leaders have turned to <a href="https://dub.sh/5ocJfGX">synthetic consumers</a>: AI-generated personas built to mirror real-world behaviors, preferences, and decision patterns. The promise? Faster, cheaper feedback — without the delays and limitations of traditional market research.</p>
+<p>But at PyMC Labs, we asked a harder question: <strong>What would it take to not just accelerate product development, but fundamentally rethink it — combining agentic workflows, multimodal vision models, and validated insights grounded in our expertise in data-driven simulations?</strong></p>
+<p>With one of our major clients in the CPG space, we have developed the <a href="https://dub.sh/innovation-lab">AI Innovation Lab</a> — a new way to turn ideas into market-ready products.</p>
+<h2 id="where-product-innovation-breaks">Where Product Innovation Breaks</h2><p>Despite billions invested in research, design, and marketing, product innovation in CPG remains flawed. Across every stage, teams face systemic barriers that make it hard to build products real consumers actually want.</p>
+<ul>
+<li><strong>Product decisions are often made without meaningful data:</strong> Too often, products are developed in the absence of real insight. Early-stage concepts rely on gut instinct or fragmentary trend reports, especially at smaller or mid-sized CPG companies. Even at the larger players, insights tend to be consolidated late — pulled from siloed sources, often after key decisions have been made. As a result, product development is guided more by internal alignment than by actual consumer behavior or unmet need.</li>
+</ul>
+<ul>
+<li><p><strong>Feedback loops are stuck in silos</strong>: In traditional product innovation workflow, each team operates in sequence: product writes the brief, R&amp;D formulates, marketing positions, and research validates — often weeks or even months later. This rigid, siloed process leaves little room for iteration or collaboration. Once decisions are made, they’re hard to reverse, and by the time feedback arrives, it rarely changes the outcome.</p>
+</li>
+<li><p><strong>Design is treated as a downstream detail</strong>: Visual identity — from packaging to typography to color palette — is often finalized after core product decisions have already been made. By then, there’s little time, budget, or flexibility left to test whether the design actually resonates with consumers. Yet in categories like skincare, beverages, and personal care, packaging is not just a wrapper — it’s the first interaction, the first impression, and often the deciding factor. Despite this, most teams have no structured way to evaluate how visual choices influence perception, relevance, or shelf appeal.</p>
+</li>
+<li><p><strong>Pricing relies on guesswork:</strong> In most workflows, pricing decisions come late, based on loose benchmarks. It's rarely tested or modeled early, even though price directly shapes demand, positioning, and market size. Without a way to simulate price elasticity up front, teams risk launching too high, too low — or simply off the mark.</p>
+</li>
+</ul>
+<p>The result? A process that’s resistant to change, and misaligned with the consumers it’s meant to serve. Fixing it requires more than speeding things up — it demands rethinking how products are imagined, evaluated, and brought to life.</p>
+<h2 id="real-value-for-high-stakes-decisions">Real Value for High-Stakes Decisions</h2><p>Our solution is designed to bring clarity and confidence to every strategic Product Development choice. From early ideation to go-to-market, it provides data-driven ideation and consumer insights that are both quantitative and actionable. The tools enhances:</p>
+<ul>
+<li><p><strong>Brainstorming</strong>: Quickly explore hundreds of concept directions, grounded in trend data and internal insights. Get to better ideas, faster — with agent-led briefs and early feasibility checks that surface what’s worth pursuing.</p>
+</li>
+<li><p><strong>Product Refinement</strong>: Test pricing and forecast market potential before launch. Understand how price, positioning, and packaging impact demand — and align confidently on go-to-market strategy.</p>
+</li>
+</ul>
+<h2 id="key-capabilities-of-the-ai-innovation-lab">Key Capabilities of the AI Innovation Lab</h2><figure>
+  <img src="key-capabilities.png" style="width:100%">
+</figure><p>The AI Innovation Lab is not just a tool — <strong>it’s an end-to-end platform to dramatically speed up the product development lifecycle, from initial idea to market validation</strong>. The platform includes five main capabilities that streamline and accelerate every stage of product development:</p>
+<ul>
+<li><p><strong>Smarter Product Briefs:</strong> The Lab generates product briefs informed by trend data, competitive analysis, and your own historical product performance — giving teams a clear, evidence-based foundation from day one.</p>
+</li>
+<li><p><strong>AI Expert Evaluation:</strong> Each product brief is reviewed by a panel of AI agents simulating expert perspectives — covering feasibility, formulation constraints, regulatory risks, and strategic fit. Based on the review, the agents suggest targeted improvements, enabling teams to refine concepts early.</p>
+</li>
+<li><p><strong>Design refinement:</strong> Product visuals are iterated using advanced multimodal models. Teams can explore and refine images, colors, typography, and claims — making design an integral part of the development process, not an afterthought.</p>
+</li>
+<li><p><strong>Synthetic Consumer Testing:</strong> Access feedback in minutes, not weeks. The platform taps into synthetic consumer panels built to reflect real-world demographics and behavioral patterns — allowing rapid testing of uniqueness, appeal, relevance and purchasing consideration.</p>
+</li>
+<li><p><strong>Market Simulation</strong>: Forecast market impact before launch. Tools for price sensitivity analysis, market sizing, and competitive dynamics help teams make data-driven decisions about positioning, pricing, and portfolio strategy.</p>
+</li>
+</ul>
+<p>Together, these capabilities form a unified system that helps teams move from idea to market with greater speed, precision, and confidence.</p>
+<h2 id="from-prototype-to-proof-validating-the-platform">From Prototype to Proof: Validating the Platform</h2><figure>
+  <img src="prototype-to-proof.png" style="width:100%">
+  <figcaption>Our robust methodology, validated with data from thousands or real consumers, guarantees that synthetic responses not only correlate with real consumer feedback but also accurately represent its distribution.</figcaption>
+</figure><p>You might ask: this all sounds promising — but how do I know it really works in practice?</p>
+<p>That's why we've validated our platform through real-world testing:</p>
+<table>
+<thead><tr>
+<th style="text-align:left">Challenge</th>
+<th style="text-align:left">Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Ideating Realistic Product Concepts</strong></td>
+<td style="text-align:left"><strong>Multiagent Expert Collaboration</strong><br><br>Leveraging our expertise in building multi-agent systems (such as our <a href="https://dub.link/ai-mmm-agent">MMM Insight Agent</a>), we've developed a dynamic, domain-aware agent collaboration framework for product ideation. This solution enables seamless interactions between AI roles—product designer, marketing strategist, and sustainability expert—using self-feedback loops to efficiently generate realistic products with minimal user input.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Reproducing Human Feedback</strong></td>
+<td style="text-align:left"><strong>Advanced Prompt Engineering</strong><br><br>We developed an innovative prompting method that involves asking synthetic consumers exclusively open-ended questions. We then convert these qualitative responses into standardized quantitative metrics using embeddings. This allows the LLM to allocate more <em>test time compute</em> to answering the questions, resulting in smoother and more realistic response distributions.<br><br>This <a href="https://dub.link/synth-responses">case study</a>, highlighting how LLMs handle open-ended questions, provides insight into our method’s practical effectiveness.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Evaluating Synthetic Consumer Quality</strong></td>
+<td style="text-align:left">We conducted a large-scale replication study with a major international CPG brand, assessing synthetic consumer panels across hundreds of products and thousands of real consumer responses. Our evaluation focused on two key metrics:<br><br><strong>Response Correlation:</strong> Using Pearson correlation, we measured how closely synthetic consumers matched real consumers in product rankings—often sufficient for early-stage concept testing and directional insights.<br><br><strong>Distribution Similarity:</strong> Employing the Kolmogorov–Smirnov (KS) test, we compared full response distributions of synthetic versus real consumers, uncovering variations that averages alone might overlook.<br><br>Within the oral-care category, our synthetic panel successfully replicated up to 90% of real consumer responses when asked about purchase intent.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Developing a General-Purpose Synthetic Panel</strong></td>
+<td style="text-align:left"><strong>Harnessing Large-Scale Public Datasets</strong><br><br>We’ve created representative synthetic panels for major markets by modeling target demographics based on publicly available datasets such as <a href="https://electionstudies.org">ANES</a> and <a href="https://gssdataexplorer.norc.org">GSS</a>.<br><br><a href="https://dub.link/synth-consumers">Validation against real-world benchmarks, including voting behavior and TV preferences in the US demonstrates strong performance</a>, providing initial evidence that this general purpose panel can effectively support diverse advertisers and brands.</td>
+</tr>
+</tbody>
+</table>
+<p><p>&nbsp;</p>
+Not every challenge is yet fully solved — and that’s exactly the point. We’re building forward, with real progress, tested methods, and a clear path toward even more robust, reliable product decision-making.</p>
+<h2 id="looking-ahead-one-integrated-system">Looking Ahead: One Integrated System</h2><p>At PyMC Labs, we’re extending the AI Innovation Lab in two key directions:</p>
+<ul>
+<li><p><strong>Creative Testing</strong> – expanding the Lab’s capabilities to evaluate ads and campaign assets early in the development cycle.</p>
+</li>
+<li><p><strong>Marketing Integration</strong> – linking it with our <a href="https://dub.link/ai-mmm-agent">MMM Insight Agent</a><strong>,</strong> built on top of the <a href="https://dub.link/pymc-marketing">PyMC-Marketing toolbox</a>, to optimize media spend with precision and transparency.</p>
+</li>
+</ul>
+<p>Together, these systems form a unified, iterative workflow:</p>
+<ul>
+<li><p><strong>What should we launch?</strong><br>
+The AI Innovation Lab supports product and creative development — testing concepts, messaging, and packaging with synthetic consumers.</p>
+</li>
+<li><p><strong>How should we market it?</strong><br>
+The <strong>MMM Insight Agent</strong> simulates the impact of different budget allocations, creatives, and channels — helping teams maximize return on spend.</p>
+</li>
+</ul>
+<figure>
+  <img src="agents-in-synergy.png" style="width:50%">
+  <figcaption>Agents in synergy: Creating a closed-loop learning system for marketing strategy.</figcaption>
+</figure><p>The real power comes from closing the loop. Synthetic panels can help inform priors for Media Mix Model campaign coefficients, while in turn underperforming creatives or channels feed back into the Innovation Lab for refinement, creating a continuous cycle of testing, optimization, and learning.</p>
+<p>By breaking down silos between consumer research and marketing, we help brands align what they build with how they sell — unlocking smarter product decisions and more efficient growth. Marketing is already PyMC Labs’ strength — and now we’re extending that intelligence across the full innovation lifecycle.</p>
+<h2 id="ready-to-accelerate-product-innovation">Ready to Accelerate Product Innovation?</h2><p>The AI Innovation Lab could be the breakthrough your team needs — combining synthetic consumers, agentic workflows, and multimodal vision models. Contact us today to explore how this end-to-end platform can help you make smarter, faster product decisions with confidence.</p>
+
+	<!--THIS IS THE FOOTER OF THE BLOGPSOT-->
+	<hr> 
+		<!--div class="container"-->
+			<h2 class="font-roboto">Work with PyMC Labs</h2>
+			<p>If you are interested in seeing what we at PyMC Labs can do for you, then please email <a href="mailto:info@pymc-labs.com">info@pymc-labs.com</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity.
+
+We also run <a href="https://www.pymc-labs.com/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics.
+			</p>
+		<!--/div-->
+    
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBottom"
+                aria-controls="navbarBottom" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarBottom">
+                <ul class="navbar-nav ml-auto">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-brands fa-twitter"
+                                aria-hidden="true"></i>
+                            Twitter</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-brands fa-github"
+                                aria-hidden="true"></i>
+                            GitHub</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-brands fa-linkedin"
+                                aria-hidden="true"></i>
+                            LinkedIn</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-brands fa-youtube"
+                                aria-hidden="true"></i>
+                            YouTube</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-brands fa-meetup"
+                                aria-hidden="true"></i>
+                            Meetup</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                aria-hidden="true"></i>
+                            Newsletter</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/privacy-policy"><i class="fa fa-solid fa-lock"
+                                aria-hidden="true"></i>
+                            Privacy Policy</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/impressum"><i class="fa fa-solid fa-info-circle"
+                                aria-hidden="true"></i>
+                            Impressum</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+</body>
+
+</html>

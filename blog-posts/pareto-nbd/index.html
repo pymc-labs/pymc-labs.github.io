@@ -1,0 +1,422 @@
+<!doctype html><html lang="en">
+
+<head>
+    
+
+    <style media="screen">
+        body {
+            padding-top: 70px;
+            padding-bottom: 70px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            display: inline-block;
+            /* Ensures that the heading and the span are on the same line */
+            margin: 0;
+            /* Optional: Reset margin for better control */
+            position: relative;
+            /* Ensures that the span can be positioned relative to the heading */
+        }
+
+        .copy-span {
+            cursor: pointer;
+            /* Changes the cursor to a pointer when hovering over the # */
+            color: #81C240;
+            /* Sets the color of the # */
+            margin-left: 5px;
+            /* Adds some space between the heading text and the # */
+            font-size: 0.9em;
+            /* Adjusts the font size of the # to be slightly smaller relative to the heading */
+            visibility: hidden;
+            /* Initially hides the # */
+        }
+
+        h1:hover .copy-span,
+        h2:hover .copy-span,
+        h3:hover .copy-span,
+        .copy-span:hover {
+            visibility: visible;
+            text-decoration: none;
+            color: #81C240;
+            /* Makes the # visible when hovering over the heading or the span */
+        }
+    </style>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="../../static/css/custom_style.css?h=00853bf3">
+    <link rel="stylesheet" href="../../static/css/table_style.css?h=c677f945">
+
+    <!-- Highlight.js for syntax highlighting -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- Extra meta tags: social site cards, browser icons... -->
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+
+    <title>Customer Lifetime Value in the non-contractual continuous case: The Bayesian Pareto NBD Model - PyMC Labs</title>
+
+    <!-- Open Graph -->
+    <meta name="twitter:card" content="summary">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/pareto-nbd/" />
+    <meta property="og:title" content="Customer Lifetime Value in the non-contractual continuous case: The Bayesian Pareto NBD Model - PyMC Labs" />
+    <meta property="og:description" content="" />
+    <meta property="og:image" content="https://pymc-labs.github.io/blog-posts/pareto-nbd/cover.png" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@pymc_labs">
+    <meta name="twitter:url" content="https://pymc-labs.github.io/blog-posts/pareto-nbd/">
+    <meta name="twitter:title" content="Customer Lifetime Value in the non-contractual continuous case: The Bayesian Pareto NBD Model - PyMC Labs">
+    <meta name="twitter:description" content="">
+    <meta name="twitter:image" content="https://pymc-labs.github.io/blog-posts/pareto-nbd/cover.png">
+
+    <link rel="canonical" href="">
+    <meta name="description" content="We are a Bayesian consulting firm specializing in data analysis and predictive modeling. Contact us today to learn how we can help your business.">
+    <meta name="keywords" content="Bayesian consulting, data analysis, predictive modeling">
+
+    <!-- Highlight.js for syntax highlighting -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+    <!-- <script>hljs.highlightAll();</script> -->
+
+    <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+    <!-- We use this to do syntax highlighting -->
+    <link rel="stylesheet" href="../../static/pygments.css">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Base URL of the page (removing any existing fragment part)
+            const baseURL = window.location.href.split('#')[0];
+            // Select all h3 elements within elements of class 'blogpost'
+            const h3Elements = document.querySelectorAll('h3, h2, h1');
+            h3Elements.forEach((element) => {
+                const copyAnchor = document.createElement('a');
+                copyAnchor.textContent = `#`;
+                copyAnchor.classList.add('copy-span'); // Add a class for styling
+                copyAnchor.setAttribute('href', baseURL+`#${element.id}`); // Set href attribute to a placeholder
+                copyAnchor.setAttribute('title', 'Copy URL to clipboard'); // Tooltip text
+                // Insert the anchor after the <h1>, <h2>, or <h3> element
+                element.appendChild(copyAnchor);
+            });
+        });
+    </script>
+
+    
+<script src="../../static/scripts/toggle_code.js?h=3a00c72f" defer></script>
+
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container">
+            <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+            <a class="navbar-brand" href="/"><img alt="logo" loading="eager" width="88" height="70" title="logo"
+                    class="navbar-logo" src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop"
+                aria-controls="navbarTop" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarTop">
+                <ul class="navbar-nav ml-auto">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                aria-hidden="true"></i>
+                            What we do</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                aria-hidden="true"></i>
+                            Products</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                aria-hidden="true"></i>
+                            Team</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                aria-hidden="true"></i>
+                            Clients</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                aria-hidden="true"></i>
+                            Workshops</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                aria-hidden="true"></i>
+                            Blog</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 blogpost">
+        <h2 class="font-roboto">Customer Lifetime Value in the non-contractual continuous case: The Bayesian Pareto NBD Model</h2>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-6 author_name">
+                <small class="text-muted">AUTHORED BY</small>
+                <p class="font-bold">
+                    
+
+
+
+    
+
+
+
+    
+        Juan Orduz and Colt Allen
+    
+
+
+
+                </p>
+            </div>
+            <div class="col-md-6 author_date">
+                <!-- <p>2024-05-28</p> -->
+                
+<small class="text-muted">DATE</small>
+<p class="font-lighter">2024-05-28</p>
+
+<!--<div class="cover-blogposts"><img src="../../static/images/blog_post/cover.jpg?h=653e9b57"></div>-->
+
+            </div>
+        
+            
+                <div class="blog-cover-container">
+                    <img loading="lazy" title="cover image" alt="" class="cover-blogposts" src="cover.png">
+                </div>
+            
+	    </div>
+        <hr> <p>Understanding and predicting customer behavior is crucial for strategic customer relationship management and marketing
+analytics decision-making. There is no silver bullet to solve all cases. It depends on the business type and customer relations:</p>
+<figure>
+  <img title="priors" src="square.png" alt="priors" style="width:100%">
+  <figcaption>Taken from: https://www.brucehardie.com/talks/ho_cba_tut_art_09.pdf</figcaption>
+</figure><p>An accurate and trustworthy customer-level model should encode the purchase behavior mechanism. For example, grocery purchases and yearly magazine subscriptions should be modeled differently.</p>
+<p>For the non-contractual continuous case, one of the most classic probabilistic models for this purpose is the <strong>Pareto/NBD model</strong>
+introduced in the seminal work <a href="https://www.jstor.org/stable/2631608">"Counting Your Customers: Who Are They and What Will They Do Next?"</a>
+by David C. Schmittlein, Donald G. Morrison, and Richard Colombo. For many years, this model was not fully adopted in real
+industrial applications as the derived formulas and expressions are complicated and usually not part of the analytics toolbox
+of marketing practitioners. Even though this model has always been Bayesian by design, traditionally, it has been fitted
+with maximum-likelihood (MLE) techniques. Fortunately, we are happy to announce that we have included the full Bayesian
+<a href="https://www.pymc-marketing.io/en/stable/api/generated/pymc_marketing.clv.models.pareto_nbd.ParetoNBDModel.html#pymc_marketing.clv.models.pareto_nbd.ParetoNBDModel">Pareto NBD</a>
+model as part of <a href="https://www.pymc-marketing.io/en/stable">PyMC-Marketing</a> <a href="https://www.pymc-marketing.io/en/stable/api/generated/pymc_marketing.clv.models.html#module-pymc_marketing.clv.models">CLV module</a>.
+The complex formulas in this model do pose some challenges depending on the sampling method. Still, the regularization
+afforded by maximum a posteriori estimate (MAP) significantly improves out-of-sample prediction accuracy over MLE.</p>
+<p>In this blog post, we introduce the model and explain how to use it via <a href="https://www.pymc-marketing.io/en/stable">PyMC-Marketing</a> to better understand and optimize the strategy around customer lifetime value.</p>
+<p>The content of this blog is based on the example notebook <a href="https://www.pymc-marketing.io/en/stable/notebooks/clv/pareto_nbd.html#pareto-nbd-model">Pareto/NBD Model</a> from the <a href="https://www.pymc-marketing.io/en/stable/">PyMC Marketing</a> official documentation.</p>
+<h2 id="applications">Applications</h2><p>Before going through the model specifications and details, let's mention some of the most common applications in the industry:</p>
+<ul>
+<li><p><strong>Retention Strategies:</strong> Understanding which customers are likely to churn helps businesses develop targeted retention strategies to maintain high-value customers. The Pareto NBD model estimates a customer's activeness. We can answer questions such as: What is the probability of this many purchases being made by a specific customer, and how will it change over time?</p>
+</li>
+<li><p><strong>Customer Segmentation:</strong> By identifying customers with different purchasing behaviors and dropout probabilities, businesses can more effectively segment their customer base and tailor their marketing efforts accordingly.</p>
+</li>
+<li><p><strong>Resource Allocation:</strong> Businesses can allocate marketing resources more efficiently by focusing on customers predicted to have a higher lifetime value, maximizing return on investment.</p>
+</li>
+<li><p><strong>Financial Forecasting:</strong> Accurate CLV predictions contribute to better financial planning and forecasting, aiding long-term strategic decision-making.</p>
+</li>
+</ul>
+<p>For an insightful case study, please check our webinar on <strong>Customer Lifetime Value Modeling in Marine Industry</strong> with Wärtsilä:</p>
+<center>
+  <iframe width="600" height="375" src="https://www.youtube.com/embed/u3oMWgStIZY" frameborder="0" allowfullscreen> </iframe>
+</center><h2 id="model-features">Model Features</h2><p>Let's delve into the model's input features. At its core, the model relies on purchase summary metrics at the individual customer level.</p>
+<ul>
+<li><code>customer_id</code> is an index of unique identifiers for each customer.</li>
+<li><code>frequency</code> is the number of repeat purchases a customer has made (i.e., total number of purchases minus one).</li>
+<li><code>recency</code> indicates the time period when a customer made their most recent purchase. If a customer has only made one purchase, recency is 0.</li>
+<li><code>T</code> is a customer's "age" or the number of time periods since their first purchase.</li>
+</ul>
+<p>We can extract these metrics from a purchase-history table in a structured database.</p>
+<p>The current PyMC-Marketing implementation allows adding <strong>time-invariant covariates</strong> to the model, as described in <a href="https://www.brucehardie.com/notes/019/time_invariant_covariates.pdf">Fader, Peter &amp; G. S. Hardie, Bruce (2007). "Incorporating Time-Invariant Covariates into the Pareto/NBD and BG/NBD Models"</a>. Hence, we could enrich the input data by adding variables like user acquisition channel (coming from an attribution model), month of acquisition, and other user-level characteristics.</p>
+<h2 id="model-specification">Model Specification</h2><p>The Pareto NBD model couples two customer mechanisms together:</p>
+<p><strong>Purchasing Process:</strong> While active, the number of transactions made by a customer follows a Poisson process. This is equivalent to assuming that the time between transactions is exponentially distributed. This means that short periods are much more likely than long periods.</p>
+<p><strong>Dropout Process:</strong> The model acknowledges that customers may stop purchasing (churn). The time until a customer becomes inactive is modeled using an exponential distribution.</p>
+<p>By writing these processes in a probabilistic generative model, we can derive the likelihood formula for a customer base in terms of certain hyper-parameters controlling the heterogeneity of the population. Inference methods like MCMC can be applied to get posterior estimates of the hyper-parameters and the derived formulas of interest. For more details, see the note <a href="https://www.brucehardie.com/notes/009/pareto_nbd_derivations_2005-11-05.pdf">"A Note on Deriving the Pareto/NBD Model and Related Expressions"</a> by Fader and Hardie.</p>
+<p>Note that so far, this model only models purchase occurrences -- <em>not</em> the monetary value associated with these purchases. Thus, in order to compute the customer lifetime <em>value</em>, we need to combine the output of this model with a monetary model, like the <a href="https://www.pymc-marketing.io/en/stable/notebooks/clv/gamma_gamma.html">Gamma-Gamma</a>, which is also available in PyMC-Marketing.</p>
+<h2 id="model-output-example">Model Output Example</h2><p>Now that we understand the input and logic of the Pareto NBD model, we are prepared to explore its output. We use the example presented in PyMC-Marketing documentation <a href="https://www.pymc-marketing.io/en/stable/notebooks/clv/pareto_nbd.html">notebook</a>. The input data is the CDNOW sample dataset, a popular CLV modeling research benchmarking dataset (see <a href="https://www.brucehardie.com/notes/026/">here</a> for more information about the dataset).</p>
+<p>Fitting the model in PyMC-Marketing is very easy:</p>
+<div class="hll"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pymc_marketing</span><span class="w"> </span><span class="kn">import</span> <span class="n">clv</span>
+
+<span class="n">pnbd</span> <span class="o">=</span> <span class="n">clv</span><span class="o">.</span><span class="n">ParetoNBDModel</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">idata</span> <span class="o">=</span> <span class="n">pnbd</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+</pre></div>
+<p>Even though we skip the details regarding the data preparation and code details, the following plot is handy for assessing the goodness of the fit. It shows the observed and predicted purchases per customer distribution.</p>
+<p><img src="pareto_nbd_30_8.png" alt="png"></p>
+<p>It looks pretty good for this example!</p>
+<p>Let's continue by listing the main methods offered by the model API.</p>
+<ul>
+<li><code>expected_purchases</code>: Given <em>recency</em>, <em>frequency</em>, and <em>T</em> for an individual customer, this method predicts the expected number of future purchases across <em>future_t</em> time periods.</li>
+<li><code>expected_probability_alive</code>: Compute the probability that a customer with history <em>frequency</em>, <em>recency</em>, and <em>T</em> is currently active. Can also estimate alive probability for <em>future_t</em> periods into the future.</li>
+<li><code>expected_purchases_new_customer</code>: Expected number of purchases for a new customer across <em>t</em> time periods.</li>
+<li><code>expected_purchase_probability</code>: Estimate probability of <em>n_purchases</em> over <em>future_t</em> time periods, given an individual customer's current <em>frequency</em>, <em>recency</em>, and <em>T</em>.</li>
+</ul>
+<p>Having this information at the user level can be very useful. For example, we can generate what-if simulations to see how the CLV estimations vary across different segments by imposing business constraints or expectations on the purchase history.</p>
+<p>Next, we look at some of these methods for a sub-sample set of users.</p>
+<p><img src="users.png" alt="png"></p>
+<p>Customers 5 &amp; 10 are <em>non-repeat buyers</em>, whereas 46 and 1413 are <em>frequent buyers</em>.</p>
+<h3 id="expected-number-of-purchases">Expected Number of Purchases</h3><p>First, let’s plot each customer’s expected number of purchases over the next 90 time periods:</p>
+<p><img src="pareto_nbd_48_0.png" alt="png"></p>
+<p>Observe the large number of purchases expected from frequent buyers (Customers 46 and 1413). In contrast, the remaining customers expect little or no future activity.</p>
+<h3 id="probability-of-being-active">Probability of Being Active</h3><p>We can now look into the probability that our customers are still alive:</p>
+<p><img src="pareto_nbd_51_0.png" alt="png"></p>
+<p>Customer 1413 has a rather low alive probability despite being a frequent purchaser. <strong>This would be an excellent example of a customer to target with a special offer for retention.</strong></p>
+<p>These probabilities are estimated at time period 0. However, we can also estimate the probability customers will still be active in the future. Let’s calculate the posterior densities 90 time periods from now:</p>
+<p><img src="pareto_nbd_53_0.png" alt="png"></p>
+<p>Pay attention to the x-axes for each customer - The probabilities barely change for the non-repeat customers because they were already so low the customers are likely no longer active. Still, there is a significant delta for frequent buyers. A good rule of thumb is that an alive probability of 0.25-0.30 usually indicates an at-risk or inactive customer. Future projections can give additional insight into customer churn risk.</p>
+<h3 id="probability-of-purchases-over-time">Probability of Purchases Over Time</h3><p>Customer 46 is our best customer in this small sample set and is expected to make at least 15 purchases over the next 90 time periods. What is the probability of this many purchases being made, and how will it change over time? Let’s plot a heatmap to paint the full picture:</p>
+<p><img src="pareto_nbd_57_0.png" alt="png"></p>
+<p>This heatmap highlights how Customer 46 is expected to make at least 15 purchases up to time period 90, but the odds of 15 purchases being made before time period 75 or even time period 60 are slightly higher. Also note these probabilities assume exact expectations (i.e., there’s a 6.2% chance of the 15th purchase being made precisely during time period 60).</p>
+<h3 id="expected-number-of-purchases-for-new-customers">Expected Number of Purchases for New Customers</h3><p>So far, we’ve only been running predictions for existing customers. But we can also estimate the expected number of transactions over time for a new customer:</p>
+<p><img src="pareto_nbd_60_0.png" alt="png"></p>
+<h3 id="time-invariant-covariates">Time-Invariant Covariates</h3><p>The results above were obtained using the core Pareto NBD model and the purchase history as input. We can add additional time-invariant covariates so that we can allow the model parameters to vary over them. For this specific example, there are two features that improve the model estimates:</p>
+<p><img src="pareto_nbd_66_0.png" alt="png"></p>
+<p>Please see the example notebook for details.</p>
+<h2 id="conclusion">Conclusion</h2><p>The Pareto NBD model, now available in PyMC Marketing, provides a valuable tool for modeling customer purchase behavior and estimating customer lifetime value. By leveraging this model, businesses can enhance customer segmentation, develop targeted retention strategies, allocate resources more efficiently, and improve financial forecasting. Additionally, the model's ability to incorporate time-invariant covariates offers further flexibility for enriching the input data and gaining deeper insights into customer behavior.</p>
+
+	<!--THIS IS THE FOOTER OF THE BLOGPSOT-->
+	<hr> 
+		<!--div class="container"-->
+			<h2 class="font-roboto">Work with PyMC Labs</h2>
+			<p>If you are interested in seeing what we at PyMC Labs can do for you, then please email <a href="mailto:info@pymc-labs.com">info@pymc-labs.com</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity.
+
+We also run <a href="https://www.pymc-labs.com/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics.
+			</p>
+		<!--/div-->
+    
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBottom"
+                aria-controls="navbarBottom" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarBottom">
+                <ul class="navbar-nav ml-auto">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-brands fa-twitter"
+                                aria-hidden="true"></i>
+                            Twitter</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-brands fa-github"
+                                aria-hidden="true"></i>
+                            GitHub</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-brands fa-linkedin"
+                                aria-hidden="true"></i>
+                            LinkedIn</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-brands fa-youtube"
+                                aria-hidden="true"></i>
+                            YouTube</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-brands fa-meetup"
+                                aria-hidden="true"></i>
+                            Meetup</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                aria-hidden="true"></i>
+                            Newsletter</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/privacy-policy"><i class="fa fa-solid fa-lock"
+                                aria-hidden="true"></i>
+                            Privacy Policy</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/impressum"><i class="fa fa-solid fa-info-circle"
+                                aria-hidden="true"></i>
+                            Impressum</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+</body>
+
+</html>

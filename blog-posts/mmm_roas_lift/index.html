@@ -1,0 +1,832 @@
+<!doctype html><html lang="en">
+
+<head>
+    
+
+    <style media="screen">
+        body {
+            padding-top: 70px;
+            padding-bottom: 70px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            display: inline-block;
+            /* Ensures that the heading and the span are on the same line */
+            margin: 0;
+            /* Optional: Reset margin for better control */
+            position: relative;
+            /* Ensures that the span can be positioned relative to the heading */
+        }
+
+        .copy-span {
+            cursor: pointer;
+            /* Changes the cursor to a pointer when hovering over the # */
+            color: #81C240;
+            /* Sets the color of the # */
+            margin-left: 5px;
+            /* Adds some space between the heading text and the # */
+            font-size: 0.9em;
+            /* Adjusts the font size of the # to be slightly smaller relative to the heading */
+            visibility: hidden;
+            /* Initially hides the # */
+        }
+
+        h1:hover .copy-span,
+        h2:hover .copy-span,
+        h3:hover .copy-span,
+        .copy-span:hover {
+            visibility: visible;
+            text-decoration: none;
+            color: #81C240;
+            /* Makes the # visible when hovering over the heading or the span */
+        }
+    </style>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="../../static/css/custom_style.css?h=00853bf3">
+    <link rel="stylesheet" href="../../static/css/table_style.css?h=c677f945">
+
+    <!-- Highlight.js for syntax highlighting -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- Extra meta tags: social site cards, browser icons... -->
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+
+    <title>Unobserved Confounders, ROAS and Lift Tests in Media Mix Models - PyMC Labs</title>
+
+    <!-- Open Graph -->
+    <meta name="twitter:card" content="summary">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/mmm_roas_lift/" />
+    <meta property="og:title" content="Unobserved Confounders, ROAS and Lift Tests in Media Mix Models - PyMC Labs" />
+    <meta property="og:description" content="" />
+    <meta property="og:image" content="https://pymc-labs.github.io/blog-posts/mmm_roas_lift/cover.png" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@pymc_labs">
+    <meta name="twitter:url" content="https://pymc-labs.github.io/blog-posts/mmm_roas_lift/">
+    <meta name="twitter:title" content="Unobserved Confounders, ROAS and Lift Tests in Media Mix Models - PyMC Labs">
+    <meta name="twitter:description" content="">
+    <meta name="twitter:image" content="https://pymc-labs.github.io/blog-posts/mmm_roas_lift/cover.png">
+
+    <link rel="canonical" href="">
+    <meta name="description" content="We are a Bayesian consulting firm specializing in data analysis and predictive modeling. Contact us today to learn how we can help your business.">
+    <meta name="keywords" content="Bayesian consulting, data analysis, predictive modeling">
+
+    <!-- Highlight.js for syntax highlighting -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+    <!-- <script>hljs.highlightAll();</script> -->
+
+    <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+    <!-- We use this to do syntax highlighting -->
+    <link rel="stylesheet" href="../../static/pygments.css">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Base URL of the page (removing any existing fragment part)
+            const baseURL = window.location.href.split('#')[0];
+            // Select all h3 elements within elements of class 'blogpost'
+            const h3Elements = document.querySelectorAll('h3, h2, h1');
+            h3Elements.forEach((element) => {
+                const copyAnchor = document.createElement('a');
+                copyAnchor.textContent = `#`;
+                copyAnchor.classList.add('copy-span'); // Add a class for styling
+                copyAnchor.setAttribute('href', baseURL+`#${element.id}`); // Set href attribute to a placeholder
+                copyAnchor.setAttribute('title', 'Copy URL to clipboard'); // Tooltip text
+                // Insert the anchor after the <h1>, <h2>, or <h3> element
+                element.appendChild(copyAnchor);
+            });
+        });
+    </script>
+
+    
+<script src="../../static/scripts/toggle_code.js?h=3a00c72f" defer></script>
+
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container">
+            <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+            <a class="navbar-brand" href="/"><img alt="logo" loading="eager" width="88" height="70" title="logo"
+                    class="navbar-logo" src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop"
+                aria-controls="navbarTop" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarTop">
+                <ul class="navbar-nav ml-auto">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                aria-hidden="true"></i>
+                            What we do</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                aria-hidden="true"></i>
+                            Products</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                aria-hidden="true"></i>
+                            Team</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                aria-hidden="true"></i>
+                            Clients</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                aria-hidden="true"></i>
+                            Workshops</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                aria-hidden="true"></i>
+                            Blog</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 blogpost">
+        <h2 class="font-roboto">Unobserved Confounders, ROAS and Lift Tests in Media Mix Models</h2>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-6 author_name">
+                <small class="text-muted">AUTHORED BY</small>
+                <p class="font-bold">
+                    
+
+
+
+    
+
+
+
+    
+        Juan Orduz
+    
+
+
+
+                </p>
+            </div>
+            <div class="col-md-6 author_date">
+                <!-- <p>2024-08-12</p> -->
+                
+<small class="text-muted">DATE</small>
+<p class="font-lighter">2024-08-12</p>
+
+<!--<div class="cover-blogposts"><img src="../../static/images/blog_post/cover.jpg?h=653e9b57"></div>-->
+
+            </div>
+        
+            
+                <div class="blog-cover-container">
+                    <img loading="lazy" title="cover image" alt="" class="cover-blogposts" src="cover.png">
+                </div>
+            
+	    </div>
+        <hr> <h3 id="the-importance-of-calibration-in-media-mix-models">The Importance of Calibration in Media Mix Models</h3><p>When working with Media Mix Models (MMMs), calibration with lift tests is not just a technical step —it's essential for making these models reliable and actionable. Lift tests serve as a reality check, grounding the model's predictions in real-world outcomes. This process is particularly important because MMMs often rely on data that is both noisy and limited in scope, making accurate predictions difficult.</p>
+<h3 id="why-mmms-need-to-be-causal-models">Why MMMs Need to Be Causal Models</h3><p>The true power of MMMs lies in their ability to guide decisions based on potential changes in marketing strategy. For instance, a marketer might ask, "What impact would reducing the budget for channel X by 50% have on overall sales?" To answer such questions, MMMs must be developed as <em>causal models</em>—models that can predict the effects of specific interventions.</p>
+<p>Creating a causal model involves constructing a well-defined <em>directed acyclic graph</em> (DAG). A DAG is a visual representation of the relationships between different variables in the model, helping to ensure that the right covariates (or control variables) are included. This isn't just about throwing in every available piece of data; it's about selecting variables that genuinely contribute to understanding the causal relationships in your marketing activities.</p>
+<h3 id="the-challenge-of-unobserved-confounders">The Challenge of Unobserved Confounders</h3><p>Even with a well-constructed DAG, unobserved confounders can pose a significant problem. These are variables that influence both the treatment (e.g., spending on a particular marketing channel) and the outcome (e.g., sales) but are not included in the model. Their omission can lead to biased estimates, which in turn can result in poor decision-making. Unfortunately, unobserved confounders are almost inevitable in any real-world scenario.</p>
+<h3 id="a-recent-innovation-calibrating-mmms-with-bayesian-priors-and-lift-tests">A Recent Innovation: Calibrating MMMs with Bayesian Priors and Lift Tests</h3><p>In theory, methods like instrumental variables can help address the issue of unobserved confounders. An instrumental variable is a variable that is correlated with the treatment but not with the outcome, except through the treatment. However, finding good instruments is notoriously difficult, making this solution less practical.</p>
+<p>An alternative, more practical solution is to calibrate the MMM using lift tests. Lift tests are experiments that measure the incremental effect of a marketing intervention, such as a temporary increase in ad spend on a specific channel. By calibrating the model with the results of these tests, we can reduce the bias introduced by unobserved confounders. Bayesian methods are particularly well-suited for this approach because they allow us to incorporate prior knowledge—information we have before analyzing the data—into the model. This can significantly improve the model's accuracy, even before we start crunching the numbers.</p>
+<p>A recent paper, <a href="https://research.google/pubs/media-mix-model-calibration-with-bayesian-priors/">Media Mix Model Calibration With Bayesian Priors</a> by Zhang et al. (2024), proposes a novel approach to calibrating MMMs. Instead of using the traditional beta (or regression) coefficients for each channel, the authors suggest parametrizing the model in terms of <em>return on ad spend</em> (ROAS).</p>
+<p>The concept is straightforward: express the beta coefficients in terms of ROAS, and then substitute these into a standard MMM equation. This method simplifies the calibration process and can partially mitigate biases coming from unobserved confounders and noise in the data.</p>
+<h3 id="practical-application-implementing-the-method-in-pymc">Practical Application: Implementing the Method in PyMC</h3><p>In the blog post <a href="https://juanitorduz.github.io/mmm_roas/">Media Mix Model and Experimental Calibration: A Simulation Study</a>, <a href="https://juanitorduz.github.io">Juan Orduz</a> provides a comprehensive implementation of this method using PyMC. This work demonstrates how this calibration approach can yield more accurate estimates, even when dealing with unobserved confounders. However, despite its strengths, this method has a limitation: it doesn't automatically improve when additional lift tests are added. The authors of the paper suggest aggregating the results of multiple lift tests by taking a weighted average of the ROAS estimates from each experiment.</p>
+<h3 id="a-new-approach-refining-mmms-with-custom-likelihood-functions">A New Approach: Refining MMMs with Custom Likelihood Functions</h3><p>While the method proposed by Zhang et al. is effective, it could be more efficient in leveraging the results of lift tests. Running these experiments requires significant planning and resources, so it's important to maximize their value.</p>
+<p>To address this, we propose an alternative approach. Instead of directly reparametrizing the model in terms of ROAS, we suggest adding additional likelihood functions based on the saturation curves of the marketing channels. Saturation curves describe how the effectiveness of a marketing channel diminishes as spending increases. By calibrating the model through these curves using lift test results, we can continuously refine our estimates as more experiments are conducted. This approach allows us to make better use of the data from lift tests, leading to more accurate and reliable MMMs over time.</p>
+<h3 id="demonstrating-the-approach-results-and-implementation">Demonstrating the Approach: Results and Implementation</h3><p>In our notebook, we replicate the results from the blog post <a href="https://juanitorduz.github.io/mmm_roas/">Media Mix Model and Experimental Calibration: A Simulation Study</a> using the PyMC-Marketing framework. This framework allows us to incorporate lift tests through custom likelihood functions, providing a more nuanced calibration of the MMM. By continuously refining our estimates as new data becomes available, this approach offers a dynamic and robust solution to the challenges posed by unobserved confounders in marketing mix modeling.</p>
+<p>For those interested in diving deeper, we encourage you to explore a detailed description of the method in our notebook {ref}<code>mmm_lift_test</code>, where we walk through the process step by step.</p>
+<h2 id="prepare-notebook">Prepare Notebook</h2>
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode18" aria-expanded="false" aria-controls="collapseibleCode18">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode18" class="collapse">
+                <div class="hll"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">arviz</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">az</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">graphviz</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pymc_marketing.hsgp_kwargs</span><span class="w"> </span><span class="kn">import</span> <span class="n">HSGPKwargs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pymc_marketing.mmm.delayed_saturated_mmm</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MMM</span><span class="p">,</span>
+    <span class="n">GeometricAdstock</span><span class="p">,</span>
+    <span class="n">LogisticSaturation</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pymc_marketing.paths</span><span class="w"> </span><span class="kn">import</span> <span class="n">data_dir</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pymc_marketing.prior</span><span class="w"> </span><span class="kn">import</span> <span class="n">Prior</span>
+
+<span class="n">az</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">&quot;arviz-darkgrid&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;figure.figsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;figure.dpi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;figure.facecolor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span>
+
+<span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">ord</span><span class="p">,</span> <span class="s2">&quot;roas&quot;</span><span class="p">))</span>
+<span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+</pre></div>
+
+            </div>
+            <h2 id="read-data">Read Data</h2><p>We read the data, which is available in the <code>data</code> of our repository.</p>
+<div class="hll"><pre><span></span><span class="n">data_path</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/pymc-labs/pymc-marketing/main/data/mmm_roas_data.csv&quot;</span>
+
+<span class="n">raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">])</span>
+
+<span class="n">raw_df</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+</pre></div>
+<pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 131 entries, 0 to 130
+Data columns (total 20 columns):
+ #   Column                Non-Null Count  Dtype         
+---  ------                --------------  -----         
+ 0   date                  131 non-null    datetime64[ns]
+ 1   dayofyear             131 non-null    int64         
+ 2   quarter               131 non-null    object        
+ 3   trend                 131 non-null    float64       
+ 4   cs                    131 non-null    float64       
+ 5   cc                    131 non-null    float64       
+ 6   seasonality           131 non-null    float64       
+ 7   z                     131 non-null    float64       
+ 8   x1                    131 non-null    float64       
+ 9   x2                    131 non-null    float64       
+ 10  epsilon               131 non-null    float64       
+ 11  x1_adstock            131 non-null    float64       
+ 12  x2_adstock            131 non-null    float64       
+ 13  x1_adstock_saturated  131 non-null    float64       
+ 14  x2_adstock_saturated  131 non-null    float64       
+ 15  x1_effect             131 non-null    float64       
+ 16  x2_effect             131 non-null    float64       
+ 17  y                     131 non-null    float64       
+ 18  y01                   131 non-null    float64       
+ 19  y02                   131 non-null    float64       
+dtypes: datetime64[ns](1), float64(17), int64(1), object(1)
+memory usage: 20.6+ KB
+</code></pre>
+<p>There are many columns in the dataset. We will explain the below. For now, that is important is for modeling purposes we will only use the <code>date</code>, <code>x1</code>, <code>x2</code> (channels)and <code>y</code> (target) columns.</p>
+<div class="hll"><pre><span></span><span class="n">model_df</span> <span class="o">=</span> <span class="n">raw_df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">filter</span><span class="p">([</span><span class="s2">&quot;date&quot;</span><span class="p">,</span> <span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">])</span>
+</pre></div>
+<h2 id="data-generating-process">Data Generating Process</h2><p>In the original <a href="https://juanitorduz.github.io/mmm_roas/">blog post</a>, the authors generate the data using the following DAG.</p>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode19" aria-expanded="false" aria-controls="collapseibleCode19">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode19" class="collapse">
+                <div class="hll"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">Digraph</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;seasonality&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;seasonality&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;lightgray&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;filled&quot;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;trend&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;trend&quot;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;lightgray&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;filled&quot;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#2a2eec80&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;filled&quot;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;x2&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;x2&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#fa7c1780&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;filled&quot;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#328c0680&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;filled&quot;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">tail_name</span><span class="o">=</span><span class="s2">&quot;seasonality&quot;</span><span class="p">,</span> <span class="n">head_name</span><span class="o">=</span><span class="s2">&quot;x1&quot;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">tail_name</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">head_name</span><span class="o">=</span><span class="s2">&quot;x1&quot;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">tail_name</span><span class="o">=</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="n">head_name</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">tail_name</span><span class="o">=</span><span class="s2">&quot;seasonality&quot;</span><span class="p">,</span> <span class="n">head_name</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">tail_name</span><span class="o">=</span><span class="s2">&quot;trend&quot;</span><span class="p">,</span> <span class="n">head_name</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">tail_name</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">head_name</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">tail_name</span><span class="o">=</span><span class="s2">&quot;x2&quot;</span><span class="p">,</span> <span class="n">head_name</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+<span class="n">g</span>
+</pre></div>
+
+            </div>
+            <p><img src="mmm_roas_9_0.svg" alt="svg"></p>
+<p>We are interested in the effect of the <code>x1</code> and <code>x2</code> channels on the <code>y</code> variable. We have additional covariates like yearly seasonality and a a  non-linear trend component. In addition, there is an unobserved confounder <code>z</code> that affects both the channels and the target variable. This variable introduces a bias in the estimates if we do not account for it. However, for this problem we are going to assume that we do not have access to the <code>z</code> variable (hence, unobserved).</p>
+<p>In the <code>raw_df</code> we have all all the columns needed in the data generating process to obtain the target variable <code>y</code>. For example, the <code>x1_adstock_saturated</code> column is the result of applying the adstock function and then the saturation to the <code>x1</code> channel.</p>
+<p>The target variable <code>y</code> is generated as</p>
+<pre><code>y = amplitude * (trend + seasonality + z + x1_effect + x2_effect + epsilon)
+</code></pre>
+<p>where <code>epsilon</code> is a Gaussian noise and <code>amplitude</code> is a set to $100$.</p>
+<p>The variables <code>y01</code> and <code>y02</code> are the target variable <code>y</code> without the effect of the <code>x1</code> and <code>x2</code> channels, respectively. Hence</p>
+<pre><code>y01 = {amplitude} * (trend + seasonality + z + x2_effect + epsilon)
+y02 = {amplitude} * (trend + seasonality + z + x1_effect + epsilon)
+</code></pre>
+<p>For details on the data generating process, please refer to the <a href="https://juanitorduz.github.io/mmm_roas/">blog post</a>.</p>
+<p>From the variables <code>y01</code> and <code>y02</code> we can compute the true ROAS for the <code>x1</code> and <code>x2</code> channels for the whole period ( for simplicity we ignore the carryover effect).</p>
+<div class="hll"><pre><span></span><span class="n">true_roas_x1</span> <span class="o">=</span> <span class="p">(</span><span class="n">raw_df</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">raw_df</span><span class="p">[</span><span class="s2">&quot;y01&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">raw_df</span><span class="p">[</span><span class="s2">&quot;x1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">true_roas_x2</span> <span class="o">=</span> <span class="p">(</span><span class="n">raw_df</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">raw_df</span><span class="p">[</span><span class="s2">&quot;y02&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">raw_df</span><span class="p">[</span><span class="s2">&quot;x2&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;True ROAS for x1: </span><span class="si">{</span><span class="n">true_roas_x1</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;True ROAS for x2: </span><span class="si">{</span><span class="n">true_roas_x2</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+<pre><code>True ROAS for x1: 93.39
+True ROAS for x2: 171.41
+</code></pre>
+<p>We would like to recover the true ROAS for the <code>x1</code> and <code>x2</code> channels using a media mix model.</p>
+<p>Before jumping into the model, let's plot channels the data to understand it better.</p>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode20" aria-expanded="false" aria-controls="collapseibleCode20">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode20" class="collapse">
+                <div class="hll"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">model_df</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span>
+    <span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">],</span> <span class="n">value_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">],</span> <span class="n">var_name</span><span class="o">=</span><span class="s2">&quot;channel&quot;</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">&quot;x&quot;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">pipe</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">sns</span><span class="o">.</span><span class="n">relplot</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">),</span>
+    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span>
+    <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;channel&quot;</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">aspect</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Channels Spend Data&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.02</span><span class="p">);</span>
+</pre></div>
+
+            </div>
+            <p><img src="mmm_roas_15_1.png" alt="png"></p>
+<h2 id="baseline-model">Baseline Model</h2><p>To begin with, we fit a media mix model, without including the unobserved confounder <code>z</code>, using a saturated adstock and logistic saturation using PyMC-Marketing's API. For more details on the model, please refer to the {ref}<code>mmm_example</code> notebook. As we discuss in that notebook, without any lift test information, a good starting point is to pass the cost share into the prior of the beta channel coefficients.</p>
+<div class="hll"><pre><span></span><span class="n">cost_share</span> <span class="o">=</span> <span class="n">model_df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">model_df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+</pre></div>
+<p>We can specify the model configuration as follows (see the {ref}<code>model_configuration</code> notebook for more details):</p>
+<div class="hll"><pre><span></span><span class="n">model_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;intercept&quot;</span><span class="p">:</span> <span class="n">Prior</span><span class="p">(</span><span class="s2">&quot;Normal&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">20</span><span class="p">),</span>
+    <span class="s2">&quot;likelihood&quot;</span><span class="p">:</span> <span class="n">Prior</span><span class="p">(</span><span class="s2">&quot;Normal&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">Prior</span><span class="p">(</span><span class="s2">&quot;HalfNormal&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+    <span class="s2">&quot;gamma_fourier&quot;</span><span class="p">:</span> <span class="n">Prior</span><span class="p">(</span><span class="s2">&quot;Normal&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;fourier_mode&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;intercept_tvp_config&quot;</span><span class="p">:</span> <span class="n">HSGPKwargs</span><span class="p">(</span>
+        <span class="n">m</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eta_lam</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">ls_mu</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">ls_sigma</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">cov_func</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;adstock_alpha&quot;</span><span class="p">:</span> <span class="n">Prior</span><span class="p">(</span><span class="s2">&quot;Beta&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;channel&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;saturation_lam&quot;</span><span class="p">:</span> <span class="n">Prior</span><span class="p">(</span><span class="s2">&quot;Gamma&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;channel&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;saturation_beta&quot;</span><span class="p">:</span> <span class="n">Prior</span><span class="p">(</span><span class="s2">&quot;HalfNormal&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">cost_share</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;channel&quot;</span><span class="p">),</span>
+<span class="p">}</span>
+</pre></div>
+<p>Observe that we are going to use a Gaussian process to model the non-linear trend component (see {ref}<code>mmm_tv_intercept</code>).</p>
+<p>Let's fit the model!</p>
+<div class="hll"><pre><span></span><span class="n">mmm</span> <span class="o">=</span> <span class="n">MMM</span><span class="p">(</span>
+    <span class="n">adstock</span><span class="o">=</span><span class="n">GeometricAdstock</span><span class="p">(</span><span class="n">l_max</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span>
+    <span class="n">saturation</span><span class="o">=</span><span class="n">LogisticSaturation</span><span class="p">(),</span>
+    <span class="n">date_column</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
+    <span class="n">channel_columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">],</span>
+    <span class="n">time_varying_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">time_varying_media</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">yearly_seasonality</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">model_config</span><span class="o">=</span><span class="n">model_config</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">y</span> <span class="o">=</span> <span class="n">model_df</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">model_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">])</span>
+
+<span class="n">fit_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;tune&quot;</span><span class="p">:</span> <span class="mi">1_000</span><span class="p">,</span>
+    <span class="s2">&quot;chains&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s2">&quot;draws&quot;</span><span class="p">:</span> <span class="mi">2_000</span><span class="p">,</span>
+    <span class="s2">&quot;nuts_sampler&quot;</span><span class="p">:</span> <span class="s2">&quot;numpyro&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;target_accept&quot;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
+    <span class="s2">&quot;random_seed&quot;</span><span class="p">:</span> <span class="n">rng</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">_</span> <span class="o">=</span> <span class="n">mmm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_kwargs</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">mmm</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">extend_idata</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span>
+<span class="p">)</span>
+</pre></div>
+<p>Let's verify that we do not have divergent transitions.</p>
+<div class="hll"><pre><span></span><span class="c1"># Number of diverging samples</span>
+<span class="n">mmm</span><span class="o">.</span><span class="n">idata</span><span class="p">[</span><span class="s2">&quot;sample_stats&quot;</span><span class="p">][</span><span class="s2">&quot;diverging&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+</pre></div>
+<pre><code>0
+</code></pre>
+<p>Next, we look into the model components contributions:</p>
+<div class="hll"><pre><span></span><span class="n">mmm</span><span class="o">.</span><span class="n">plot_components_contributions</span><span class="p">(</span><span class="n">original_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">);</span>
+</pre></div>
+<p><img src="mmm_roas_25_0.png" alt="png"></p>
+<p>The results look very similar to the results from the original blog post. In particular, note that we were able to capture the non-linear trend.</p>
+<p>Next, we look into the channel contributions against the true effects (which we know from the data generating process).</p>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode21" aria-expanded="false" aria-controls="collapseibleCode21">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode21" class="collapse">
+                <div class="hll"><pre><span></span><span class="n">channels_contribution_original_scale</span> <span class="o">=</span> <span class="n">mmm</span><span class="o">.</span><span class="n">compute_channel_contribution_original_scale</span><span class="p">()</span>
+<span class="n">channels_contribution_original_scale_hdi</span> <span class="o">=</span> <span class="n">az</span><span class="o">.</span><span class="n">hdi</span><span class="p">(</span>
+    <span class="n">ary</span><span class="o">=</span><span class="n">channels_contribution_original_scale</span>
+<span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span>
+    <span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="s2">&quot;constrained&quot;</span>
+<span class="p">)</span>
+
+<span class="n">amplitude</span> <span class="o">=</span> <span class="mi">100</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">]):</span>
+    <span class="c1"># HDI estimated contribution in the original scale</span>
+    <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">model_df</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">],</span>
+        <span class="n">y1</span><span class="o">=</span><span class="n">channels_contribution_original_scale_hdi</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">channel</span><span class="o">=</span><span class="n">x</span><span class="p">)[</span><span class="s2">&quot;x&quot;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="n">y2</span><span class="o">=</span><span class="n">channels_contribution_original_scale_hdi</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">channel</span><span class="o">=</span><span class="n">x</span><span class="p">)[</span><span class="s2">&quot;x&quot;</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;C</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">rf</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2"> $94\%$ HDI contribution&quot;</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">_effect&quot;</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">raw_df</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">_effect&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="n">amplitude</span> <span class="o">*</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">_effect&quot;</span><span class="p">]}),</span>  <span class="c1"># noqa B023</span>
+        <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;C</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2"> effect&quot;</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;center left&quot;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+    <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Channel </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+
+            </div>
+            <p><img src="mmm_roas_28_0.png" alt="png"></p>
+<p>We see that the contribution for <code>x1</code> is very different from the true effect. This is because the absence of the unobserved confounder <code>z</code>. For <code>x2</code>, the contribution is very similar to the true effect.</p>
+<p>Finally, we can compute the ROAS for the <code>x1</code> and <code>x2</code> channels (again, ignoring the small carryover effect).</p>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode22" aria-expanded="false" aria-controls="collapseibleCode22">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode22" class="collapse">
+                <div class="hll"><pre><span></span><span class="n">roas_posterior</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">channels_contribution_original_scale</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="p">)</span>
+    <span class="o">/</span> <span class="n">model_df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
+<span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span>
+    <span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="s2">&quot;constrained&quot;</span>
+<span class="p">)</span>
+
+<span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span><span class="p">(</span><span class="n">roas_posterior</span><span class="p">,</span> <span class="n">ref_val</span><span class="o">=</span><span class="p">[</span><span class="n">true_roas_x1</span><span class="p">,</span> <span class="n">true_roas_x2</span><span class="p">],</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;x1&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;x2&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;ROAS Posterior Distribution&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.05</span><span class="p">);</span>
+</pre></div>
+
+            </div>
+            <p><img src="mmm_roas_31_0.png" alt="png"></p>
+<p>We see that the ROAS for <code>x1</code> is very different from the true value. This is reflecting the bias induced by the unobserved confounder <code>z</code>. The models suggests that <code>x1</code> is more effective than <code>x2</code>, but we know from the data generating process that <code>x2</code> is more effective!</p>
+<h2 id="lift-test-model">Lift Test Model</h2><p>Now we fit a model with some lift tests. We will use the same model configuration as before, but we free the priors of the beta channel coefficients as these are included in the saturation function parametrization. In general, we expect lift tests priors or associated custom likelihoods to be better than the cost share prior.</p>
+<div class="hll"><pre><span></span><span class="n">model_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;intercept&quot;</span><span class="p">:</span> <span class="n">Prior</span><span class="p">(</span><span class="s2">&quot;Normal&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">20</span><span class="p">),</span>
+    <span class="s2">&quot;likelihood&quot;</span><span class="p">:</span> <span class="n">Prior</span><span class="p">(</span><span class="s2">&quot;Normal&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">Prior</span><span class="p">(</span><span class="s2">&quot;HalfNormal&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+    <span class="s2">&quot;gamma_fourier&quot;</span><span class="p">:</span> <span class="n">Prior</span><span class="p">(</span><span class="s2">&quot;Normal&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;fourier_mode&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;intercept_tvp_config&quot;</span><span class="p">:</span> <span class="n">HSGPKwargs</span><span class="p">(</span>
+        <span class="n">m</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eta_lam</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">ls_mu</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">ls_sigma</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">cov_func</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;adstock_alpha&quot;</span><span class="p">:</span> <span class="n">Prior</span><span class="p">(</span><span class="s2">&quot;Beta&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;channel&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;saturation_lam&quot;</span><span class="p">:</span> <span class="n">Prior</span><span class="p">(</span><span class="s2">&quot;Gamma&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;channel&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;saturation_beta&quot;</span><span class="p">:</span> <span class="n">Prior</span><span class="p">(</span><span class="s2">&quot;HalfNormal&quot;</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;channel&quot;</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="n">mmm_lift</span> <span class="o">=</span> <span class="n">MMM</span><span class="p">(</span>
+    <span class="n">adstock</span><span class="o">=</span><span class="n">GeometricAdstock</span><span class="p">(</span><span class="n">l_max</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span>
+    <span class="n">saturation</span><span class="o">=</span><span class="n">LogisticSaturation</span><span class="p">(),</span>
+    <span class="n">date_column</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
+    <span class="n">channel_columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">],</span>
+    <span class="n">time_varying_intercept</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">time_varying_media</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">yearly_seasonality</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">model_config</span><span class="o">=</span><span class="n">model_config</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># we need to build the model before adding the lift test measurements</span>
+<span class="n">mmm_lift</span><span class="o">.</span><span class="n">build_model</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+<p>In a lift study, one temporarily changes the budget of a channel for a fixed period of time, and then uses some method (for example <a href="https://causalpy.readthedocs.io/en/stable/">CausalPy</a>) to make inference about the change in sales directly caused by the adjustment.</p>
+<p><strong>Recall:</strong> A lift test is characterized by:</p>
+<ul>
+<li><code>channel</code>: the channel that was tested</li>
+<li><code>x</code>: pre-test channel spend</li>
+<li><code>delta_x</code>: change made to x</li>
+<li><code>delta_y</code>: inferred change in sales due to delta_x</li>
+<li><code>sigma</code>: standard deviation of delta_y</li>
+</ul>
+<p>An experiment characterized in this way can be viewed as two points on the saturation curve for the channel.</p>
+<p>Next, assume we have run two lift tests for the <code>x1</code> and <code>x2</code> channels. The results table looks like this:</p>
+<div class="hll"><pre><span></span><span class="n">df_lift_test</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;channel&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">,</span> <span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">],</span>
+        <span class="s2">&quot;delta_x&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">],</span>
+        <span class="s2">&quot;delta_y&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">true_roas_x1</span> <span class="o">*</span> <span class="mf">0.25</span><span class="p">,</span>
+            <span class="n">true_roas_x2</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">,</span>
+            <span class="n">true_roas_x1</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">,</span>
+            <span class="n">true_roas_x2</span> <span class="o">*</span> <span class="mf">0.25</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">df_lift_test</span>
+</pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>channel</th>
+      <th>x</th>
+      <th>delta_x</th>
+      <th>delta_y</th>
+      <th>sigma</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>x1</td>
+      <td>0.25</td>
+      <td>0.25</td>
+      <td>23.347033</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>x2</td>
+      <td>0.10</td>
+      <td>0.10</td>
+      <td>17.140880</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>x1</td>
+      <td>0.80</td>
+      <td>0.80</td>
+      <td>74.710505</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>x2</td>
+      <td>0.25</td>
+      <td>0.25</td>
+      <td>42.852201</td>
+      <td>3</td>
+    </tr>
+  </tbody>
+</table>
+</div><p><strong>Remark:</strong> Note that we have added the true ROAS for the <code>x1</code> and <code>x2</code> channels implicit to the <code>df_lift_test</code> table. We add them by multiplying the <code>delta_y</code> as this is what we would have observed if we had run the lift test (or similar values). In the simulation <a href="https://juanitorduz.github.io/mmm_roas/">Media Mix Model and Experimental Calibration: A Simulation Study</a>, the author included these "true" values into the prior for the ROAS.</p>
+<p>Now, we fit the model with the lift test measurements.</p>
+<div class="hll"><pre><span></span><span class="n">mmm_lift</span><span class="o">.</span><span class="n">add_lift_test_measurements</span><span class="p">(</span><span class="n">df_lift_test</span><span class="o">=</span><span class="n">df_lift_test</span><span class="p">)</span>
+</pre></div>
+<div class="hll"><pre><span></span><span class="n">_</span> <span class="o">=</span> <span class="n">mmm_lift</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_kwargs</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">mmm_lift</span><span class="o">.</span><span class="n">sample_posterior_predictive</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">extend_idata</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="n">rng</span>
+<span class="p">)</span>
+</pre></div>
+<p>Again, we verify that we do not have divergent transitions.</p>
+<div class="hll"><pre><span></span><span class="c1"># Number of diverging samples</span>
+<span class="n">mmm_lift</span><span class="o">.</span><span class="n">idata</span><span class="p">[</span><span class="s2">&quot;sample_stats&quot;</span><span class="p">][</span><span class="s2">&quot;diverging&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+</pre></div>
+<pre><code>0
+</code></pre>
+<p>Let's plot the components' contributions as we did before.</p>
+<div class="hll"><pre><span></span><span class="n">mmm_lift</span><span class="o">.</span><span class="n">plot_components_contributions</span><span class="p">(</span><span class="n">original_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">);</span>
+</pre></div>
+<p><img src="mmm_roas_45_0.png" alt="png"></p>
+<p>As before, we have recovered the non-linear trend component and the yearly seasonality.</p>
+<p>Now, let's compute the channel contributions to the true ones.</p>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode23" aria-expanded="false" aria-controls="collapseibleCode23">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode23" class="collapse">
+                <div class="hll"><pre><span></span><span class="n">channels_contribution_original_scale</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">mmm_lift</span><span class="o">.</span><span class="n">compute_channel_contribution_original_scale</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">channels_contribution_original_scale_hdi</span> <span class="o">=</span> <span class="n">az</span><span class="o">.</span><span class="n">hdi</span><span class="p">(</span>
+    <span class="n">ary</span><span class="o">=</span><span class="n">channels_contribution_original_scale</span>
+<span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span>
+    <span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="s2">&quot;constrained&quot;</span>
+<span class="p">)</span>
+
+<span class="n">amplitude</span> <span class="o">=</span> <span class="mi">100</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">]):</span>
+    <span class="c1"># HDI estimated contribution in the original scale</span>
+    <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">model_df</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">],</span>
+        <span class="n">y1</span><span class="o">=</span><span class="n">channels_contribution_original_scale_hdi</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">channel</span><span class="o">=</span><span class="n">x</span><span class="p">)[</span><span class="s2">&quot;x&quot;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="n">y2</span><span class="o">=</span><span class="n">channels_contribution_original_scale_hdi</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">channel</span><span class="o">=</span><span class="n">x</span><span class="p">)[</span><span class="s2">&quot;x&quot;</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;C</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">rf</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2"> $94\%$ HDI contribution&quot;</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">lineplot</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">_effect&quot;</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">raw_df</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">_effect&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="n">amplitude</span> <span class="o">*</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">_effect&quot;</span><span class="p">]}),</span>  <span class="c1"># noqa B023</span>
+        <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;C</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2"> effect&quot;</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;center left&quot;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+    <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Channel </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+
+            </div>
+            <p><img src="mmm_roas_48_0.png" alt="png"></p>
+<p>The contributions look much better and they are very close to the ones of the original blog post! Hence, <strong>these two approaches are very similar</strong>. However note that the PyMC-Marketing approach is more flexible as it allows to enrich the estimates with more test and different media spends to have a better understanding of the saturation effect.</p>
+<p>Finally, let's compute the ROAS for the <code>x1</code> and <code>x2</code> channels.</p>
+
+            <p>
+                <button class="btn btn-primary btn-code-toggle collapsed" type="button" data-toggle="collapse" data-target="#collapseibleCode24" aria-expanded="false" aria-controls="collapseibleCode24">
+                    Toggle code
+                </button>
+            </p>
+            <div id="collapseibleCode24" class="collapse">
+                <div class="hll"><pre><span></span><span class="n">roas_posterior</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">channels_contribution_original_scale</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s2">&quot;date&quot;</span><span class="p">)</span>
+    <span class="o">/</span> <span class="n">model_df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
+<span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span>
+    <span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="s2">&quot;constrained&quot;</span>
+<span class="p">)</span>
+
+<span class="n">az</span><span class="o">.</span><span class="n">plot_posterior</span><span class="p">(</span><span class="n">roas_posterior</span><span class="p">,</span> <span class="n">ref_val</span><span class="o">=</span><span class="p">[</span><span class="n">true_roas_x1</span><span class="p">,</span> <span class="n">true_roas_x2</span><span class="p">],</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;x1&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;x2&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;ROAS Posterior Distribution&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.05</span><span class="p">);</span>
+</pre></div>
+
+            </div>
+            <p><img src="mmm_roas_51_0.png" alt="png"></p>
+<p>The estimates are very very close to the true ROAS! We do get from the model that <code>x2</code> is more effective than <code>x1</code>, which is aligned with the lift test results!</p>
+<h2 id="conclusion">Conclusion</h2><p>In this notebook, we have seen a concrete example of how media mix models can provide bias estimates when we have unobserved confounders in the model specification. Ideally, we'd add the confounder, but in the absence of that, we need to provide a reality anchor to the model to have meaningful estimates. We have shown that the PyMC-Marketing approach of adding lift test measurements to the model is very similar to the one proposed in the paper <a href="https://research.google/pubs/media-mix-model-calibration-with-bayesian-priors/">Media Mix Model Calibration With Bayesian Priors</a> and the blog post <a href="https://juanitorduz.github.io/mmm_roas/">Media Mix Model and Experimental Calibration: A Simulation Study</a>.
+However, the PyMC-Marketing approach is more flexible as it allows enriching the estimates with more lift tests and different media spending to better understand the saturation effect. We have also seen why it is essential to include the lift test measurements in the model to account for the unobserved confounders and better understand the saturation effect.</p>
+
+	<!--THIS IS THE FOOTER OF THE BLOGPSOT-->
+	<hr> 
+		<!--div class="container"-->
+			<h2 class="font-roboto">Work with PyMC Labs</h2>
+			<p>If you are interested in seeing what we at PyMC Labs can do for you, then please email <a href="mailto:info@pymc-labs.com">info@pymc-labs.com</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity.
+
+We also run <a href="https://www.pymc-labs.com/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics.
+			</p>
+		<!--/div-->
+    
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBottom"
+                aria-controls="navbarBottom" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarBottom">
+                <ul class="navbar-nav ml-auto">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-brands fa-twitter"
+                                aria-hidden="true"></i>
+                            Twitter</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-brands fa-github"
+                                aria-hidden="true"></i>
+                            GitHub</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-brands fa-linkedin"
+                                aria-hidden="true"></i>
+                            LinkedIn</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-brands fa-youtube"
+                                aria-hidden="true"></i>
+                            YouTube</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-brands fa-meetup"
+                                aria-hidden="true"></i>
+                            Meetup</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                aria-hidden="true"></i>
+                            Newsletter</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/privacy-policy"><i class="fa fa-solid fa-lock"
+                                aria-hidden="true"></i>
+                            Privacy Policy</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/impressum"><i class="fa fa-solid fa-info-circle"
+                                aria-hidden="true"></i>
+                            Impressum</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+</body>
+
+</html>

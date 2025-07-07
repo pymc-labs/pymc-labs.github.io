@@ -1,0 +1,411 @@
+<!doctype html><html lang="en">
+
+<head>
+    
+
+    <style media="screen">
+        body {
+            padding-top: 70px;
+            padding-bottom: 70px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            display: inline-block;
+            /* Ensures that the heading and the span are on the same line */
+            margin: 0;
+            /* Optional: Reset margin for better control */
+            position: relative;
+            /* Ensures that the span can be positioned relative to the heading */
+        }
+
+        .copy-span {
+            cursor: pointer;
+            /* Changes the cursor to a pointer when hovering over the # */
+            color: #81C240;
+            /* Sets the color of the # */
+            margin-left: 5px;
+            /* Adds some space between the heading text and the # */
+            font-size: 0.9em;
+            /* Adjusts the font size of the # to be slightly smaller relative to the heading */
+            visibility: hidden;
+            /* Initially hides the # */
+        }
+
+        h1:hover .copy-span,
+        h2:hover .copy-span,
+        h3:hover .copy-span,
+        .copy-span:hover {
+            visibility: visible;
+            text-decoration: none;
+            color: #81C240;
+            /* Makes the # visible when hovering over the heading or the span */
+        }
+    </style>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="../../static/css/custom_style.css?h=00853bf3">
+    <link rel="stylesheet" href="../../static/css/table_style.css?h=c677f945">
+
+    <!-- Highlight.js for syntax highlighting -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- Extra meta tags: social site cards, browser icons... -->
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+
+    <title>Application of Bayesian Computation in Finance - PyMC Labs</title>
+
+    <!-- Open Graph -->
+    <meta name="twitter:card" content="summary">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/bayesian_computation_in_finance/" />
+    <meta property="og:title" content="Application of Bayesian Computation in Finance - PyMC Labs" />
+    <meta property="og:description" content="" />
+    <meta property="og:image" content="https://pymc-labs.github.io/blog-posts/bayesian_computation_in_finance/cover.png" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@pymc_labs">
+    <meta name="twitter:url" content="https://pymc-labs.github.io/blog-posts/bayesian_computation_in_finance/">
+    <meta name="twitter:title" content="Application of Bayesian Computation in Finance - PyMC Labs">
+    <meta name="twitter:description" content="">
+    <meta name="twitter:image" content="https://pymc-labs.github.io/blog-posts/bayesian_computation_in_finance/cover.png">
+
+    <link rel="canonical" href="">
+    <meta name="description" content="We are a Bayesian consulting firm specializing in data analysis and predictive modeling. Contact us today to learn how we can help your business.">
+    <meta name="keywords" content="Bayesian consulting, data analysis, predictive modeling">
+
+    <!-- Highlight.js for syntax highlighting -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+    <!-- <script>hljs.highlightAll();</script> -->
+
+    <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+    <!-- We use this to do syntax highlighting -->
+    <link rel="stylesheet" href="../../static/pygments.css">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Base URL of the page (removing any existing fragment part)
+            const baseURL = window.location.href.split('#')[0];
+            // Select all h3 elements within elements of class 'blogpost'
+            const h3Elements = document.querySelectorAll('h3, h2, h1');
+            h3Elements.forEach((element) => {
+                const copyAnchor = document.createElement('a');
+                copyAnchor.textContent = `#`;
+                copyAnchor.classList.add('copy-span'); // Add a class for styling
+                copyAnchor.setAttribute('href', baseURL+`#${element.id}`); // Set href attribute to a placeholder
+                copyAnchor.setAttribute('title', 'Copy URL to clipboard'); // Tooltip text
+                // Insert the anchor after the <h1>, <h2>, or <h3> element
+                element.appendChild(copyAnchor);
+            });
+        });
+    </script>
+
+    
+<script src="../../static/scripts/toggle_code.js?h=3a00c72f" defer></script>
+
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container">
+            <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+            <a class="navbar-brand" href="/"><img alt="logo" loading="eager" width="88" height="70" title="logo"
+                    class="navbar-logo" src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop"
+                aria-controls="navbarTop" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarTop">
+                <ul class="navbar-nav ml-auto">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                aria-hidden="true"></i>
+                            What we do</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                aria-hidden="true"></i>
+                            Products</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                aria-hidden="true"></i>
+                            Team</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                aria-hidden="true"></i>
+                            Clients</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                aria-hidden="true"></i>
+                            Workshops</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                aria-hidden="true"></i>
+                            Blog</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 blogpost">
+        <h2 class="font-roboto">Application of Bayesian Computation in Finance</h2>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-6 author_name">
+                <small class="text-muted">AUTHORED BY</small>
+                <p class="font-bold">
+                    
+
+
+
+    
+
+
+
+    
+        Camilo Saldarriaga
+    
+
+
+
+                </p>
+            </div>
+            <div class="col-md-6 author_date">
+                <!-- <p>2025-05-29</p> -->
+                
+<small class="text-muted">DATE</small>
+<p class="font-lighter">2025-05-29</p>
+
+<!--<div class="cover-blogposts"><img src="../../static/images/blog_post/cover.jpg?h=653e9b57"></div>-->
+
+            </div>
+        
+            
+                <div class="blog-cover-container">
+                    <img loading="lazy" title="cover image" alt="" class="cover-blogposts" src="cover.png">
+                </div>
+            
+	    </div>
+        <hr> <p style="text-align: center;">
+  <em>Figure 1: Bayesian CAPM regression</em><br>
+</p><p><img src="capm_example_0.svg" alt="svg"></p>
+<p>Finance is the study of risk, and financial analysis is the study of decision-making under risk. No field stands to benefit more from the uncertainty quantification offered by Bayesian analysis. Today, thanks to decades of optimization, advanced algorithms can solve sophisticated financial models in seconds. <em><a href="https://pypi.org/project/pymc/">PyMC</a></em> is at the forefront of delivering these algorithms to users across a wide range of scientific fields and disciplines. Finance, however, has lagged behind. In this article, we highlight three ways in which financial analysis can benefit from the Bayesian toolkit:</p>
+<ol>
+<li><p>Modeling and quantifying uncertainty — essential for risk assessment.</p>
+</li>
+<li><p>Overcoming the restrictive assumptions of traditional econometric models.</p>
+</li>
+<li><p>Managing complex model structures involving non-normal and exotic probability distributions.</p>
+</li>
+</ol>
+<p>The accelerated progress in Bayesian computational methods over the past decade has led to widespread adoption of Bayesian statistical techniques across numerous scientific fields and industries. Open-source packages such as <em><a href="https://pypi.org/project/pymc/">PyMC</a></em> have significantly broadened access to advanced Bayesian inference techniques. Despite clear advantages and alignment with industry requirements, however, Bayesian statistical techniques remain relatively underutilized in the financial industry. The resulting underutilization of Bayesian methods represents a massive opportunity, as they offer several compelling benefits for financial applications.</p>
+<h1 id="what-are-bayesian-statistics">What are Bayesian Statistics?</h1><p>Bayesian statistics is the native language of probability. It allows you to encode your beliefs about the world as probability distributions, and then test those beliefs against data. Most powerfully, the result of this test is another probability distribution—representing all plausible model configurations that could have generated the data.</p>
+<p>Unlike traditional frequentist statistics, which treats parameters as fixed but unknown constants, Bayesian methods view parameters as random variables with explicit probability distributions. In contrast with an OLS regression, which returns only a single estimate with an opaque confidence interval, the Bayesian approach provides a clear and interpretable output. For example, after observing data, you might be 95% certain that a value lies within a specific range. Moreover, these distributions can be further manipulated—propagating and preserving uncertainty as abstract model parameters are translated into actionable business metrics.</p>
+<p>One of the most compelling advantages of Bayesian statistics in finance is that, unlike other approaches, the Bayesian framework offers a single, simple, and universal estimator: the posterior. This stands in sharp contrast to other approaches, where model assumptions often impose severe restrictions on the types of problems that can be addressed with each estimator. Once a model and prior beliefs — which can encode hard-earned domain knowledge about markets, instruments, or investor behavior — are specified, the posterior becomes the central tool for all downstream analysis.</p>
+<p>The posterior not only yields parameter estimates but also gives analysts immediate access to everything needed to make informed decisions. It enables simulation from generative models, direct quantification of uncertainty, and coherent testing of hypotheses or counterfactuals. In the inherently noisy and uncertain world of finance, this comprehensive and structured approach is especially powerful. It allows practitioners to incorporate prior market understanding, respond flexibly to new data, and rigorously assess the risks or plausibility of future scenarios — all from a single inferential engine.</p>
+<p>The last few decades have witnessed remarkable progress in Bayesian computational methods, transforming what was once a theoretically elegant but intractable approach into a practical tool set for complex real-world problems. The refinement of Markov Chain Monte Carlo (MCMC) methods revolutionized Bayesian computation by providing ways to sample from complex posterior distributions that lack closed-form solutions. PyMC has lead the way in democratizing access to powerful Bayesian tools, by combining a user-friendly API, a permissive open-source license, and best-in-class implementations of cutting edge algorithms.</p>
+<h1 style="text-align: center;">Why use it in finance</h1><h2 id="uncertainty-quantification">Uncertainty Quantification</h2><p>One of the most impactful contributions of Bayesian statistics to finance is their natural ability to quantify model uncertainty. Traditional financial models often rely on single-point estimates—one “best guess” of expected returns or risk exposures. But financial data is noisy, and the structure of markets is constantly shifting.</p>
+<p>Bayesian inference does not return a single model; it returns a posterior distribution over a family of plausible models, each consistent with the observed data and prior beliefs. This means that instead of selecting one model and ignoring the rest, we can propagate the full range of model uncertainty through to our forecasts and decisions. To illustrate this, consider a simple but ubiquitous model: a basic linear regression to estimate the CAPM. As seen on Figure 2, the Bayesian approach gives us not just a single estimate of market beta, but a distribution over them. This allows us to simulate from an ensemble of models that are all consistent with the data. This ensemble forecasting approach enables more robust backtesting and scenario analysis, helping practitioners avoid overconfidence and better understand the range of possible outcomes. By embracing model uncertainty, we reduce one of the most pervasive and underacknowledged sources of risk in financial modeling.</p>
+<p style="text-align: center;">
+  <em>Figure 2: Quantifying parameter uncertainty</em><br>
+</p><p><img src="uncertainty.svg" alt="svg"></p>
+<p>In asset pricing or risk factor models, treating parameters as fixed can lead to severe underestimation of tail risks, excessive confidence in model forecasts, and fragile investment strategies that fail under real-world deviations. In contrast, Bayesian approach enables analysts to visualize the range of plausible parameter values, detect features like multimodality, and examine dependencies between parameters, we can observe an example of this on Figure 3.</p>
+<p style="text-align: center;">
+  <em>Figure 3: Full distribution estimate vs. frequentist point estimate</em><br>
+</p><p><img src="bayesian_vs_freq.svg" alt="svg"></p>
+<h2 id="not-everything-is-normal">Not everything is normal!</h2><p>Traditional financial econometric models—such as ordinary least squares (OLS) regression, and standard time series methods—typically assume that model residuals (errors) follow a normal distribution for inference purposes. This assumption simplifies inference and underpins key procedures like hypothesis testing and confidence interval construction. But financial data is well known to violate this assumption, exhibiting skewness, heavy tails, and excess kurtosis. These features can lead to biased estimates, underestimated risk, and unreliable conclusions when using traditional methods.</p>
+<p>Bayesian statistics offers a more flexible framework. Rather than assuming normally distributed errors, Bayesian models allow the analyst to specify alternative distributions that better reflect empirical realities. With probabilistic programming tools like PyMC, this boils down to a one-line change of the observation distribution, with access to a large pool of explicit alternative distributions to choose from such as skew-normal, Laplace, or generalized hyperbolic distributions. This flexibility enhances the robustness of parameter estimates and improves predictive performance, especially in the presence of non-normal data.</p>
+<p>This point can also be illustrated with a simple CAPM regression. Let's assume assume a linear data-generating process: 
+$excess \ returns=0.1+1.2 * market \ returns +\boldsymbol{\varepsilon}$, with known co-variate $market \ returns$ 
+and an error term $\boldsymbol{\varepsilon}$ that is drawn from a distribution with strong negative skewness and heavy tails. As shown in Figure 4, the OLS regression line (in red) significantly deviates from the true line (black dashed), producing a biased slope estimate. Figure 4 further reveals that the OLS residuals deviate sharply from normality, invalidating standard OLS inference.</p>
+<p>In contrast, a Bayesian approach implemented in PyMC directly accommodates the non-normal error structure. By defining a custom likelihood based on the Skewed Student’s T-distribution, we allow the model to learn not only the intercept and slope but also the shape of error distribution. The resulting Bayesian estimate of the $beta$ (green line in Figure 4) closely matches the true value. Importantly, no math or special estimators are required to achieve this result! We only specify that we believe, a priori, that errors might have negative skew and long tails, and the magic of Bayesian inference does the rest. In the lower segment of Figure 4, the mismatch between OLS residuals and the normal distribution becomes clear, reinforcing the need for more flexible error modeling.</p>
+<p style="text-align: center;">
+  <em>Figure 4: Skewed errors — OLS bias vs Bayesian robustness</em><br>
+</p><p><img src="OLS_vs_bayesian.svg" alt="svg"></p>
+<p>This particular example underscores how PyMC provides powerful tools for handling realistic, complex error structures in financial data.</p>
+<p>Consequently, the Bayesian framework allows you to overcome limitations imposed by restrictive assumptions about the error distribution, freeing your mind to focus on the data itself rather than on a specific latent quantity — the residuals — which you may have little to no intuition about.</p>
+<p>Bayesian statistics also offer remarkable flexibility in specification of the underlying distribution of the data itself. Traditional methods that often assume the dependent variable follows a normal or log-normal distribution. It is well-established, however, that financial variables such as asset returns, risk premia, and volatility often deviate substantially from the Gaussian assumption. These variables frequently exhibit heavy tails, skewness, and volatility clustering. These features are often not captured adequately by traditional models. Ignoring them can lead to systematic underestimation of risk and misleading inference. This can be particularly pernicious in stress scenarios or tail events that matter most for financial decision-making.</p>
+<p>Bayesian paradigm enables the use of alternative statistical distributions that better capture the empirical features of financial variables. For example, asset returns can be modeled using skewed distributions to account for asymmetry, or heavy-tailed distributions such as the Laplace or generalized hyperbolic to represent extreme market movements more realistically. In Bayesian modeling, these choices are not constrained by closed-form solutions, as posterior inference is performed through numerical methods such as Markov Chain Monte Carlo (MCMC).</p>
+<p>A practical example of this flexibility is the use of the skew-normal distribution to model asset returns. In many financial markets, due to asymmetric information, regulatory effects, or behavioral biases, return distributions exhibit systematic skewness. For instance, equity returns often display left-skewness, reflecting a higher probability of large negative shocks. Using PyMC, it is straightforward to specify a model in which returns are assumed to follow a skew-normal distribution, allowing one to capture these asymmetries directly within the likelihood function. This results in more realistic risk estimates and posterior inferences that appropriately reflect the downside risk—critical for risk management, option pricing, and stress testing.</p>
+<p style="text-align: center;">
+  <em>Figure 5: Modeling a skewed distribution</em><br>
+</p><p><img src="skewd returns.svg" alt="svg"></p>
+<p>Another example, are compound returns over multiple periods. As these returns are calculated as the cumulative product of $(1 + return)$, This will, under certain assumptions, give rise to a lognormal distribution. This property is relevant in modeling long-term investment outcomes, portfolio growth, or asset price trajectories. In Bayesian frameworks like PyMC, this behavior can be explicitly modeled by specifying lognormal priors or likelihoods, offering a more coherent probabilistic interpretation of compounded wealth and accommodating uncertainty in both parameter estimates and structural assumptions.</p>
+<p style="text-align: center;">
+  <em>Figure 6: Modeling terminal values with lognormal distribution</em><br>
+</p><p><img src="terminal_value_ex.svg" alt="svg"></p>
+<p>Beyond standard skewed or heavy-tailed distributions, PyMC also supports the use of more exotic families, such as the generalized hyperbolic distribution or mixture models. These are particularly powerful in contexts like high-frequency trading or credit risk, where data can exhibit extreme kurtosis, multimodality, or time-varying heteroskedasticity.</p>
+<h2 id="risk-management-and-probabilistic-modeling-a-perfect-match">Risk management and probabilistic modeling: a perfect match</h2><p>Bayesian statistics offers a compelling framework for risk management in finance. Probabilistic outputs are especially useful for financial decision-making, where uncertainty is not a peripheral consideration but a central feature of the environment.</p>
+<p>In risk management, the ability to quantify and propagate uncertainty through models is critical. Armed with a posterior distribution, financial analysts can construct comprehensive risk profiles. These profiles fully capture the range of plausible outcomes and their associated probabilities, providing a much richer basis for evaluating exposure, stress testing, and designing hedging strategies. For example, in estimating future losses, Bayesian models can generate posterior predictive distributions that capture not just the central tendency but also the asymmetry and fat tails that often characterize financial data.</p>
+<p>These techniques can be used to enhance Value-at-Risk (VaR) methodologies. Traditional VaR models typically rely on strong assumptions—such as normally distributed returns and constant volatility—that often fail during periods of market stress. A Bayesian approach allows the analyst to incorporate arbitrary distributions for modeling returns. Plus, it allows the inclusion of uncertainty in parameters and predictions of the return model. Using PyMC, one can construct a Bayesian VaR model by specifying a data generating distribution for returns obtaining probability distributions over parameters of interest.</p>
+<p>This probabilistic VaR estimate is more robust than classical VaR because it reflects not only the risk inherent in future returns but also uncertainty in the underlying model parameters. Moreover, the Bayesian framework naturally extends to conditional VaR (or expected shortfall), scenario analysis, and stress testing. For instance, posterior samples can be used to generate plausible market stress scenarios that account for the joint distribution of multiple risk factors. These scenarios are internally consistent and probabilistically grounded, making them more reliable than ad hoc stress tests.</p>
+<p>We present a brief example of Value at Risk (VaR) estimation for an equally weighted portfolio composed of three stocks: Apple, JPMorgan, and Pfizer. Two traditional VaR approaches are first computed: Historical VaR, which directly uses a lower percentile (e.g., the 5th percentile) of the observed historical portfolio returns; and Parametric (Normal) VaR, which assumes normally distributed returns and derives the VaR using the historical mean and standard deviation.</p>
+<p>We then develop a Bayesian model using PyMC, specifying a Student’s t-distribution as the likelihood function for portfolio returns. This model allows for greater flexibility by explicitly modeling the heavy tails and potential outliers. The Bayesian inference process estimates not only the location and scale parameters but also the degrees of freedom, which control the thickness of the tails. The resulting probability distribution of the predicted values reflects a higher likelihood of extreme negative returns compared to the normal assumption. Consequently, the Bayesian VaR more accurately captures extreme outcomes, providing a more robust estimate of potential portfolio losses and their respective probabilities.</p>
+<p style="text-align: center;">
+  <em>Figure 7: Bayesian Value at Risk</em><br>
+</p><p><img src="var.svg" alt="svg"></p>
+<h2 id="option-pricing">Option pricing</h2><p>The same Bayesian framework that enhances risk management also offers powerful tools for option pricing. Both domains share a core challenge: making informed decisions under uncertainty. In risk management, we focused on modeling extreme losses and understanding the distribution of potential outcomes. In option pricing, the challenge lies in valuing derivative contracts when key inputs are uncertain.</p>
+<p>PyMC offer several major benefits for improving option pricing models, particularly when uncertainty around inputs—such as volatility, interest rates, or underlying asset dynamics—is significant. Traditional models like Black-Scholes assume fixed parameters, leading to a single-point estimate of the option price. In reality, however, these parameters are uncertain and often time-varying. This enables to capture the inherent uncertainty in the option pricing inputs and propagate it through to the pricing outputs.</p>
+<p>Furthermore, PyMC models are natively data-generating engines, which can be used to perform Monte Carlo simulations for complex option pricing problems—especially when closed-form solutions are unavailable. Once the posterior distributions of the model parameters (e.g., volatility or drift in a stochastic process) have been estimated via Bayesian inference, one can simulate thousands of future paths for the underlying asset using these distributions by running the same PyMC model in "forward" (or simulation) mode. For each simulated path, the payoff of the option can be computed and discounted back to present value. This yields a posterior distribution of the option’s price, from which summary statistics (e.g., posterior mean price, credible intervals, tail risk metrics) can be derived.</p>
+<p>A major advantage is that PyMC handles high-dimensional simulation natively through vectorization and labeled dimensions. Once the core model is defined, users can simply call sample_prior_predictive, and PyMC will automatically handle broadcasting, simulation structure, and the dimensionality of inputs and outputs—eliminating the need to manually manage loops or reshape arrays.</p>
+<p>Here we implement the pricing of an American put option for Apple by explicitly accounting for uncertainty in the underlying asset's volatility. Instead of assuming a fixed volatility, we employ a Bayesian statistical model using PyMC to estimate the probability distribution of the daily volatility parameter, treating it as an unknown quantity inferred from the historical returns. The result is not a single volatility number but a posterior distribution representing plausible volatility values given the observed data. The core pricing then uses the Longstaff-Schwartz Monte Carlo (LSMC) algorithm, which simulates numerous potential stock price paths according to Geometric Brownian Motion and uses regression to estimate the optimal early exercise strategy characteristic of American options. Crucially, this LSMC simulation is performed repeatedly, with each run drawing a different volatility value from the previously estimated Bayesian posterior distribution. The final output is therefore a distribution of potential option prices. This can be visualized alongside the input data, the inferred volatility distribution, and the relationship between volatility and price. Together, these elements offer a comprehensive view of the pricing process under uncertainty.</p>
+<p style="text-align: center;">
+  <em>Figure 8: Bayesian Option Pricing</em><br>
+</p><p><img src="option_pricing.png" alt=""></p>
+<p>The primary contribution of the Bayesian methodology here is the rigorous quantification and propagation of parameter uncertainty, specifically regarding volatility. Traditional option pricing often relies on a single point estimate for volatility (like historical or implied volatility), implicitly ignoring the fact that this parameter is itself uncertain. The Bayesian approach, by contrast, explicitly models volatility as a random variable and uses the historical data to derive its posterior probability distribution. This distribution captures the range of likely volatility values and our degree of belief in each. By subsequently integrating over this entire distribution, the resulting distribution of option prices directly reflects the impact of this volatility uncertainty. This yields a more robust and informative result than a single price estimate, which is crucial for risk management and understanding the sensitivity of the option price to market conditions.</p>
+<h2 id="additional-topics">Additional topics</h2><p>The final key advantage of PyMC for financial modeling is its flexibility in handling complex and hierarchical structures—features that frequently arise in financial data. Financial markets are rarely uniform. For example, different assets may exhibit varying levels of volatility, sectors may respond differently to macroeconomic shocks. PyMC makes it easy to build hierarchical Bayesian models in which parameters can vary across groups while still sharing information through higher-level distributions. This partial pooling approach introduces automatic regularization and leads to more robust inference, particularly in environments with sparse or noisy data.</p>
+<p>Moreover, PyMC enables professionals to flexibly construct models that go beyond the limitations of traditional parametric frameworks. In financial applications, it is often necessary to account for nonlinear relationships, latent variables, and time-varying dynamics that cannot be easily captured using standard econometric techniques. PyMC supports a wide range of model types, including state-space models, hidden Markov models, and Gaussian Processes, all of which can be adapted to reflect the evolving nature of financial markets.</p>
+<p>Bayesian methods extend naturally to time series analysis through state space models (SSMs), which are well-suited for capturing the dynamic and complex nature of financial data. PyMC enables flexible modeling of latent components such as trend, seasonality, and dynamic regression relationships that evolve over time, allowing for interpretable forecasts and rigorous uncertainty quantification. If you want to learn more about this module, check out our webinar: <a href="https://youtu.be/G9VWXZdbtKQ">webinar link</a></p>
+<p>On the computational side, for large-scale financial applications, PyMC’s integration with PyTensor brings powerful optimization and acceleration capabilities. PyTensor’s ability to compile highly optimized, numerically stable code for CPUs (and, through its integration with JAX, and PyTorch, GPUs) makes it ideal for handling the computational demands of large-scale financial modeling, from Monte Carlo simulations to real-time risk assessment.</p>
+<h1 id="conclusions">Conclusions</h1><p>This blog post has highlighted several critical advantages of Bayesian techniques in finance: their ability to accommodate non-Gaussian features in error terms and return distributions, their intuitive and comprehensive approach to uncertainty quantification, and their capacity to model real-world phenomena such as asymmetry, fat tails, and compounding effects. Each of these dimensions reveals an opportunity to go beyond traditional econometrics approaches by adopting the Bayesian paradigm.</p>
+<p>By leveraging modern computational tools like PyMC and its PyTensor backend, finance professionals can reap the benefits of Bayesian statistics. Embracing Bayesian statistics not only enhances the analytical rigor of financial modeling but also equips practitioners to better navigate uncertainty, providing an essential advantage in today’s rapidly evolving financial landscape.</p>
+<h3 id="working-with-pymc">Working with PyMC</h3><p>If you are interested in seeing what we at PyMC Labs can do for you, then please email info\@pymc-labs.com. We work with companies at a variety of scales and with varying levels of existing modeling capacity. We also run corporate workshop training events and can provide sessions ranging from introduction to Bayes to more advanced topics.</p>
+
+	<!--THIS IS THE FOOTER OF THE BLOGPSOT-->
+	<hr> 
+		<!--div class="container"-->
+			<h2 class="font-roboto">Work with PyMC Labs</h2>
+			<p>If you are interested in seeing what we at PyMC Labs can do for you, then please email <a href="mailto:info@pymc-labs.com">info@pymc-labs.com</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity.
+
+We also run <a href="https://www.pymc-labs.com/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics.
+			</p>
+		<!--/div-->
+    
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBottom"
+                aria-controls="navbarBottom" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarBottom">
+                <ul class="navbar-nav ml-auto">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-brands fa-twitter"
+                                aria-hidden="true"></i>
+                            Twitter</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-brands fa-github"
+                                aria-hidden="true"></i>
+                            GitHub</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-brands fa-linkedin"
+                                aria-hidden="true"></i>
+                            LinkedIn</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-brands fa-youtube"
+                                aria-hidden="true"></i>
+                            YouTube</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-brands fa-meetup"
+                                aria-hidden="true"></i>
+                            Meetup</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                aria-hidden="true"></i>
+                            Newsletter</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/privacy-policy"><i class="fa fa-solid fa-lock"
+                                aria-hidden="true"></i>
+                            Privacy Policy</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/impressum"><i class="fa fa-solid fa-info-circle"
+                                aria-hidden="true"></i>
+                            Impressum</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+</body>
+
+</html>

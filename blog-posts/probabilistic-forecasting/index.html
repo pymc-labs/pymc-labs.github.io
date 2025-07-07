@@ -1,0 +1,573 @@
+<!doctype html><html lang="en">
+
+<head>
+    
+
+    <style media="screen">
+        body {
+            padding-top: 70px;
+            padding-bottom: 70px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            display: inline-block;
+            /* Ensures that the heading and the span are on the same line */
+            margin: 0;
+            /* Optional: Reset margin for better control */
+            position: relative;
+            /* Ensures that the span can be positioned relative to the heading */
+        }
+
+        .copy-span {
+            cursor: pointer;
+            /* Changes the cursor to a pointer when hovering over the # */
+            color: #81C240;
+            /* Sets the color of the # */
+            margin-left: 5px;
+            /* Adds some space between the heading text and the # */
+            font-size: 0.9em;
+            /* Adjusts the font size of the # to be slightly smaller relative to the heading */
+            visibility: hidden;
+            /* Initially hides the # */
+        }
+
+        h1:hover .copy-span,
+        h2:hover .copy-span,
+        h3:hover .copy-span,
+        .copy-span:hover {
+            visibility: visible;
+            text-decoration: none;
+            color: #81C240;
+            /* Makes the # visible when hovering over the heading or the span */
+        }
+    </style>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="../../static/css/custom_style.css?h=00853bf3">
+    <link rel="stylesheet" href="../../static/css/table_style.css?h=c677f945">
+
+    <!-- Highlight.js for syntax highlighting -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- Extra meta tags: social site cards, browser icons... -->
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="../../static/favicon.ico?h=d935d59e">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png?h=2bad941d">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png?h=1673bb68">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png?h=089e66cb">
+
+    <title>Probabilistic Time Series Analysis: Opportunities and Applications - PyMC Labs</title>
+
+    <!-- Open Graph -->
+    <meta name="twitter:card" content="summary">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pymc-labs.github.io/blog-posts/probabilistic-forecasting/" />
+    <meta property="og:title" content="Probabilistic Time Series Analysis: Opportunities and Applications - PyMC Labs" />
+    <meta property="og:description" content="" />
+    <meta property="og:image" content="https://pymc-labs.github.io/blog-posts/probabilistic-forecasting/cover.png" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@pymc_labs">
+    <meta name="twitter:url" content="https://pymc-labs.github.io/blog-posts/probabilistic-forecasting/">
+    <meta name="twitter:title" content="Probabilistic Time Series Analysis: Opportunities and Applications - PyMC Labs">
+    <meta name="twitter:description" content="">
+    <meta name="twitter:image" content="https://pymc-labs.github.io/blog-posts/probabilistic-forecasting/cover.png">
+
+    <link rel="canonical" href="">
+    <meta name="description" content="We are a Bayesian consulting firm specializing in data analysis and predictive modeling. Contact us today to learn how we can help your business.">
+    <meta name="keywords" content="Bayesian consulting, data analysis, predictive modeling">
+
+    <!-- Highlight.js for syntax highlighting -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/styles/default.min.css"> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.0.0/highlight.min.js"></script> -->
+    <!-- <script>hljs.highlightAll();</script> -->
+
+    <!-- From: https://github.com/lektor/lektor-markdown-highlighter -->
+    <!-- We use this to do syntax highlighting -->
+    <link rel="stylesheet" href="../../static/pygments.css">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F3RDLH8R8X"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-F3RDLH8R8X');
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Base URL of the page (removing any existing fragment part)
+            const baseURL = window.location.href.split('#')[0];
+            // Select all h3 elements within elements of class 'blogpost'
+            const h3Elements = document.querySelectorAll('h3, h2, h1');
+            h3Elements.forEach((element) => {
+                const copyAnchor = document.createElement('a');
+                copyAnchor.textContent = `#`;
+                copyAnchor.classList.add('copy-span'); // Add a class for styling
+                copyAnchor.setAttribute('href', baseURL+`#${element.id}`); // Set href attribute to a placeholder
+                copyAnchor.setAttribute('title', 'Copy URL to clipboard'); // Tooltip text
+                // Insert the anchor after the <h1>, <h2>, or <h3> element
+                element.appendChild(copyAnchor);
+            });
+        });
+    </script>
+
+    
+<script src="../../static/scripts/toggle_code.js?h=3a00c72f" defer></script>
+
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container">
+            <!-- <a class="navbar-brand" href="/">PyMC Labs</a> -->
+            <a class="navbar-brand" href="/"><img alt="logo" loading="eager" width="88" height="70" title="logo"
+                    class="navbar-logo" src="../../static/images/pymc-labs-logo.png?h=999c3177'"></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop"
+                aria-controls="navbarTop" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarTop">
+                <ul class="navbar-nav ml-auto">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/what-we-do"><i class="fa fa-info-circle"
+                                aria-hidden="true"></i>
+                            What we do</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products"><i class="fa fa-shopping-cart"
+                                aria-hidden="true"></i>
+                            Products</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/team"><i class="fa fa-user-friends"
+                                aria-hidden="true"></i>
+                            Team</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/clients"><i class="fa fa-microphone"
+                                aria-hidden="true"></i>
+                            Clients</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/workshops"><i class="fa fa-chalkboard-teacher"
+                                aria-hidden="true"></i>
+                            Workshops</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/blog-posts"><i class="fa fa-book-open"
+                                aria-hidden="true"></i>
+                            Blog</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8 blogpost">
+        <h2 class="font-roboto">Probabilistic Time Series Analysis: Opportunities and Applications</h2>
+        
+        <hr>
+        <div class="row">
+            <div class="col-md-6 author_name">
+                <small class="text-muted">AUTHORED BY</small>
+                <p class="font-bold">
+                    
+
+
+
+    
+
+
+
+    
+        Juan Orduz
+    
+
+
+
+                </p>
+            </div>
+            <div class="col-md-6 author_date">
+                <!-- <p>2025-04-28</p> -->
+                
+<small class="text-muted">DATE</small>
+<p class="font-lighter">2025-04-28</p>
+
+<!--<div class="cover-blogposts"><img src="../../static/images/blog_post/cover.jpg?h=653e9b57"></div>-->
+
+            </div>
+        
+            
+                <div class="blog-cover-container">
+                    <img loading="lazy" title="cover image" alt="" class="cover-blogposts" src="cover.png">
+                </div>
+            
+	    </div>
+        <hr> <p>Over the past few years, we've witnessed the profound impact of Bayesian modeling on businesses' decisions.
+In this post, we aim to delve into a specific area where Bayesian methods have demonstrated their transformative
+potential: probabilistic forecasting models.</p>
+<p>Forecasting is a critical component of business planning across industries—from retail inventory management to 
+financial market analysis, from energy demand prediction to marketing budget allocation. Traditionally, businesses 
+have relied on point forecasts that provide a single estimate of future values. While these approaches can work 
+reasonably well under stable conditions, they often fail to capture the inherent uncertainty in real-world systems 
+and can lead to suboptimal decisions when confronted with volatile or complex environments.</p>
+<p>Probabilistic forecasting addresses these limitations by generating complete probability distributions over possible 
+future outcomes rather than single-point predictions. This paradigm shift provides decision-makers with a more 
+comprehensive view of potential scenarios, enabling robust planning that accounts for risk and uncertainty. With 
+recent advances in computational methods and Bayesian statistics, these sophisticated approaches have become 
+increasingly accessible to practitioners.</p>
+<p>In this post, we'll explore how probabilistic forecasting models can provide a competitive advantage through their 
+ability to incorporate domain expertise, handle data limitations, and model complex relationships. We'll demonstrate 
+these capabilities through several case studies that showcase practical applications across different business contexts.</p>
+<h2 id="classical-time-series-forecasting-models">Classical Time Series Forecasting Models</h2><p>In many business domains, such as logistics, retail, and marketing, we are interested in predicting the future values
+of one or more time series. Typical examples are KPIs like sales, conversions, orders, and retention. When businesses
+encounter forecasting challenges, they typically have two main approaches to consider:</p>
+<p>Use statistical methods to infer the trend, seasonality, and remainder components. Once we understand these components,
+we can use them to predict the future. Classical examples that have been widely applied are exponential smoothing and
+autoregressive models. These models are great baselines and relatively easy to fit. Use external regressors and lagged
+copies of the time series to fit a machine-learning model, such as linear regression or a gradient-boosted tree model.</p>
+<p>Depending on the data and concrete applications, either of these methods can perform very well. In fact, with modern
+open-source packages like the ones developed by <a href="https://github.com/Nixtla">Nixtla</a>, it is straightforward to test and
+experiment with these models (see <a href="https://github.com/Nixtla/statsforecast"><code>statsforecast</code></a> for statistical models
+and <a href="https://github.com/Nixtla/mlforecast"><code>mlforecast</code></a> for machine learning forecasting models)).</p>
+<p>Of course, forecasting is a well-studied domain (see, for example,
+<a href="https://otexts.com/fpp3/">Forecasting: Principles and Practice</a> for an introduction), and there are many more approaches
+and combinations of these methods. For instance,
+the article <a href="https://www.uber.com/en-DE/blog/m4-forecasting-competition/">M4 Forecasting Competition: Introducing a New Hybrid ES-RNN Model</a>
+describes a hybrid method between exponential smoothing and recurrent neural networks that outperformed many classical
+time series models in the <a href="https://forecasters.org/resources/time-series-data/">M4 competition</a>. Trying to summarize
+all the models and possibilities in a blog post is nearly impossible. Instead, we want to describe some concrete
+cases where Bayesian forecasting models can be a competitive advantage for business applications.</p>
+<h2 id="probabilistic-forecasting-models">Probabilistic Forecasting Models</h2><p>Generally speaking, when discussing probabilistic forecasting models, we often refer to a forecasting model learning
+parameters of a distribution instead of just the point forecast. For example, we can predict the mean and the standard
+deviation when using a normal likelihood. This strategy provides great flexibility, as we can better control the
+uncertainty and model the mean and variance jointly. A well-known example of these models is the
+<a href="https://arxiv.org/abs/1704.04110">DeepAR: Probabilistic Forecasting with Autoregressive Recurrent Networks</a> developed
+by Amazon Research.</p>
+<p>In addition, we can go fully Bayesian by setting priors on the model parameters. The blog post
+<a href="https://juanitorduz.github.io/exponential_smoothing_numpyro/">Notes on Exponential Smoothing with NumPyro</a>
+provides an explicit description of how to implement an <a href="https://en.wikipedia.org/wiki/Exponential_smoothing">exponential smoothing model</a>
+as a fully Bayesian probabilistic forecasting model.</p>
+<p>Okay, and so what? What benefits can we get from these types of models? We are glad you asked 😉! Next, we present various
+case studies where probabilistic forecasting models can significantly improve performance.</p>
+<h2 id="hierarchical-models">Hierarchical Models</h2><p>One typical scenario where Bayesian models shine is when we have a hierarchical structure (e.g., category levels, region groupings).
+In this case, sharing information across related groups can improve model performance by regularizing parameter
+estimation (the shrinkage effect). For a detailed description of this approach, please see the complete write-up
+<a href="https://betanalpha.github.io/assets/case_studies/hierarchical_modeling.html">Hierarchical Modeling</a>
+by <a href="https://betanalpha.github.io/">Michael Betancourt</a>. In the context of time series forecasting, we can better
+estimate trend and seasonality components by leveraging the information-sharing nature of hierarchical models.</p>
+<p>Let's look at a concrete example to illustrate this point. Consider the
+<a href="https://www.kaggle.com/datasets/luisblanche/quarterly-tourism-in-australia">quarterly tourism In Australia dataset</a>,
+where we have tourism volumes between 1998 and 2016 per state, region, and purpose. For illustration, let us consider
+forecasting these tourism volumes for each state, region, and purpose combination (308 time series). We can take a look
+at a sample from the state of "Victoria" in the following plot:</p>
+<p><img src="hierarchical_data.png" alt="png"></p>
+<p>While subtle, we see a positive trend component in most of these sample series.</p>
+<p>A natural approach would be to consider each series independently and use a time series model, such as exponential
+smoothing. This approach is a great baseline, but we can do better! In this example, there is a shared trend component
+across regions, which might not be evident in the historical data of some smaller areas. Using <em>hierarchical</em> exponential
+smoothing, we can improve the model performance, particularly for these smaller areas, as illustrated in the following plot:</p>
+<p><img src="hierarchical_exponential_smoothing.png" alt="png"></p>
+<p>We clearly see that in the test period, a mild trend component is inferred from the hierarchical structure
+(orange and green lines), which would likely not have been captured by a purely univariate time series model (pink line).</p>
+<p>The effort to adapt an exponential smoothing model to a hierarchical version is not as complicated as it might sound.
+<a href="https://juanitorduz.github.io/hierarchical_exponential_smoothing/">Here</a> you can find all the code and details to
+reproduce this result (and potentially adapt it for your application 😉).</p>
+<p><strong>Remark [Forecasting Baselines]:</strong> In this simple case, the hierarchical model performs slightly better than independent
+<a href="https://nixtlaverse.nixtla.io/statsforecast/docs/models/autoets.html"><code>AutoETS</code></a> models fitted to each individual series.
+This result reflects the general situation where strong baseline models are often hard to beat. So please establish baseline
+models and robust evaluation processes before implementing more complex models 💡!</p>
+<h2 id="censored-likelihoods">Censored Likelihoods</h2><p>In demand forecasting, we often face the challenge of censored data, where observations are only partially known.
+Censoring occurs when values above (or below) a certain threshold are unobserved or replaced with the
+threshold value itself. This is particularly relevant in retail, where sales data only captures observed demand when products
+are in stock. The true, unconstrained demand remains unobserved during stockouts or when inventory capacity limits are reached.</p>
+<p>The simulation study <a href="https://juanitorduz.github.io/demand/">Demand Forecasting with Censored Likelihood</a> demonstrates how
+Bayesian models with censored likelihoods can provide more accurate demand forecasts compared to traditional time series
+methods such as ARIMA. By simulating true demand as an AR(2) process with seasonal components and then generating censored
+sales data reflecting stockouts and capacity constraints, the study shows how traditional forecasting methods systematically
+underestimate future demand because they treat the observed sales as the complete signal.</p>
+<p>Let's examine the simulated data:</p>
+<p><img src="censored_data.png" alt="png"></p>
+<ul>
+<li>The top plot shows the true underlying demand (black) and the sales that would have occurred without availability constraints (blue).</li>
+<li>The bottom plot shows the expected sales without constraints (blue) versus the observed sales (orange) when availability
+constraints impose a maximum sales value (note: this upper bound often varies over time).</li>
+</ul>
+<p>Ultimately, we want to forecast the unconstrained demand (black curve) while only observing the constrained sales (orange curve). The
+following plot compares the forecasts from a simple AR(2) seasonal model versus the censored likelihood model:</p>
+<p><img src="censored_forecast.png" alt="png"></p>
+<p>The results highlight a significant advantage of censored likelihood models: they accurately model the underlying demand
+distribution even during periods with stockouts or capacity constraints, effectively "reconstructing" what the true demand
+would have been. This is clearly visible as the predictions (pink) from the censored model are much closer to the true demand target
+(black) than those from the simple AR(2) model (green).</p>
+<p>This modeling approach leads to forecasts that better capture both the
+true magnitude and the uncertainty of future demand. It provides critical information for inventory planning, capacity decisions,
+and revenue optimization that would be missed by conventional forecasting techniques ignoring the censoring mechanism.</p>
+<h2 id="availability-constrained-tsb-models-for-intermittent-series">Availability-Constrained TSB Models for Intermittent Series</h2><p>In retail, intermittent time series are the norm rather than the exception. While top-selling products might show regular
+daily sales patterns, <strong>the vast majority of items in a typical retail catalog exhibit sporadic demand</strong> - with many days
+showing zero sales followed by occasional purchases. This pattern is particularly common for niche products, seasonal
+items, or products with long replacement cycles. Traditional forecasting methods, often designed for continuous demand streams, struggle with these patterns.</p>
+<p>For products with sporadic demand patterns (intermittent time series), the Teunter-Syntetos-Babai (TSB) model is a
+popular forecasting approach. However, standard TSB models cannot distinguish between true zero demand (no customer interest) and zeros caused
+by product unavailability (out of stock). The case study
+<a href="https://juanitorduz.github.io/availability_tsb/">Hacking the TSB Model for Intermediate Time Series to Accommodate for Availability Constraints</a>
+demonstrates how to extend the TSB model to account for availability constraints in intermittent demand forecasting.</p>
+<p>The study, motivated by <a href="https://openforecast.org/">Ivan Svetunkov's</a> <a href="https://openforecast.org/2024/11/18/why-zeroes-happen/">"Why zeroes happen"</a> blog post,
+simulates intermittent time series using a Poisson process combined with a binary availability mask. By incorporating this
+availability information directly into the model, it prevents the estimated probability of non-zero demand from dropping excessively when zeros are observed due to unavailability rather
+than a lack of demand. The modified TSB model better preserves the true demand signal when forecasting, as it can
+distinguish between zero sales caused by unavailability versus actual zero demand. Let's look at a specific time series prediction:</p>
+<p><img src="availability_tsb.png" alt="png"></p>
+<p>Despite the fact that the last two data points of the training data are zeros, the model does not simply predict zeros for
+the next time steps, which is a common behavior for standard intermittent time series models. The reason is that the model is aware
+that these last two zeros are due to the lack of availability and not actual zero demand. Hence, when we set the
+availability to one for the future forecast period, the forecast is appropriately non-zero. This is exactly what we want 🙌!</p>
+<p>This approach demonstrates the flexibility of probabilistic models to incorporate business constraints directly into the
+forecasting process. The results show significant improvement in forecast accuracy, particularly for products with
+limited availability histories, providing more reliable demand estimates for inventory planning and allocation. The
+study also highlights how these models can be efficiently implemented and scaled to handle thousands of time series
+simultaneously, making them practical for real-world business applications.</p>
+<h2 id="calibration-and-custom-likelihoods">Calibration and Custom Likelihoods</h2><p>Probabilistic forecasting models can be further enhanced through parameter calibration using domain knowledge or
+experimental data. The case study <a href="https://juanitorduz.github.io/electricity_forecast_with_priors/">Electricity Demand Forecast with Prior Calibration</a>
+demonstrates how to incorporate external information to improve a dynamic time-series model for electricity demand
+forecasting. The core idea is to model electricity demand as a function of temperature:</p>
+<p><img src="electricity_data.png" alt="png"></p>
+<p>When examining the ratio of electricity demand to temperature, we observe that this ratio is not constant but
+depends on the temperature itself. Hence, we can use a Gaussian process to model this relationship.
+The specific model uses a Hilbert Space Gaussian Process (HSGP) to capture the potentially complex, time-varying relationship between temperature
+and electricity demand.</p>
+<p>A key innovation here is the use of a prior calibration process to constrain the estimated temperature effect on demand, particularly
+for extreme temperatures where historical data might be limited. By incorporating domain expertise on how electricity demand
+responds to very high temperatures (e.g., above 32°C due to air conditioning load), the model produces more reliable forecasts in these edge cases. The
+calibration works by adding custom likelihoods that effectively "inform" the model about expected parameter values in certain
+regimes. In this concrete example, we use a Gaussian process to model the temperature-electricity relationship while
+imposing a constraint on this ratio for high temperatures:</p>
+<p><img src="calibration.png" alt="png"></p>
+<p>This estimated effect plot aligns with the observations made in the exploratory data analysis section of
+<a href="https://otexts.com/fpp2/scatterplots.html">Forecasting: Principles and Practice (2nd ed.)</a>
+by Hyndman and Athanasopoulos:</p>
+<blockquote><p>It is clear that high demand occurs when temperatures are high due to the effect of air-conditioning. But there is also a heating effect, where demand increases for very low temperatures.</p>
+</blockquote>
+<p>Indeed, our model captures this: at the extremes of the common temperature range, the temperature effect on demand increases.
+Heating and cooling demand typically increases outside the approximate range of 15°C - 25°C.</p>
+<p>This calibration approach mirrors the methodology used in
+<a href="https://www.pymc-marketing.io/en/latest/">PyMC Marketing's</a> <a href="https://www.pymc-marketing.io/en/latest/notebooks/mmm/mmm_lift_test.html">Media Mix Model with Lift Test Calibration</a>,
+where experimental results (lift tests) are used to calibrate marketing effectiveness parameters. In both cases, we enhance the
+forecasting model by incorporating additional likelihood terms that reflect external knowledge—whether that's experimental
+lift test results, known physical constraints, or other domain expertise. This calibration technique is especially valuable when
+historical data doesn't fully represent all possible future scenarios or when we suspect the presence of unobserved confounders
+(see <a href="https://www.pymc-labs.com/blog-posts/mmm_roas_lift/">Unobserved Confounders, ROAS and Lift Tests in Media Mix Models</a>).</p>
+<p>It is important to emphasize that these ideas are not new. The simulation example above is inspired by a similar technique
+from the <a href="https://pyro.ai/">Pyro</a> tutorial
+<a href="https://pyro.ai/examples/forecasting_dlm.html#Train-a-DLM-with-coefficients-priors-at-various-time-points">Train a DLM with coefficients priors at various time points</a>.
+Similarly, extensions of this approach exist for larger time-series architectures like <a href="https://github.com/zalandoresearch/pytorch-ts/tree/version-0.7.0/pts/model/causal_deepar">Causal DeepAR</a>
+developed by <a href="https://github.com/zalandoresearch">Zalando Research</a>.</p>
+<p><strong>Remark [Scaling Probabilistic Forecasting Models]:</strong> Depending on the size of your dataset, you might consider
+running full Markov Chain Monte Carlo (MCMC) or opting for faster approximate inference methods like Stochastic Variational Inference (SVI), as described in NumPyro's tutorial
+<a href="https://num.pyro.ai/en/latest/tutorials/hierarchical_forecasting.html">Hierarchical Forecasting</a>.</p>
+<h2 id="hierarchical-price-elasticity-models">Hierarchical Price Elasticity Models</h2><p>Probabilistic modeling isn't limited to time series applications; it can also provide powerful solutions for price
+sensitivity analysis. The case study <a href="https://juanitorduz.github.io/elasticities/">Hierarchical Pricing Elasticity Models</a>
+demonstrates how Bayesian hierarchical models can significantly improve price elasticity estimates in retail settings,
+especially where data may be sparse at the individual product level.</p>
+<p>Using a retail dataset with over 5,000 SKUs across nearly 200 categories, the study compares three approaches to
+modeling the constant elasticity demand function $\log(\text{quantity}) = \log(A) + \beta\log(\text{price})$:</p>
+<ol>
+<li>A simple model where each SKU has independent elasticity estimates.</li>
+<li>A fixed-effects model accounting for date effects.</li>
+<li>A hierarchical model that incorporates the product category structure.</li>
+</ol>
+<p>The hierarchical approach shows distinct advantages by leveraging the multilevel structure inherent in retail data. When
+individual SKUs have limited price variation or sparse sales data, the hierarchical model "borrows strength" from
+similar products within the same category, producing more stable and economically sensible elasticity estimates.</p>
+<p><img src="elasticity.png" alt="png"></p>
+<p>A key insight from this study is how the hierarchical model regularizes extreme elasticity values often caused by data
+sparsity or outliers. Where simple, independent models might estimate implausible positive price elasticities for some
+products due to noise, the hierarchical structure pulls these estimates toward more reasonable category-level means
+through partial pooling. This shrinkage effect is especially valuable for retailers with large product catalogs where
+many items inevitably have limited historical price and sales data.</p>
+<p>The approach also enables elasticity estimation at different levels of the product hierarchy (e.g., individual SKU, category,
+department), allowing analysts to understand price sensitivity at multiple relevant decision-making levels. The implementation
+using stochastic variational inference in NumPyro demonstrates that these sophisticated models can scale efficiently
+to large retail datasets with thousands of products, making them practical for real-world pricing applications.</p>
+<h2 id="state-space-models-in-pymc">State Space Models in PyMC</h2><p>For time series forecasting, state space models (SSMs) provide a powerful and flexible framework capable of handling complex
+dynamics, including time-varying trends, multiple seasonality patterns, and the influence of external regressors. The PyMC ecosystem recently expanded with the
+introduction of <a href="https://github.com/pymc-devs/pymc-extras">PyMC-Extras</a>, which includes a specialized
+module for structural time series modeling based on state space representations
+(primarily developed by <a href="https://github.com/jessegrabowski">Jesse Grabowski</a>).</p>
+<p>The <a href="https://github.com/pymc-devs/pymc-extras/blob/main/notebooks/Structural%20Timeseries%20Modeling.ipynb">Structural Time Series Modeling notebook</a>
+demonstrates how to leverage these components to build sophisticated forecasting models within PyMC. The module provides building
+blocks that can be combined to create custom models tailored to specific needs, including:</p>
+<ul>
+<li><strong>Local Linear Trend</strong>: Captures time-varying level and slope components.</li>
+<li><strong>Seasonal components</strong>: Models periodic patterns with flexible frequencies (e.g., daily, weekly, yearly).</li>
+<li><strong>Regression components</strong>: Incorporates the static effects of covariates.</li>
+<li><strong>Dynamic regression coefficients</strong>: Allows for time-varying relationships between predictors and the target variable.</li>
+<li><strong>Cycle components</strong>: Models quasi-cyclical behaviors with stochastic periodicity and damping factors.</li>
+</ul>
+<p>What makes this implementation particularly powerful is its composability – you can easily mix and match these components
+to construct models that reflect the specific characteristics and expected dynamics of your data.</p>
+<p>The implementation relies on an efficient Kalman filter algorithm for state estimation and likelihood calculation. This allows for seamless handling of missing data,
+robust anomaly detection, and integrated forecasting all within a unified Bayesian framework. This approach also facilitates the incorporation of domain knowledge
+through informative priors on the variance parameters, which control the flexibility and rate of change for each model component over time.</p>
+<p>A key advantage of the state space approach is its interpretability. It decomposes the time series into distinct, understandable components,
+making it easier to communicate insights to stakeholders. For example, you can extract and visualize the estimated trend,
+seasonal effects, and regression impacts separately, providing clear explanations of the factors driving your forecasts.</p>
+<p><img src="statespace.png" alt="png"></p>
+<p>For practitioners looking to move beyond traditional or "black-box" forecasting methods, PyMC-Extras' state space module offers a
+fully Bayesian approach that explicitly models uncertainty while maintaining high interpretability. This is especially valuable
+in business contexts where understanding the <em>why</em> behind predictions is often as important as the predictions themselves.</p>
+<p>If you want to learn more about this module, check out our webinar:</p>
+<center>
+  <iframe width="600" height="375" src="https://www.youtube.com/embed/G9VWXZdbtKQ" title="PyMC-Marketing How-to: Time Series and State Space Models" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</center><h2 id="summary">Summary</h2><p>In this blog post, we've explored several ways probabilistic forecasting models can provide significant advantages for
+business applications compared to traditional time series methods. We've seen how hierarchical models can leverage shared
+information across related time series to improve forecasts, especially when dealing with sparse data. Censored likelihoods help
+overcome limitations imposed by historical data, enabling us to model the true underlying demand even when observations are truncated
+by stockouts or capacity constraints. For intermittent demand patterns, availability-constrained TSB models distinguish
+between true zero demand and stockout-induced zeros, leading to more accurate forecasts for sporadically selling products.</p>
+<p>We've also demonstrated how domain knowledge can be incorporated through model calibration using custom likelihoods. This
+technique proves particularly valuable when historical data contains unobserved confounders or doesn't fully capture all relevant dynamics, allowing us to understand not
+only the forecast but also the <em>drivers</em> behind it. Finally, we've highlighted the powerful state space modeling capabilities now available in
+PyMC-Extras, which provide flexible, interpretable components for building sophisticated Bayesian time series forecasting models.</p>
+<p>Across all these applications, the common thread is clear: probabilistic forecasting doesn't just quantify uncertainty
+more effectively—it enables us to directly incorporate business constraints, domain knowledge, and potentially causal relationships into our
+models. This leads to forecasts that are not only potentially more accurate but also more actionable and interpretable for decision-
+makers. As computational tools and methods continue to evolve, these sophisticated approaches are becoming increasingly accessible to practitioners,
+making probabilistic forecasting a valuable addition to any modern data scientist's toolkit.</p>
+<p>Additionally, we've shown how these probabilistic approaches extend beyond traditional time series forecasting into areas like
+price elasticity modeling. Here, hierarchical Bayesian methods can regularize elasticity estimates for large product
+catalogs by leveraging the natural hierarchy in retail data. This ability to produce reliable estimates at different
+levels of aggregation (from individual SKUs to product categories) while effectively handling data sparsity demonstrates the
+versatility of probabilistic modeling for critical business decision-making beyond pure forecasting tasks.</p>
+
+	<!--THIS IS THE FOOTER OF THE BLOGPSOT-->
+	<hr> 
+		<!--div class="container"-->
+			<h2 class="font-roboto">Work with PyMC Labs</h2>
+			<p>If you are interested in seeing what we at PyMC Labs can do for you, then please email <a href="mailto:info@pymc-labs.com">info@pymc-labs.com</a>. We work with companies at a variety of scales and with varying levels of existing modeling capacity.
+
+We also run <a href="https://www.pymc-labs.com/workshops/">corporate workshop training events</a> and can provide sessions ranging from introduction to Bayes to more advanced topics.
+			</p>
+		<!--/div-->
+    
+    </div>
+    <div class="col-md-2"></div>
+</div>
+
+
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/8cc267a9ab.js" crossorigin="anonymous"></script>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-bottom">
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBottom"
+                aria-controls="navbarBottom" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarBottom">
+                <ul class="navbar-nav ml-auto">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://twitter.com/pymc_labs"><i class="fa fa-brands fa-twitter"
+                                aria-hidden="true"></i>
+                            Twitter</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://github.com/pymc-labs"><i class="fa fa-brands fa-github"
+                                aria-hidden="true"></i>
+                            GitHub</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.linkedin.com/company/pymc-labs/"><i class="fa fa-brands fa-linkedin"
+                                aria-hidden="true"></i>
+                            LinkedIn</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.youtube.com/c/PyMCLabs"><i class="fa fa-brands fa-youtube"
+                                aria-hidden="true"></i>
+                            YouTube</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.meetup.com/pymc-labs-online-meetup/"><i class="fa fa-brands fa-meetup"
+                                aria-hidden="true"></i>
+                            Meetup</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/newsletter"><i class="fa fa-solid fa-bell"
+                                aria-hidden="true"></i>
+                            Newsletter</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/privacy-policy"><i class="fa fa-solid fa-lock"
+                                aria-hidden="true"></i>
+                            Privacy Policy</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/impressum"><i class="fa fa-solid fa-info-circle"
+                                aria-hidden="true"></i>
+                            Impressum</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mathjax for latex/equations -->
+    <!-- Mathjax -->
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$']]}});
+    </script>
+
+</body>
+
+</html>
